@@ -6,7 +6,9 @@
      Returns the new index, or -1 when Up leaves the top row. Down from a row above a
      shorter last row lands on that row's last cell. */
   function grid(index, count, cols, key) {
-    var col = index % cols, row = Math.floor(index / cols), rows = Math.ceil(count / cols);
+    var col = index % cols,
+      row = Math.floor(index / cols),
+      rows = Math.ceil(count / cols);
     if (key === 'left') return col > 0 ? index - 1 : index;
     if (key === 'right') return col < cols - 1 && index < count - 1 ? index + 1 : index;
     if (key === 'down') return row < rows - 1 ? Math.min(index + cols, count - 1) : index;

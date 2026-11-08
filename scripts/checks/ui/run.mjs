@@ -18,8 +18,14 @@ try {
   for (const area of [startup, catalogue, editing, settings, wallpaper, input]) await area(suite);
   suite.sectionName = 'Whole run';
   try {
-    suite.record('No unexpected page errors or failed requests', suite.report.pageErrors.length === 0, suite.report.pageErrors);
-  } catch (error) { /* recorded */ }
+    suite.record(
+      'No unexpected page errors or failed requests',
+      suite.report.pageErrors.length === 0,
+      suite.report.pageErrors
+    );
+  } catch (error) {
+    /* recorded */
+  }
 } catch (error) {
   suite.report.failures.push({ section: suite.sectionName, error: error.stack });
 } finally {
@@ -29,5 +35,7 @@ try {
   writeFileSync(root + '.local/qa/checks.json', JSON.stringify(suite.report, null, 2) + '\n');
 }
 const passed = suite.report.checks.filter(c => c.passed).length;
-console.log(passed + ' checks passed; ' + suite.report.failures.length + ' failure(s). Report: .local/qa/checks.json');
+console.log(
+  passed + ' checks passed; ' + suite.report.failures.length + ' failure(s). Report: .local/qa/checks.json'
+);
 if (suite.report.failures.length) process.exitCode = 1;

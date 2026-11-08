@@ -32,7 +32,12 @@
   top: 0;
   width: 1920px;
   height: 520px;
-  background: linear-gradient(to bottom,rgba(4,10,12,0),rgba(4,10,12,.42) 70%,rgba(4,10,12,.52));
+  background: linear-gradient(
+    to bottom,
+    rgba(4, 10, 12, 0),
+    rgba(4, 10, 12, 0.42) 70%,
+    rgba(4, 10, 12, 0.52)
+  );
 }
 .mat-veil {
   position: absolute;
@@ -40,10 +45,10 @@
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(8,14,18,.16);
+  background: rgba(8, 14, 18, 0.16);
 }
 .tone-light .mat-veil {
-  background: rgba(8,14,18,.27);
+  background: rgba(8, 14, 18, 0.27);
 }
 .registered-material .mat-scrim,
 .registered-material .mat-veil {
@@ -53,36 +58,36 @@
   display: none;
 }
 .m-frost .mat-veil {
-  background: rgba(12,10,8,var(--fv,.12));
+  background: rgba(12, 10, 8, var(--fv, 0.12));
 }
 .fv-2 {
-  --fv: .20;
+  --fv: 0.2;
 }
 .fv-3 {
-  --fv: .30;
+  --fv: 0.3;
 }
 .fv-4 {
-  --fv: .36;
+  --fv: 0.36;
 }
 .fv-5 {
-  --fv: .44;
+  --fv: 0.44;
 }
 .m-tint .mat-veil {
-  background: rgba(8,14,18,.3);
+  background: rgba(8, 14, 18, 0.3);
 }
 .tone-light.m-tint .mat-veil {
-  background: rgba(8,14,18,.38);
+  background: rgba(8, 14, 18, 0.38);
 }
 /* The shelf edge is a single hairline along the top curve. */
 .mat::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
   border-radius: 48px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
   pointer-events: none;
 }
 .shelf {
@@ -94,16 +99,28 @@
   overflow: hidden;
 }
 .shelf.fade-r {
-  -webkit-mask-image: linear-gradient(to right,#000 calc(100% - 132px),rgba(0,0,0,.2));
-  mask-image: linear-gradient(to right,#000 calc(100% - 132px),rgba(0,0,0,.2));
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 132px), rgba(0, 0, 0, 0.2));
+  mask-image: linear-gradient(to right, #000 calc(100% - 132px), rgba(0, 0, 0, 0.2));
 }
 .shelf.fade-l {
-  -webkit-mask-image: linear-gradient(to left,#000 calc(100% - 132px),rgba(0,0,0,.2));
-  mask-image: linear-gradient(to left,#000 calc(100% - 132px),rgba(0,0,0,.2));
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 132px), rgba(0, 0, 0, 0.2));
+  mask-image: linear-gradient(to left, #000 calc(100% - 132px), rgba(0, 0, 0, 0.2));
 }
 .shelf.fade-l.fade-r {
-  -webkit-mask-image: linear-gradient(to right,rgba(0,0,0,.2),#000 132px,#000 calc(100% - 132px),rgba(0,0,0,.2));
-  mask-image: linear-gradient(to right,rgba(0,0,0,.2),#000 132px,#000 calc(100% - 132px),rgba(0,0,0,.2));
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.2),
+    #000 132px,
+    #000 calc(100% - 132px),
+    rgba(0, 0, 0, 0.2)
+  );
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.2),
+    #000 132px,
+    #000 calc(100% - 132px),
+    rgba(0, 0, 0, 0.2)
+  );
 }
 .track {
   position: absolute;
@@ -121,7 +138,9 @@
   height: 200px;
   border-radius: 32px;
   opacity: 0;
-  transition: transform var(--t) var(--ease),opacity 120ms linear;
+  transition:
+    transform var(--t) var(--ease),
+    opacity 120ms linear;
   will-change: transform;
 }
 .plate.on-focus {
@@ -130,7 +149,7 @@
   opacity: 1;
 }
 .plate.on-sel {
-  background: rgba(255,255,255,.11);
+  background: rgba(255, 255, 255, 0.11);
   opacity: 1;
 }
 .plate.on-lift {
@@ -139,17 +158,37 @@
   opacity: 1;
 }
 .m-frost .dock .plate.on-focus {
-  background: linear-gradient(170deg,rgba(255,255,255,.26),rgba(255,255,255,.08) 58%,rgba(255,255,255,.10));
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0.08) 58%,
+    rgba(255, 255, 255, 0.1)
+  );
 }
 .m-frost .dock .plate.on-lift {
-  background: linear-gradient(170deg,rgba(255,255,255,.34),rgba(255,255,255,.14) 58%,rgba(255,255,255,.16));
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.14) 58%,
+    rgba(255, 255, 255, 0.16)
+  );
 }
 .bg-photo.db-quiet.m-frost .dock .plate.on-focus {
-  background: linear-gradient(170deg,rgba(255,255,255,.24),rgba(255,255,255,0) 52%,rgba(12,10,8,.08));
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.24),
+    rgba(255, 255, 255, 0) 52%,
+    rgba(12, 10, 8, 0.08)
+  );
 }
 .bg-photo.db-quiet.m-soft .dock .plate.on-focus,
 .bg-photo.db-quiet.m-tint .dock .plate.on-focus {
-  background: linear-gradient(170deg,rgba(255,255,255,.30),rgba(255,255,255,.10) 52%,rgba(255,255,255,.08));
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1) 52%,
+    rgba(255, 255, 255, 0.08)
+  );
 }
 .tile {
   position: absolute;
@@ -200,15 +239,15 @@
   justify-content: center;
   width: 1.65em;
   height: 1.65em;
-  border-radius: .4em;
+  border-radius: 0.4em;
 }
 .monogram span::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border: 2px solid currentColor;
   border-radius: inherit;
-  opacity: .38;
+  opacity: 0.38;
 }
 .native-icon img {
   position: absolute;
@@ -224,8 +263,10 @@
   position: absolute;
   left: 84px;
   top: 34px;
-  opacity: .84;
-  transition: opacity 160ms linear,transform var(--t) var(--ease);
+  opacity: 0.84;
+  transition:
+    opacity 160ms linear,
+    transform var(--t) var(--ease);
 }
 .tile .label {
   position: absolute;
@@ -235,12 +276,12 @@
   overflow: hidden;
   font-size: 36px;
   line-height: 44px;
-  letter-spacing: -.8px;
+  letter-spacing: -0.8px;
   font-weight: 500;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: .84;
+  opacity: 0.84;
   transition: opacity 160ms linear;
 }
 .tile.is-focus .mark,
@@ -252,7 +293,7 @@
 }
 .tile.is-sel .mark,
 .tile.is-sel .label {
-  opacity: .94;
+  opacity: 0.94;
 }
 .tile.is-press .mark {
   animation: press 300ms var(--ease);
@@ -262,7 +303,7 @@
     transform: translateY(-3px) scale(1.04);
   }
   40% {
-    transform: translateY(0) scale(.94);
+    transform: translateY(0) scale(0.94);
   }
   100% {
     transform: translateY(-3px) scale(1.04);
@@ -289,7 +330,7 @@
 .dock-empty p {
   font-size: 36px;
   font-weight: 500;
-  letter-spacing: -.6px;
+  letter-spacing: -0.6px;
 }
 .cue {
   position: absolute;
@@ -301,14 +342,14 @@
   width: 48px;
   height: 48px;
   color: #fff;
-  background: rgba(8,14,18,.28);
+  background: rgba(8, 14, 18, 0.28);
   border-radius: 24px;
   opacity: 0;
   transition: opacity 160ms linear;
   pointer-events: none;
 }
 .cue.is-on {
-  opacity: .8;
+  opacity: 0.8;
 }
 .cue .ico {
   width: 30px;

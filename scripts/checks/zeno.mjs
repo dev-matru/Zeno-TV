@@ -1,72 +1,346 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import {parse} from 'acorn';
-import {openPreview,root} from '../lib/browser.mjs';
-for(const name of ['main.js','device.js','zeno-control.js','zeno-extras.js','zeno-system.js'])parse(readFileSync(root+'app/'+name,'utf8'),{ecmaVersion:5});
-const preview=await openPreview({publicOnly:process.env.ZENO_PERSONAL!=='1'}),passed=[];
-function check(name,value){assert.ok(value,name);passed.push(name);console.log('PASS '+name);}
-try{
- const page=await preview.browser.newPage({viewport:{width:1920,height:1080}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.route('https://get.geojs.io/**',r=>r.fulfill({json:{city:'Milano',latitude:'45.46',longitude:'9.19'}}));
- await page.route('https://api.open-meteo.com/**',r=>r.fulfill({json:{current:{temperature_2m:14,weather_code:1}}}));
- await page.route('https://api.github.com/**',r=>r.fulfill({json:{tag_name:'v2.1.1',assets:[]}}));
- await page.route('https://wsrv.nl/**',r=>r.fulfill({contentType:'image/jpeg',body:readFileSync(root+'app/assets/wallpapers/misty-thumb.jpg')}));
- await page.route('http://192.0.2.24:4797/**',async r=>{const data=r.request().postDataJSON();await page.evaluate(d=>__calls.push({method:'bridge',data:d}),data);return r.fulfill({json:r.request().url().endsWith('/capabilities')?{available:true}:{stopped:true,uninstalled:true}});});
- await page.route('http://127.0.0.1:4796/**',r=>{if(r.request().method()==='OPTIONS')return r.fulfill({status:204});const data=r.request().postDataJSON();return r.fulfill({json:data?{id:data.id,value:data.op==='cache-info'?{bytes:1048576,sets:2}:data.op==='app-memory'?{bytes:23068672}:{ip:'192.0.2.24',enabled:true,canWrite:false}}:{ready:true}});});
- await page.addInitScript(()=>{
-  const ids=['tv','pc','youtube','netflix','primevideo','disneyplus','raiplay','infinity','now','dazn','appletv'];
-  const native=['org.tizen.tv-viewer','casa.pc','xvvl3S1TT1.TizenTubeStandalone','org.tizen.netflix-app','org.tizen.primevideo','MCmYXNxgcu.DisneyPlus','5im3FztIhW.RaiTVtizen','g3zzYA7yO8.InfinityNew','jcz0WrZYdy.NOWTV','yu1NM3vHsU.DAZN','com.samsung.tv.aria-video'];
-  const records=Array.from({length:24},(_,i)=>({id:'ZenoTest'+String(i).padStart(2,'0')+'.App',appId:'ZenoTest'+String(i).padStart(2,'0')+'.App',name:'Applicazione '+(i+1)}));
-  window.CASA_OFFLINE_TEST=true;window.__calls=[];window.CasaDeviceDefaults={localToken:'qa',macHost:'192.0.2.24',bridgeToken:'qa-bridge',pcMac:'00:11:22:33:44:55'};
-  localStorage.setItem('zeno.home.v1',JSON.stringify({casaVersion:4,home:ids.concat(records.map(r=>r.id)),appRecords:records,wall:'misty',bg:'photo',layout:'dock',font:'geist',apps:'both',mode:'fixed'}));
-  window.tizen={application:{getAppsInfo(ok){ok(native.filter(id=>id!=='casa.pc').map((id,i)=>({id,name:ids[i],show:true})).concat(records.map(r=>({id:r.id,name:r.name,show:true}))));},getAppInfo(id){return {id,name:id,version:'1.2.3',packageId:id.split('.')[0]};},getAppsContext(ok){ok([{id:'123',appId:'xvvl3S1TT1.TizenTubeStandalone'}]);},launch(id,ok){__calls.push({method:'launch',id});ok();}},package:{getPackageInfo(id){return {id,totalSize:10485760,dataSize:2097152,version:'1.2.3'};}},systeminfo:{getTotalMemory(){return 2147483648;},getAvailableMemory(){return 536870912;},getPropertyValue(key,ok){if(key==='STORAGE')ok({units:[{type:'INTERNAL',capacity:4294967296,availableCapacity:1073741824}]});else ok({current:{type:'TV',number:1},connected:[{type:'TV',number:1},{type:'HDMI',number:2}],disconnected:[]});}}};
- });
- const state=()=>page.evaluate(()=>ZenoQA.state()),ready=()=>page.waitForFunction(()=>window.ZenoQA&&ZenoQA.ready());
- const act=async a=>assert.ok(await page.evaluate(a=>ZenoQA.activate(a),a),a);
- const nav=(...keys)=>page.evaluate(keys=>ZenoQA.nav(keys),keys);
- const glass=async(selector,pseudo)=>page.locator(selector).evaluate((e,pseudo)=>{const s=getComputedStyle(e,pseudo),alpha=Number(s.backgroundColor.match(/[\d.]+/g)?.[3]??1);return alpha>0&&alpha<.6&&s.backgroundImage.includes('linear-gradient')&&s.boxShadow.includes('inset')&&s.backdropFilter==='none';},pseudo);
- await page.goto(preview.baseURL+'/home/');await ready();
- check('Existing app order survives with more than eleven apps',(await state()).home.length===35);
- check('Home only exposes sources and Personalizza',await page.locator('#utils [data-action="util.apps"]').count()===0);
- await page.evaluate(()=>ZenoQA.look({layout:'grid'}));await ready();
- for(const width of [1920,1280]){await page.setViewportSize({width,height:width*9/16});await nav(...Array(7).fill('down'));await page.waitForTimeout(260);const bounds=await page.locator('.zeno-app-card.is-focus').boundingBox();check('Grid focus remains visible at '+width,bounds&&bounds.y>=0&&bounds.y+bounds.height<=width*9/16+2);}
- check('Grid scrolls into later app rows',(await state()).selected.startsWith('ZenoTest'));
- await page.setViewportSize({width:1920,height:1080});
- await page.evaluate(()=>ZenoQA.scene('settings'));
- check('Modern settings has five sidebar sections',await page.locator('.zeno-category').count()===5);
- check('Personalizza uses translucent cached glass',await glass('.zeno-settings-window'));
- await act('settings.category.appearance');await act('settings.group.background');
- check('Nested settings share the same glass',await glass('#sheet','::after'));
- check('Nested selections share the translucent focus material',await page.locator('.appearance .setting-choice.is-focus').evaluate(e=>{const s=getComputedStyle(e);return s.backgroundImage.includes('linear-gradient')&&s.boxShadow.includes('inset')&&s.color===getComputedStyle(e.closest('.appearance')).color;}));
- check('Background and colors are grouped',await page.locator('#appearanceTitle').innerText()==='Sfondo e colori');
- await page.screenshot({path:root+'.local/qa/preview-Zeno-Sfondo.png'});
- check('Manual image-quality menu is removed',!(await page.locator('[data-action="background.quality"]').count()));
- await act('background.colors');await act('choice.inkColor.mint');await ready();
- check('A palette choice applies manual ink',(await state()).colorMode==='manual'&&(await state()).inkColor==='mint');
- check('Home clock uses the selected global ink',await page.locator('.clock').evaluate(e=>getComputedStyle(e).color)==='rgb(217, 247, 231)');
- await act('color.custom');check('Remote keyboard uses the shared glass frame',await glass('#sheetView','::before'));await page.screenshot({path:root+'.local/qa/preview-Zeno-Tastiera.png'});await nav('back');
- await nav('back','back');await act('settings.category.applications');await act('settings.group.manager');await page.waitForFunction(()=>!ZenoQA.state().catalog.loading);
- await act('apps.open.youtube');await page.waitForFunction(()=>ZenoQA.state().view==='appdetail');
- check('App details use the shared glass frame',await glass('.zeno-app-window'));await page.screenshot({path:root+'.local/qa/preview-Zeno-App.png'});
- await page.waitForFunction(()=>document.querySelector('.zeno-app-info')?.textContent.includes('10.0 MB'));
- check('App details show package sizes',await page.locator('.zeno-app-info').innerText().then(t=>t.includes('10.0 MB')));
- await page.waitForSelector('[data-action="appdetail.uninstall"]');await act('appdetail.uninstall');check('Uninstall defaults to Cancel',await page.evaluate(()=>ZenoQA.state().focusAction)==='message.back');check('Confirmation uses translucent glass',await glass('.zeno-message-window'));await page.screenshot({path:root+'.local/qa/preview-Zeno-Conferma.png'});await nav('ok');check('Cancelling uninstall sends no action',await page.evaluate(()=>!__calls.some(c=>c.method==='bridge'&&c.data.op==='uninstall')));
- await act('appdetail.youtube');check('YouTube options are nested under its app',(await state()).settingsGroup==='updates');
- await nav('back');check('Back returns to the app detail',(await state()).view==='appdetail');await nav('back');check('Back returns to installed apps',(await state()).view==='apps');await nav('back');
- await act('settings.group.storage');await page.waitForFunction(()=>document.querySelector('#appearanceRows')?.textContent.includes('512.0 MB'));
- check('Storage view distinguishes RAM and disk',await page.locator('#appearanceRows').innerText().then(t=>t.includes('Memoria RAM')&&t.includes('Spazio del TV')));
- await page.evaluate(()=>ZenoQA.scene('settings'));await act('settings.editor');await nav(...Array(22).fill('down'));await page.waitForTimeout(240);
- const editorFocus=await page.locator('.er-name.is-focus').boundingBox();check('Home editor scrolls beyond eleven apps',editorFocus&&editorFocus.y>=250&&editorFocus.y+editorFocus.height<1040);
- check('No runtime errors',errors.length===0);
- await page.evaluate(()=>ZenoQA.scene('settings'));await act('settings.category.appearance');await page.screenshot({path:root+'.local/qa/preview-Zeno-Personalizza.png'});
- await page.evaluate(()=>{ZenoQA.scene('home');ZenoQA.look({layout:'grid'});});await ready();await nav(...Array(7).fill('up'));await page.waitForTimeout(260);await page.screenshot({path:root+'.local/qa/preview-Zeno-Griglia.png'});
- await nav(...Array(20).fill('up'),'down',...Array(3).fill('left'),'right');
- check('PC receives focus without launching',(await state()).focusAction==='home.app.pc');
- await page.keyboard.down('Enter');await page.waitForTimeout(720);await page.keyboard.up('Enter');
- check('PC popup uses shared translucent glass',await glass('.pc-card'));await page.screenshot({path:root+'.local/qa/preview-Zeno-PC.png'});await nav('back');
- await page.evaluate(()=>ZenoQA.look({colorMode:'manual',inkColor:'ink'}));await ready();await page.evaluate(()=>ZenoQA.scene('settings'));
- check('Dark text gets the matching translucent light glass',await glass('.zeno-settings-window')&&await page.locator('.stage').getAttribute('data-ink-tone')==='dark');
- await page.screenshot({path:root+'.local/qa/preview-Zeno-Vetro-chiaro.png'});
- check('Glass surfaces introduce no live blur',await page.locator('.stage').evaluate(e=>Array.from(e.querySelectorAll('*')).every(n=>!getComputedStyle(n).filter.includes('blur')&&!getComputedStyle(n).backdropFilter.includes('blur'))));
- console.log(passed.length+' Zeno checks passed');
-}finally{await preview.close();}
+import { readFileSync } from 'node:fs';
+import { parse } from 'acorn';
+import { openPreview, root } from '../lib/browser.mjs';
+for (const name of [
+  'main.js',
+  'src/system/device.js',
+  'src/system/control.js',
+  'src/home/extras.js',
+  'src/system/info.js'
+])
+  parse(readFileSync(root + 'app/' + name, 'utf8'), { ecmaVersion: 5 });
+const preview = await openPreview({ publicOnly: process.env.ZENO_PERSONAL !== '1' }),
+  passed = [];
+function check(name, value) {
+  assert.ok(value, name);
+  passed.push(name);
+  console.log('PASS ' + name);
+}
+try {
+  const page = await preview.browser.newPage({ viewport: { width: 1920, height: 1080 } }),
+    errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.route('https://get.geojs.io/**', r =>
+    r.fulfill({ json: { city: 'Milano', latitude: '45.46', longitude: '9.19' } })
+  );
+  await page.route('https://api.open-meteo.com/**', r =>
+    r.fulfill({ json: { current: { temperature_2m: 14, weather_code: 1 } } })
+  );
+  await page.route('https://api.github.com/**', r => r.fulfill({ json: { tag_name: 'v2.1.1', assets: [] } }));
+  await page.route('https://wsrv.nl/**', r =>
+    r.fulfill({
+      contentType: 'image/jpeg',
+      body: readFileSync(root + 'app/assets/wallpapers/misty-thumb.jpg')
+    })
+  );
+  await page.route('http://192.0.2.24:4797/**', async r => {
+    const data = r.request().postDataJSON();
+    await page.evaluate(d => __calls.push({ method: 'bridge', data: d }), data);
+    return r.fulfill({
+      json: r.request().url().endsWith('/capabilities')
+        ? { available: true }
+        : { stopped: true, uninstalled: true }
+    });
+  });
+  await page.route('http://127.0.0.1:4796/**', r => {
+    if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 204 });
+    const data = r.request().postDataJSON();
+    return r.fulfill({
+      json: data
+        ? {
+            id: data.id,
+            value:
+              data.op === 'cache-info'
+                ? { bytes: 1048576, sets: 2 }
+                : data.op === 'app-memory'
+                  ? { bytes: 23068672 }
+                  : { ip: '192.0.2.24', enabled: true, canWrite: false }
+          }
+        : { ready: true }
+    });
+  });
+  await page.addInitScript(() => {
+    const ids = [
+      'tv',
+      'pc',
+      'youtube',
+      'netflix',
+      'primevideo',
+      'disneyplus',
+      'raiplay',
+      'infinity',
+      'now',
+      'dazn',
+      'appletv'
+    ];
+    const native = [
+      'org.tizen.tv-viewer',
+      'zeno.pc',
+      'xvvl3S1TT1.TizenTubeStandalone',
+      'org.tizen.netflix-app',
+      'org.tizen.primevideo',
+      'MCmYXNxgcu.DisneyPlus',
+      '5im3FztIhW.RaiTVtizen',
+      'g3zzYA7yO8.InfinityNew',
+      'jcz0WrZYdy.NOWTV',
+      'yu1NM3vHsU.DAZN',
+      'com.samsung.tv.aria-video'
+    ];
+    const records = Array.from({ length: 24 }, (_, i) => ({
+      id: 'ZenoTest' + String(i).padStart(2, '0') + '.App',
+      appId: 'ZenoTest' + String(i).padStart(2, '0') + '.App',
+      name: 'Applicazione ' + (i + 1)
+    }));
+    window.ZENO_OFFLINE_TEST = true;
+    window.__calls = [];
+    window.ZenoDeviceDefaults = {
+      localToken: 'qa',
+      macHost: '192.0.2.24',
+      bridgeToken: 'qa-bridge',
+      pcMac: '00:11:22:33:44:55'
+    };
+    localStorage.setItem(
+      'zeno.home.v1',
+      JSON.stringify({
+        homeVersion: 4,
+        home: ids.concat(records.map(r => r.id)),
+        appRecords: records,
+        wall: 'misty',
+        bg: 'photo',
+        layout: 'dock',
+        font: 'geist',
+        apps: 'both',
+        mode: 'fixed'
+      })
+    );
+    window.tizen = {
+      application: {
+        getAppsInfo(ok) {
+          ok(
+            native
+              .filter(id => id !== 'zeno.pc')
+              .map((id, i) => ({ id, name: ids[i], show: true }))
+              .concat(records.map(r => ({ id: r.id, name: r.name, show: true })))
+          );
+        },
+        getAppInfo(id) {
+          return { id, name: id, version: '1.2.3', packageId: id.split('.')[0] };
+        },
+        getAppsContext(ok) {
+          ok([{ id: '123', appId: 'xvvl3S1TT1.TizenTubeStandalone' }]);
+        },
+        launch(id, ok) {
+          __calls.push({ method: 'launch', id });
+          ok();
+        }
+      },
+      package: {
+        getPackageInfo(id) {
+          return { id, totalSize: 10485760, dataSize: 2097152, version: '1.2.3' };
+        }
+      },
+      systeminfo: {
+        getTotalMemory() {
+          return 2147483648;
+        },
+        getAvailableMemory() {
+          return 536870912;
+        },
+        getPropertyValue(key, ok) {
+          if (key === 'STORAGE')
+            ok({
+              units: [{ type: 'INTERNAL', capacity: 4294967296, availableCapacity: 1073741824 }]
+            });
+          else
+            ok({
+              current: { type: 'TV', number: 1 },
+              connected: [
+                { type: 'TV', number: 1 },
+                { type: 'HDMI', number: 2 }
+              ],
+              disconnected: []
+            });
+        }
+      }
+    };
+  });
+  const state = () => page.evaluate(() => ZenoQA.state()),
+    ready = () => page.waitForFunction(() => window.ZenoQA && ZenoQA.ready());
+  const act = async a => assert.ok(await page.evaluate(a => ZenoQA.activate(a), a), a);
+  const nav = (...keys) => page.evaluate(keys => ZenoQA.nav(keys), keys);
+  const glass = async (selector, pseudo) =>
+    page.locator(selector).evaluate((e, pseudo) => {
+      const s = getComputedStyle(e, pseudo),
+        alpha = Number(s.backgroundColor.match(/[\d.]+/g)?.[3] ?? 1);
+      return (
+        alpha > 0 &&
+        alpha < 0.6 &&
+        s.backgroundImage.includes('linear-gradient') &&
+        s.boxShadow.includes('inset') &&
+        s.backdropFilter === 'none'
+      );
+    }, pseudo);
+  await page.goto(preview.baseURL + '/home/');
+  await ready();
+  check('Existing app order survives with more than eleven apps', (await state()).home.length === 35);
+  check(
+    'Home only exposes sources and Personalizza',
+    (await page.locator('#utils [data-action="util.apps"]').count()) === 0
+  );
+  await page.evaluate(() => ZenoQA.look({ layout: 'grid' }));
+  await ready();
+  for (const width of [1920, 1280]) {
+    await page.setViewportSize({ width, height: (width * 9) / 16 });
+    await nav(...Array(7).fill('down'));
+    await page.waitForTimeout(260);
+    const bounds = await page.locator('.zeno-app-card.is-focus').boundingBox();
+    check(
+      'Grid focus remains visible at ' + width,
+      bounds && bounds.y >= 0 && bounds.y + bounds.height <= (width * 9) / 16 + 2
+    );
+  }
+  check('Grid scrolls into later app rows', (await state()).selected.startsWith('ZenoTest'));
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.evaluate(() => ZenoQA.scene('settings'));
+  check('Modern settings has five sidebar sections', (await page.locator('.zeno-category').count()) === 5);
+  check('Personalizza uses translucent cached glass', await glass('.zeno-settings-window'));
+  await act('settings.category.appearance');
+  await act('settings.group.background');
+  check('Nested settings share the same glass', await glass('#sheet', '::after'));
+  check(
+    'Nested selections share the translucent focus material',
+    await page.locator('.appearance .setting-choice.is-focus').evaluate(e => {
+      const s = getComputedStyle(e);
+      return (
+        s.backgroundImage.includes('linear-gradient') &&
+        s.boxShadow.includes('inset') &&
+        s.color === getComputedStyle(e.closest('.appearance')).color
+      );
+    })
+  );
+  check(
+    'Background and colors are grouped',
+    (await page.locator('#appearanceTitle').innerText()) === 'Sfondo e colori'
+  );
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Sfondo.png' });
+  check(
+    'Manual image-quality menu is removed',
+    !(await page.locator('[data-action="background.quality"]').count())
+  );
+  await act('background.colors');
+  await act('choice.inkColor.mint');
+  await ready();
+  check(
+    'A palette choice applies manual ink',
+    (await state()).colorMode === 'manual' && (await state()).inkColor === 'mint'
+  );
+  check(
+    'Home clock uses the selected global ink',
+    (await page.locator('.clock').evaluate(e => getComputedStyle(e).color)) === 'rgb(217, 247, 231)'
+  );
+  await act('color.custom');
+  check('Remote keyboard uses the shared glass frame', await glass('#sheetView', '::before'));
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Tastiera.png' });
+  await nav('back');
+  await nav('back', 'back');
+  await act('settings.category.applications');
+  await act('settings.group.manager');
+  await page.waitForFunction(() => !ZenoQA.state().catalog.loading);
+  await act('apps.open.youtube');
+  await page.waitForFunction(() => ZenoQA.state().view === 'appdetail');
+  check('App details use the shared glass frame', await glass('.zeno-app-window'));
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-App.png' });
+  await page.waitForFunction(() => document.querySelector('.zeno-app-info')?.textContent.includes('10.0 MB'));
+  check(
+    'App details show package sizes',
+    await page
+      .locator('.zeno-app-info')
+      .innerText()
+      .then(t => t.includes('10.0 MB'))
+  );
+  await page.waitForSelector('[data-action="appdetail.uninstall"]');
+  await act('appdetail.uninstall');
+  check(
+    'Uninstall defaults to Cancel',
+    (await page.evaluate(() => ZenoQA.state().focusAction)) === 'message.back'
+  );
+  check('Confirmation uses translucent glass', await glass('.zeno-message-window'));
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Conferma.png' });
+  await nav('ok');
+  check(
+    'Cancelling uninstall sends no action',
+    await page.evaluate(() => !__calls.some(c => c.method === 'bridge' && c.data.op === 'uninstall'))
+  );
+  await act('appdetail.youtube');
+  check('YouTube options are nested under its app', (await state()).settingsGroup === 'updates');
+  await nav('back');
+  check('Back returns to the app detail', (await state()).view === 'appdetail');
+  await nav('back');
+  check('Back returns to installed apps', (await state()).view === 'apps');
+  await nav('back');
+  await act('settings.group.storage');
+  await page.waitForFunction(() =>
+    document.querySelector('#appearanceRows')?.textContent.includes('512.0 MB')
+  );
+  check(
+    'Storage view distinguishes RAM and disk',
+    await page
+      .locator('#appearanceRows')
+      .innerText()
+      .then(t => t.includes('Memoria RAM') && t.includes('Spazio del TV'))
+  );
+  await page.evaluate(() => ZenoQA.scene('settings'));
+  await act('settings.editor');
+  await nav(...Array(22).fill('down'));
+  await page.waitForTimeout(240);
+  const editorFocus = await page.locator('.er-name.is-focus').boundingBox();
+  check(
+    'Home editor scrolls beyond eleven apps',
+    editorFocus && editorFocus.y >= 250 && editorFocus.y + editorFocus.height < 1040
+  );
+  check('No runtime errors', errors.length === 0);
+  await page.evaluate(() => ZenoQA.scene('settings'));
+  await act('settings.category.appearance');
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Personalizza.png' });
+  await page.evaluate(() => {
+    ZenoQA.scene('home');
+    ZenoQA.look({ layout: 'grid' });
+  });
+  await ready();
+  await nav(...Array(7).fill('up'));
+  await page.waitForTimeout(260);
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Griglia.png' });
+  await nav(...Array(20).fill('up'), 'down', ...Array(3).fill('left'), 'right');
+  check('PC receives focus without launching', (await state()).focusAction === 'home.app.pc');
+  await page.keyboard.down('Enter');
+  await page.waitForTimeout(720);
+  await page.keyboard.up('Enter');
+  check('PC popup uses shared translucent glass', await glass('.pc-card'));
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-PC.png' });
+  await nav('back');
+  await page.evaluate(() => ZenoQA.look({ colorMode: 'manual', inkColor: 'ink' }));
+  await ready();
+  await page.evaluate(() => ZenoQA.scene('settings'));
+  check(
+    'Dark text gets the matching translucent light glass',
+    (await glass('.zeno-settings-window')) &&
+      (await page.locator('.stage').getAttribute('data-ink-tone')) === 'dark'
+  );
+  await page.screenshot({ path: root + '.local/qa/preview-Zeno-Vetro-chiaro.png' });
+  check(
+    'Glass surfaces introduce no live blur',
+    await page
+      .locator('.stage')
+      .evaluate(e =>
+        Array.from(e.querySelectorAll('*')).every(
+          n =>
+            !getComputedStyle(n).filter.includes('blur') &&
+            !getComputedStyle(n).backdropFilter.includes('blur')
+        )
+      )
+  );
+  console.log(passed.length + ' Zeno checks passed');
+} finally {
+  await preview.close();
+}

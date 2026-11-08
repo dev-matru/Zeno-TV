@@ -9,26 +9,26 @@
   line-height: 96px;
   font-weight: 300;
   letter-spacing: -4px;
-  opacity: .96;
+  opacity: 0.96;
 }
-.casa-date,
-.casa-weather {
-  font-family: "Zeno Geist",Manrope,Arial,sans-serif;
+.zeno-date,
+.zeno-weather {
+  font-family: 'Zeno Geist', Manrope, Arial, sans-serif;
   font-weight: 400;
   font-size: 25px;
   line-height: 36px;
-  letter-spacing: -.35px;
-  text-shadow: 0 1px 4px rgba(0,0,0,.2);
+  letter-spacing: -0.35px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   color: inherit;
-  opacity: .72;
+  opacity: 0.72;
 }
-.casa-date {
+.zeno-date {
   margin-top: 4px;
   text-transform: capitalize;
 }
-.casa-weather {
+.zeno-weather {
   margin-top: 9px;
-  opacity: .88;
+  opacity: 0.88;
 }
 .bg-dark {
   --ground: #000;
@@ -39,41 +39,41 @@
 .bg-dark .sheet {
   background: #000;
 }
-.bg-dark .casa-date,
-.bg-dark .casa-weather {
+.bg-dark .zeno-date,
+.bg-dark .zeno-weather {
   text-shadow: none;
   color: #e9e9ed;
 }
-.casa-motion {
-  animation: casa-float 140s ease-in-out infinite alternate;
+.zeno-motion {
+  animation: zeno-float 140s ease-in-out infinite alternate;
 }
-.at-appearance .casa-motion,
-.at-wallpaper .casa-motion {
+.at-appearance .zeno-motion,
+.at-wallpaper .zeno-motion {
   animation: none;
 }
-@keyframes casa-float {
+@keyframes zeno-float {
   0% {
-    transform: translate3d(0,0,0);
+    transform: translate3d(0, 0, 0);
   }
   35% {
-    transform: translate3d(5px,-4px,0);
+    transform: translate3d(5px, -4px, 0);
   }
   70% {
-    transform: translate3d(-4px,5px,0);
+    transform: translate3d(-4px, 5px, 0);
   }
   100% {
-    transform: translate3d(3px,2px,0);
+    transform: translate3d(3px, 2px, 0);
   }
 }
-@media (prefers-reduced-motion:reduce) {
-  .casa-motion {
+@media (prefers-reduced-motion: reduce) {
+  .zeno-motion {
     animation: none;
   }
 }
-.is-sheet .casa-motion {
+.is-sheet .zeno-motion {
   animation-play-state: paused;
 }
-.casa-weather {
+.zeno-weather {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -92,7 +92,7 @@
   animation: weather-cloud 6s ease-in-out infinite;
 }
 .weather-partly .weather-cloud {
-  fill: rgba(110,130,145,.8);
+  fill: rgba(110, 130, 145, 0.8);
 }
 .weather-icon .weather-drops {
   animation: weather-drops 1.8s ease-in-out infinite;
@@ -120,7 +120,7 @@
 @keyframes weather-drops {
   0%,
   100% {
-    opacity: .5;
+    opacity: 0.5;
     transform: translateY(-1px);
   }
   50% {
@@ -130,15 +130,15 @@
 }
 @keyframes weather-snow {
   50% {
-    opacity: .55;
-    transform: translate(2px,2px);
+    opacity: 0.55;
+    transform: translate(2px, 2px);
   }
 }
 @keyframes weather-bolt {
   0%,
   82%,
   100% {
-    opacity: .5;
+    opacity: 0.5;
   }
   85%,
   91% {
@@ -148,9 +148,9 @@
 .weather-paused .weather-icon * {
   animation-play-state: paused;
 }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   .weather-icon * {
-    animation: none!important;
+    animation: none !important;
   }
 }
 /* Settings rows scroll inside a fixed box that stops above the remote hint. */
@@ -179,7 +179,7 @@
   background: var(--ground);
   border-radius: 30px;
   border: 1px solid var(--line);
-  box-shadow: 0 20px 80px rgba(0,0,0,.25);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.25);
 }
 .pc-card h2 {
   margin: 0 12px 4px;
@@ -229,7 +229,7 @@
   left: 140px;
   top: 400px;
   display: grid;
-  grid-template-columns: repeat(10,144px);
+  grid-template-columns: repeat(10, 144px);
   gap: 14px;
   width: 1640px;
 }
@@ -237,7 +237,7 @@
   height: 90px;
   font-size: 30px;
   color: var(--ink);
-  background: rgba(128,128,128,.12);
+  background: rgba(128, 128, 128, 0.12);
   border-radius: 18px;
 }
 .keyboard-error {

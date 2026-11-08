@@ -7,6 +7,7 @@
 Every response is sent with `Cache-Control: no-store`, and byte ranges are
 honoured so audio can be seeked like it is from the packaged widget.
 """
+
 import argparse
 import mimetypes
 import re
@@ -78,20 +79,24 @@ class Handler(BaseHTTPRequestHandler):
             return
         start, end = span or (0, len(content) - 1)
         self.send_response(206 if span else 200)
-        self.send_header('Content-Type', mimetypes.guess_type(path if not path.endswith('/') else 'x.html')[0] or 'application/octet-stream')
+        self.send_header(
+            'Content-Type',
+            mimetypes.guess_type(path if not path.endswith('/') else 'x.html')[0]
+            or 'application/octet-stream',
+        )
         self.send_header('Accept-Ranges', 'bytes')
         self.send_header('Content-Length', str(end - start + 1))
         if span:
             self.send_header('Content-Range', 'bytes %d-%d/%d' % (start, end, len(content)))
         self.finish_headers()
         if body:
-            self.wfile.write(content[start:end + 1])
+            self.wfile.write(content[start : end + 1])
 
     def lookup(self, path):
         for prefix, base in MOUNTS.items():
             if not path.startswith(prefix):
                 continue
-            relative = path[len(prefix):]
+            relative = path[len(prefix) :]
             if base.name == 'app':
                 extra = personal_overlay(include_private=self.server.include_private).get(relative)
                 if extra is not None:
@@ -111,7 +116,9 @@ class Server(ThreadingHTTPServer):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument('--port', type=int, default=4795)
     parser.add_argument('--public', action='store_true', help='leave out everything in .local/personal')
     args = parser.parse_args()

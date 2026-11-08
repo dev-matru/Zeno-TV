@@ -4,7 +4,7 @@
 .l-grid #weatherWidget,
 .l-grid #utils,
 .l-grid .util-focus-label {
-  display: none!important;
+  display: none !important;
 }
 .zeno-desktop {
   --desk-focus: var(--zeno-ink);
@@ -29,7 +29,7 @@
   top: 18px;
   width: 1660px;
   height: 870px;
-  transition: transform 200ms cubic-bezier(.2,.7,.2,1);
+  transition: transform 200ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .desk-card {
   position: absolute;
@@ -49,18 +49,25 @@
   overflow: hidden;
   border: 2px solid var(--zeno-edge);
   border-radius: 24px;
-  box-shadow: inset 0 1px 0 var(--zeno-edge),0 6px 16px rgba(0,0,0,.1);
+  box-shadow:
+    inset 0 1px 0 var(--zeno-edge),
+    0 6px 16px rgba(0, 0, 0, 0.1);
 }
 .desk-art::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: var(--zeno-glass),linear-gradient(140deg,rgba(var(--zeno-card-rgb),var(--zeno-brand-alpha)),rgba(var(--zeno-card-rgb),var(--zeno-brand-low)));
+  background: var(--zeno-glass),
+    linear-gradient(
+      140deg,
+      rgba(var(--zeno-card-rgb), var(--zeno-brand-alpha)),
+      rgba(var(--zeno-card-rgb), var(--zeno-brand-low))
+    );
   pointer-events: none;
 }
-.desk-card[data-card-tint=glass] .desk-art::after {
-  background: var(--zeno-glass),var(--zeno-surface);
+.desk-card[data-card-tint='glass'] .desk-art::after {
+  background: var(--zeno-glass), var(--zeno-surface);
 }
 .desk-glass {
   position: absolute;
@@ -99,7 +106,7 @@
 }
 .stage.a-both .desk-app-mark {
   height: 110px;
-  transform: scale(.82);
+  transform: scale(0.82);
 }
 .stage.a-text .desk-app-mark {
   display: none;
@@ -113,15 +120,17 @@
   line-height: 40px;
   text-overflow: ellipsis;
   text-align: center;
-  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
 }
-.stage[data-grid-names=focus] .desk-card.is-focus:not(.is-widget) .desk-label {
+.stage[data-grid-names='focus'] .desk-card.is-focus:not(.is-widget) .desk-label {
   display: block;
 }
 .desk-card.is-focus .desk-art {
   border-color: var(--desk-focus);
-  box-shadow: 0 0 0 4px var(--zeno-sheen),0 8px 22px rgba(0,0,0,.16);
+  box-shadow:
+    0 0 0 4px var(--zeno-sheen),
+    0 8px 22px rgba(0, 0, 0, 0.16);
 }
 .desk-card.is-no-panel .desk-art {
   background: none;
@@ -148,7 +157,7 @@
   align-items: center;
   justify-content: center;
   color: var(--zeno-ink);
-  opacity: .65;
+  opacity: 0.65;
 }
 .desk-edge .ico {
   width: 26px;
@@ -205,13 +214,13 @@
   line-height: 32px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: .85;
+  opacity: 0.85;
 }
 .widget-zone-name {
   font-size: 19px;
   line-height: 26px;
   white-space: nowrap;
-  opacity: .7;
+  opacity: 0.7;
 }
 .desk-clock-compact .widget-clock-digital {
   font-size: 58px;
@@ -281,7 +290,7 @@
   line-height: 30px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: .8;
+  opacity: 0.8;
 }
 .weather-detailed {
   justify-content: flex-start;
@@ -329,7 +338,7 @@
 .desk-weather-metrics small {
   font-size: 15px;
   line-height: 19px;
-  opacity: .72;
+  opacity: 0.72;
 }
 .desk-player {
   display: flex;
@@ -345,7 +354,7 @@
   right: 26px;
   top: 24px;
   font-size: 58px;
-  opacity: .8;
+  opacity: 0.8;
 }
 .desk-player-name {
   font-size: 33px;
@@ -354,7 +363,7 @@
 .desk-player small {
   font-size: 20px;
   line-height: 30px;
-  opacity: .7;
+  opacity: 0.7;
 }
 .desk-player-state {
   max-width: 328px;
@@ -395,14 +404,14 @@
 }
 .calendar-days {
   display: grid;
-  grid-template-columns: repeat(7,1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 5px;
   text-align: center;
 }
 .calendar-weekday {
   font-size: 19px;
   line-height: 30px;
-  opacity: .65;
+  opacity: 0.65;
 }
 .calendar-day {
   height: 55px;
@@ -423,206 +432,206 @@
   white-space: nowrap;
 }
 .weather-static .weather-icon * {
-  animation: none!important;
+  animation: none !important;
 }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   .desk-track {
     transition: none;
   }
   .weather-icon * {
-    animation: none!important;
+    animation: none !important;
   }
 }
 /* Widget variants share the cell system and retain legible, undistorted content. */
 .desk-card,
 .desk-art {
-  width: var(--desk-card-width,388px);
+  width: var(--desk-card-width, 388px);
 }
 .desk-art {
-  height: var(--desk-card-height,208px);
+  height: var(--desk-card-height, 208px);
 }
-.desk-card[data-size=half] .desk-clock,
-.desk-card[data-size=quarter] .desk-clock {
+.desk-card[data-size='half'] .desk-clock,
+.desk-card[data-size='quarter'] .desk-clock {
   align-items: center;
   padding: 16px;
   text-align: center;
 }
-.desk-card[data-size=half] .widget-clock-digital {
+.desk-card[data-size='half'] .widget-clock-digital {
   font-size: 44px;
   line-height: 54px;
   letter-spacing: -1.5px;
 }
-.desk-card[data-size=half] .widget-clock-seconds {
+.desk-card[data-size='half'] .widget-clock-seconds {
   font-size: 24px;
 }
-.desk-card[data-size=half] .has-seconds .widget-clock-digital {
+.desk-card[data-size='half'] .has-seconds .widget-clock-digital {
   font-size: 35px;
   letter-spacing: -1px;
 }
-.desk-card[data-size=half] .widget-date-main {
+.desk-card[data-size='half'] .widget-date-main {
   font-size: 19px;
   line-height: 27px;
   white-space: normal;
 }
-.desk-card[data-size=half] .widget-zone-name {
+.desk-card[data-size='half'] .widget-zone-name {
   font-size: 16px;
   line-height: 22px;
 }
-.desk-card[data-size=half] .desk-clock-analog {
+.desk-card[data-size='half'] .desk-clock-analog {
   flex-direction: column;
   gap: 4px;
   padding: 12px;
 }
-.desk-card[data-size=half] .desk-clock-analog svg {
+.desk-card[data-size='half'] .desk-clock-analog svg {
   width: 108px;
   height: 108px;
 }
-.desk-card[data-size=half] .desk-clock-analog .widget-date-main {
+.desk-card[data-size='half'] .desk-clock-analog .widget-date-main {
   font-size: 15px;
   line-height: 20px;
 }
-.desk-card[data-size=half] .desk-weather {
+.desk-card[data-size='half'] .desk-weather {
   justify-content: flex-end;
   padding: 16px;
 }
-.desk-card[data-size=half] .desk-weather-icon {
+.desk-card[data-size='half'] .desk-weather-icon {
   top: 10px;
   right: 14px;
 }
-.desk-card[data-size=half] .desk-weather-icon,
-.desk-card[data-size=half] .desk-weather-icon svg {
+.desk-card[data-size='half'] .desk-weather-icon,
+.desk-card[data-size='half'] .desk-weather-icon svg {
   width: 58px;
   height: 58px;
 }
-.desk-card[data-size=half] .desk-weather strong {
+.desk-card[data-size='half'] .desk-weather strong {
   font-size: 49px;
   line-height: 55px;
 }
-.desk-card[data-size=half] .desk-weather-city {
+.desk-card[data-size='half'] .desk-weather-city {
   max-width: 140px;
   font-size: 23px;
   line-height: 32px;
 }
-.desk-card[data-size=half] .desk-weather-description {
+.desk-card[data-size='half'] .desk-weather-description {
   max-width: 140px;
   font-size: 17px;
   line-height: 24px;
 }
-.desk-card[data-size=half] .desk-weather-metrics {
+.desk-card[data-size='half'] .desk-weather-metrics {
   display: none;
 }
-.desk-card[data-size=half] .desk-player {
+.desk-card[data-size='half'] .desk-player {
   padding: 18px;
 }
-.desk-card[data-size=half] .desk-music-art {
+.desk-card[data-size='half'] .desk-music-art {
   position: static;
   font-size: 37px;
   line-height: 44px;
 }
-.desk-card[data-size=half] .desk-player-name {
+.desk-card[data-size='half'] .desk-player-name {
   font-size: 24px;
   line-height: 34px;
 }
-.desk-card[data-size=half] .desk-player small {
+.desk-card[data-size='half'] .desk-player small {
   display: none;
 }
-.desk-card[data-size=half] .desk-player-state {
+.desk-card[data-size='half'] .desk-player-state {
   max-width: 138px;
   margin-top: 12px;
   font-size: 19px;
   line-height: 28px;
 }
-.desk-card[data-size=half] .desk-command {
+.desk-card[data-size='half'] .desk-command {
   gap: 18px;
 }
-.desk-card[data-size=half] .desk-command > .ico {
+.desk-card[data-size='half'] .desk-command > .ico {
   width: 48px;
   height: 48px;
 }
-.desk-card[data-size=half] .desk-command > span {
+.desk-card[data-size='half'] .desk-command > span {
   font-size: 21px;
   line-height: 28px;
 }
-.desk-card[data-size=quarter] .desk-clock {
+.desk-card[data-size='quarter'] .desk-clock {
   padding: 9px 12px;
 }
-.desk-card[data-size=quarter] .widget-clock-digital {
+.desk-card[data-size='quarter'] .widget-clock-digital {
   font-size: 39px;
   line-height: 48px;
   letter-spacing: -1px;
 }
-.desk-card[data-size=quarter] .has-seconds .widget-clock-digital {
+.desk-card[data-size='quarter'] .has-seconds .widget-clock-digital {
   font-size: 32px;
   line-height: 44px;
 }
-.desk-card[data-size=quarter] .widget-clock-seconds {
+.desk-card[data-size='quarter'] .widget-clock-seconds {
   font-size: 22px;
 }
-.desk-card[data-size=quarter] .widget-date-main,
-.desk-card[data-size=quarter] .widget-zone-name {
+.desk-card[data-size='quarter'] .widget-date-main,
+.desk-card[data-size='quarter'] .widget-zone-name {
   display: none;
 }
-.desk-card[data-size=quarter] .desk-clock-analog svg {
+.desk-card[data-size='quarter'] .desk-clock-analog svg {
   width: 70px;
   height: 70px;
 }
-.desk-card[data-size=quarter] .desk-clock-analog {
+.desk-card[data-size='quarter'] .desk-clock-analog {
   gap: 0;
   padding: 8px;
 }
-.desk-card[data-size=quarter] .desk-weather {
+.desk-card[data-size='quarter'] .desk-weather {
   justify-content: center;
   padding: 9px 12px;
 }
-.desk-card[data-size=quarter] .desk-weather strong {
+.desk-card[data-size='quarter'] .desk-weather strong {
   font-size: 31px;
   line-height: 39px;
 }
-.desk-card[data-size=quarter] .desk-weather-city {
+.desk-card[data-size='quarter'] .desk-weather-city {
   max-width: 100px;
   font-size: 18px;
   line-height: 24px;
 }
-.desk-card[data-size=quarter] .desk-weather-icon {
+.desk-card[data-size='quarter'] .desk-weather-icon {
   top: 15px;
   right: 8px;
 }
-.desk-card[data-size=quarter] .desk-weather-icon,
-.desk-card[data-size=quarter] .desk-weather-icon svg {
+.desk-card[data-size='quarter'] .desk-weather-icon,
+.desk-card[data-size='quarter'] .desk-weather-icon svg {
   width: 47px;
   height: 47px;
 }
-.desk-card[data-size=quarter] .desk-weather-description,
-.desk-card[data-size=quarter] .desk-weather-metrics {
+.desk-card[data-size='quarter'] .desk-weather-description,
+.desk-card[data-size='quarter'] .desk-weather-metrics {
   display: none;
 }
-.desk-card[data-size=quarter] .desk-player {
+.desk-card[data-size='quarter'] .desk-player {
   padding: 10px 14px;
 }
-.desk-card[data-size=quarter] .desk-player-name {
+.desk-card[data-size='quarter'] .desk-player-name {
   font-size: 22px;
   line-height: 29px;
 }
-.desk-card[data-size=quarter] .desk-player-state {
+.desk-card[data-size='quarter'] .desk-player-state {
   margin-top: 0;
   font-size: 18px;
   line-height: 28px;
 }
-.desk-card[data-size=quarter] .desk-music-art,
-.desk-card[data-size=quarter] .desk-player small {
+.desk-card[data-size='quarter'] .desk-music-art,
+.desk-card[data-size='quarter'] .desk-player small {
   display: none;
 }
-.desk-card[data-size=quarter] .desk-command {
+.desk-card[data-size='quarter'] .desk-command {
   flex-direction: row;
   gap: 9px;
   padding: 10px;
 }
-.desk-card[data-size=quarter] .desk-command > .ico {
+.desk-card[data-size='quarter'] .desk-command > .ico {
   flex: none;
   width: 28px;
   height: 28px;
 }
-.desk-card[data-size=quarter] .desk-command > span {
+.desk-card[data-size='quarter'] .desk-command > span {
   font-size: 17px;
   line-height: 24px;
   white-space: nowrap;
@@ -655,10 +664,10 @@
   top: 0;
 }
 .desk-card.is-peek {
-  opacity: .42;
+  opacity: 0.42;
 }
 .desk-edge {
-  opacity: .45;
+  opacity: 0.45;
   pointer-events: none;
 }
 .edge-left {
@@ -718,68 +727,68 @@
 .desk-clock-analog.density-compact .widget-date-main {
   font-size: 21px;
 }
-.desk-card[data-size=half] .desk-clock-digital .widget-clock-digital {
+.desk-card[data-size='half'] .desk-clock-digital .widget-clock-digital {
   font-size: 44px;
   line-height: 54px;
   letter-spacing: -1.5px;
 }
-.desk-card[data-size=half] .desk-clock-digital.has-seconds .widget-clock-digital {
+.desk-card[data-size='half'] .desk-clock-digital.has-seconds .widget-clock-digital {
   font-size: 35px;
   letter-spacing: -1px;
 }
-.desk-card[data-size=half] .desk-clock-digital .widget-clock-seconds {
+.desk-card[data-size='half'] .desk-clock-digital .widget-clock-seconds {
   font-size: 24px;
 }
-.desk-card[data-size=half] .desk-clock-digital.density-compact .widget-clock-digital {
+.desk-card[data-size='half'] .desk-clock-digital.density-compact .widget-clock-digital {
   font-size: 36px;
   line-height: 48px;
 }
-.desk-card[data-size=half] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
+.desk-card[data-size='half'] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
   font-size: 30px;
 }
-.desk-card[data-size=half] .desk-clock-digital.density-compact .widget-clock-seconds {
+.desk-card[data-size='half'] .desk-clock-digital.density-compact .widget-clock-seconds {
   font-size: 21px;
 }
-.desk-card[data-size=half] .desk-clock-analog.density-standard {
+.desk-card[data-size='half'] .desk-clock-analog.density-standard {
   gap: 4px;
   padding: 10px;
 }
-.desk-card[data-size=half] .desk-clock-analog.density-standard .zeno-analog-clock {
+.desk-card[data-size='half'] .desk-clock-analog.density-standard .zeno-analog-clock {
   width: 110px;
   height: 110px;
 }
-.desk-card[data-size=half] .desk-clock-analog.density-standard .widget-date-main {
+.desk-card[data-size='half'] .desk-clock-analog.density-standard .widget-date-main {
   font-size: 16px;
   line-height: 22px;
 }
-.desk-card[data-size=half] .desk-clock-analog.density-compact .zeno-analog-clock {
+.desk-card[data-size='half'] .desk-clock-analog.density-compact .zeno-analog-clock {
   width: 88px;
   height: 88px;
 }
-.desk-card[data-size=quarter] .desk-clock-digital .widget-clock-digital {
+.desk-card[data-size='quarter'] .desk-clock-digital .widget-clock-digital {
   font-size: 39px;
   line-height: 48px;
   letter-spacing: -1px;
 }
-.desk-card[data-size=quarter] .desk-clock-digital.has-seconds .widget-clock-digital {
+.desk-card[data-size='quarter'] .desk-clock-digital.has-seconds .widget-clock-digital {
   font-size: 32px;
   line-height: 44px;
 }
-.desk-card[data-size=quarter] .desk-clock-digital .widget-clock-seconds {
+.desk-card[data-size='quarter'] .desk-clock-digital .widget-clock-seconds {
   font-size: 22px;
 }
-.desk-card[data-size=quarter] .desk-clock-digital.density-compact .widget-clock-digital {
+.desk-card[data-size='quarter'] .desk-clock-digital.density-compact .widget-clock-digital {
   font-size: 32px;
   line-height: 40px;
 }
-.desk-card[data-size=quarter] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
+.desk-card[data-size='quarter'] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
   font-size: 28px;
 }
-.desk-card[data-size=quarter] .desk-clock-analog .zeno-analog-clock {
+.desk-card[data-size='quarter'] .desk-clock-analog .zeno-analog-clock {
   width: 70px;
   height: 70px;
 }
-.desk-card[data-size=quarter] .desk-clock-analog.density-compact .zeno-analog-clock {
+.desk-card[data-size='quarter'] .desk-clock-analog.density-compact .zeno-analog-clock {
   width: 58px;
   height: 58px;
 }
@@ -797,16 +806,16 @@
 .desk-weather.is-empty small {
   font-size: 18px;
   line-height: 24px;
-  opacity: .7;
+  opacity: 0.7;
 }
-.desk-card[data-size=half] .desk-weather.is-empty strong {
+.desk-card[data-size='half'] .desk-weather.is-empty strong {
   font-size: 48px;
   line-height: 56px;
 }
-.desk-card[data-size=quarter] .desk-weather.is-empty strong {
+.desk-card[data-size='quarter'] .desk-weather.is-empty strong {
   font-size: 31px;
   line-height: 39px;
 }
-.desk-card[data-size=quarter] .desk-weather.is-empty small {
+.desk-card[data-size='quarter'] .desk-weather.is-empty small {
   display: none;
 }

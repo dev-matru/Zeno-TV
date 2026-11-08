@@ -17,22 +17,30 @@ The preview serves `app/`, the same files that go into the TV package. Use the a
 
 ```
 app/                the TV app (HTML, CSS, ES5 JavaScript)
-  main.js           screens, focus, preferences
-  zeno-*.js         desktop grid, widgets, sources, remote keys, languages…
-  device.js         everything that talks to Tizen
+  main.js           screens, focus and settings: wires the modules together
+  src/core/         shared helpers, remote input, focus, translations, remote shortcuts
+  src/state/        saved preferences, built-in apps
+  src/home/         Grid layout maths, widgets, weather and clock
+  src/sources/      HDMI inputs and their icons
+  src/system/       talking to Tizen, the network service, system information
+  src/look/         glass materials, card colours
+  src/type/, src/ui/  typefaces, icons and the logo
+  styles/           one stylesheet per area, loaded in order
   service/          background service on the TV (local network, wallpaper cache)
   locales/          translations, one file per language
-  assets/           fonts, photos, glass materials, icons
+  assets/           fonts, photos, glass materials, icons, generated data
 scripts/
   dev/              local preview server
-  build/            packaging, materials, translations, audio
+  build/            packaging, materials, translations, audio, logo
   checks/           syntax, manifest and browser tests
   tv/               install, launch and the optional native Home helper
-  lib/              shared helpers
+  lib/              shared helpers (app identity, TV checks, SDB transport)
 docs/               this file, TV setup, credits
 ```
 
-The TV runs an older web engine, so code in `app/` stays ES5: `var`, `function`, no arrow functions, no modules. Tools in `scripts/` can use modern JavaScript and Python.
+The TV runs an older web engine, so code in `app/` stays ES5: `var`, `function`, no arrow functions, no modules. Each file in `src/` is a function that adds one object to `window` (`ZenoSources`, `ZenoWidgets`…) or to `window.Zeno`. Tools in `scripts/` can use modern JavaScript and Python.
+
+Code is formatted automatically: `npm run format` for JavaScript and CSS (Prettier), `ruff format scripts` for Python. `npm run check:format` fails if something is not formatted.
 
 The stage is a fixed 1920×1080 canvas scaled to the screen. Check changes at 1920×1080 and 1280×720.
 
@@ -45,7 +53,7 @@ npx playwright install chromium
 npm run check:browser    # navigation, settings, persistence in a real browser
 ```
 
-More focused browser tests are listed in `package.json` (`check:widgets`, `check:desktop`, `check:palette`…). They run against a private preview with a fresh browser profile and never contact a TV.
+More focused browser tests are listed in `package.json` (`check:desktop`, `check:palette`, `check:alignment`…). Set `ZENO_PUBLIC=1` to run them without your personal assets. They run against a private preview with a fresh browser profile and never contact a TV.
 
 ## Personal assets
 
@@ -56,6 +64,8 @@ Some things you may want on your own TV can't be shared: commercial fonts, servi
   fonts.json                 fonts to offer in Settings → Typography
   fonts/<folder>/<files>     the font files named in fonts.json
   online-wallpapers.json     {"entries": [...]} wallpapers downloaded on the TV
+  identity.json              your app ids on the TV (see TV setup)
+  storage.json               old saved-data names to carry over after a rename
   overlay/<path>             any file, used as if it were app/<path>
 ```
 

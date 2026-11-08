@@ -2,7 +2,7 @@
 
 Needs, all inside .local/ and never committed:
   tizen-sdk/                          the official SDK (tools/ide/bin/tizen)
-  certificates/private/profiles.xml   the signing profile named "CasaTV"
+  certificates/private/profiles.xml   the signing profile named in identity.json
   certificates/private/certificate-password.txt
   certificates/ca/                    the CA certificates referenced by the profile
 
@@ -10,6 +10,7 @@ The SDK asks for the certificate password on a terminal, so it runs under a
 pseudo-terminal here and gets the password typed in; its output is shown with
 the password masked.
 """
+
 import os
 import pty
 import select
@@ -23,12 +24,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
 from personal_assets import write_widget_archive  # noqa: E402
+import identity  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SDK = ROOT / '.local/tizen-sdk'
 TIZEN = SDK / 'tools/ide/bin/tizen'
 KEYS = ROOT / '.local/certificates/private'
-PROFILE_NAME = 'CasaTV'
+PROFILE_NAME = identity.load().signing_profile
 DIST = ROOT / 'dist'
 SIGN_TIMEOUT = 60
 
@@ -41,8 +43,9 @@ def prepare_sdk():
     """Point the SDK at this checkout and at the signing profile, with absolute paths."""
     data = SDK / 'data'
     data.mkdir(exist_ok=True)
-    (SDK / 'sdk.info').write_text('TIZEN_SDK_INSTALLED_PATH=%s\nTIZEN_SDK_DATA_PATH=%s\nJDK_PATH=%s\n'
-                                  % (SDK, data, SDK / 'jdk'))
+    (SDK / 'sdk.info').write_text(
+        'TIZEN_SDK_INSTALLED_PATH=%s\nTIZEN_SDK_DATA_PATH=%s\nJDK_PATH=%s\n' % (SDK, data, SDK / 'jdk')
+    )
     profile = KEYS / 'profiles.xml'
     tree = ET.parse(profile)
     for item in tree.getroot().iter('profileitem'):
@@ -51,14 +54,26 @@ def prepare_sdk():
                 item.set(attribute, str(folder / Path(item.get(attribute)).name))
     tree.write(profile, encoding='UTF-8', xml_declaration=True)
     profile.chmod(0o600)
-    if subprocess.run([str(TIZEN), 'cli-config', 'default.profiles.path=' + str(profile)],
-                      capture_output=True, timeout=30).returncode:
+    if subprocess.run(
+        [str(TIZEN), 'cli-config', 'default.profiles.path=' + str(profile)], capture_output=True, timeout=30
+    ).returncode:
         fail('the SDK refused the signing profile')
 
 
 def sign(unsigned, out_dir, password):
     """Runs `tizen package` on a pseudo-terminal and answers its prompts."""
-    command = [str(TIZEN), 'package', '-t', 'wgt', '-s', PROFILE_NAME, '-o', str(out_dir), '--', str(unsigned)]
+    command = [
+        str(TIZEN),
+        'package',
+        '-t',
+        'wgt',
+        '-s',
+        PROFILE_NAME,
+        '-o',
+        str(out_dir),
+        '--',
+        str(unsigned),
+    ]
     pid, tty = pty.fork()
     if pid == 0:
         os.execv(command[0], command)
@@ -82,7 +97,7 @@ def sign(unsigned, out_dir, password):
             if asked > answered_password:
                 os.write(tty, password + b'\n')
                 answered_password = asked
-            asked = transcript.count(b'No: (N) ?')      # "save the password?" — no
+            asked = transcript.count(b'No: (N) ?')  # "save the password?" — no
             if asked > answered_save:
                 os.write(tty, b'n\n')
                 answered_save = asked

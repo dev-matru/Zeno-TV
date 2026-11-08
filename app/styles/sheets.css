@@ -23,8 +23,8 @@
   z-index: 1;
 }
 .bg-photo.m-tint .sheet {
-  --plate: rgba(14,12,10,.42);
-  --lift: rgba(14,12,10,.62);
+  --plate: rgba(14, 12, 10, 0.42);
+  --lift: rgba(14, 12, 10, 0.62);
   --plate-edge: none;
 }
 .sheet-bg {
@@ -42,7 +42,7 @@
   top: 0;
   width: 1920px;
   height: 1080px;
-  background: rgba(8,12,14,.42);
+  background: rgba(8, 12, 14, 0.42);
 }
 .view {
   position: absolute;
@@ -69,7 +69,7 @@
   font-size: 30px;
   line-height: 40px;
   font-weight: 500;
-  letter-spacing: -.2px;
+  letter-spacing: -0.2px;
   color: var(--mute);
 }
 .s-head {
@@ -85,7 +85,7 @@
   font-size: 30px;
   line-height: 40px;
   font-weight: 600;
-  letter-spacing: -.2px;
+  letter-spacing: -0.2px;
   color: var(--faint);
 }
 .btn {
@@ -96,12 +96,14 @@
   padding: 0 30px 0 24px;
   font-size: 30px;
   font-weight: 500;
-  letter-spacing: -.3px;
+  letter-spacing: -0.3px;
   white-space: nowrap;
   color: var(--mute);
   background: none;
   border-radius: 32px;
-  transition: background-color 140ms linear,color 140ms linear;
+  transition:
+    background-color 140ms linear,
+    color 140ms linear;
 }
 .btn .ico {
   width: 30px;
@@ -185,8 +187,10 @@
   position: absolute;
   left: 100px;
   top: 30px;
-  opacity: .88;
-  transition: opacity 160ms linear,transform var(--t) var(--ease);
+  opacity: 0.88;
+  transition:
+    opacity 160ms linear,
+    transform var(--t) var(--ease);
 }
 .gt.is-focus .mark {
   opacity: 1;
@@ -201,7 +205,7 @@
   font-size: 34px;
   line-height: 44px;
   font-weight: 500;
-  letter-spacing: -.6px;
+  letter-spacing: -0.6px;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -280,8 +284,10 @@
 .f-type .sheet .eo {
   background: none;
   box-shadow: none;
-  opacity: .70;
-  transition: opacity 160ms linear,transform var(--t) var(--ease);
+  opacity: 0.7;
+  transition:
+    opacity 160ms linear,
+    transform var(--t) var(--ease);
 }
 .f-type .sheet .gt.is-focus,
 .f-type .sheet .er-name.is-focus,
@@ -354,7 +360,7 @@
   padding: 0 24px 0 16px;
   font-size: 34px;
   font-weight: 500;
-  letter-spacing: -.5px;
+  letter-spacing: -0.5px;
   white-space: nowrap;
   border-radius: 24px;
   transition: background-color 140ms linear;
@@ -405,10 +411,12 @@
   width: 304px;
   font-size: 30px;
   font-weight: 500;
-  letter-spacing: -.3px;
+  letter-spacing: -0.3px;
   color: var(--mute);
   border-radius: 24px;
-  transition: background-color 140ms linear,color 140ms linear;
+  transition:
+    background-color 140ms linear,
+    color 140ms linear;
 }
 .er.is-active .er-rm {
   visibility: visible;
@@ -453,7 +461,7 @@
   padding: 0 16px 0 24px;
   font-size: 34px;
   font-weight: 500;
-  letter-spacing: -.5px;
+  letter-spacing: -0.5px;
   white-space: nowrap;
   border-radius: 24px;
   transition: background-color 140ms linear;
@@ -509,14 +517,14 @@
   height: 24px;
   font-size: 20px;
   line-height: 24px;
-  letter-spacing: .1px;
+  letter-spacing: 0.1px;
   color: var(--faint);
 }
 .ed-order-break.is-on {
   display: flex;
 }
 .ed-order-break::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 1px;
   background: var(--line);
@@ -543,7 +551,7 @@
   font-size: 22px;
   line-height: 28px;
   font-weight: 600;
-  letter-spacing: -.2px;
+  letter-spacing: -0.2px;
   text-align: center;
   white-space: nowrap;
   color: var(--warn);
@@ -612,17 +620,17 @@
   display: flex;
   gap: 12px;
 }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   .stage,
   .stage * {
-    transition: none!important;
-    animation: none!important;
+    transition: none !important;
+    animation: none !important;
   }
   .tile .mark,
   .tile .label,
   .gt .mark {
-    transform: none!important;
-    animation: none!important;
+    transform: none !important;
+    animation: none !important;
   }
   .l-list .ph-row,
   .l-list .ph-group,
@@ -632,9 +640,9 @@
   .quiet-utils .u,
   .quiet-utils .u::after,
   .util-focus-label {
-    transition: opacity 120ms linear!important;
+    transition: opacity 120ms linear !important;
   }
   .quiet-utils .u .ico {
-    transform: none!important;
+    transform: none !important;
   }
 }

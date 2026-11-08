@@ -1,44 +1,117 @@
-"""Install or launch reviewed app packages through the owner's SDB connection."""
+"""Install, open or inspect apps on the TV over the developer connection (SDB).
+
+python3 scripts/tv/control.py info               what the TV reports about itself
+python3 scripts/tv/control.py install FILE.wgt   install a signed package
+python3 scripts/tv/control.py launch [APP_ID]    open Zeno (or another allowed app)
+python3 scripts/tv/control.py debug [APP_ID]     same, with the web inspector
+python3 scripts/tv/control.py apps               list installed apps
+"""
+
+import argparse
+import hashlib
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
-import argparse,hashlib,json,sys,subprocess,urllib.request,xml.etree.ElementTree as ET,zipfile
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"lib"))
-from sdb_transport import push,shell,Sdb
-ROOT=Path(__file__).resolve().parents[2]
-parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('action',choices=['info','install','launch','apps','debug'])
-parser.add_argument('target',nargs='?')
-a=parser.parse_args();host=json.loads((ROOT/'.local/device.json').read_text())['host']
-with urllib.request.urlopen('http://'+host+':8001/api/v2/',timeout=5) as response: info=json.load(response)
-if a.action=='info':
- d=info.get('device',{})
- for k in ['name','modelName','OS','firmwareVersion','ip','wifiMac','developerMode','developerIP']:print('%-16s %s'%(k,d.get(k,'')))
- sys.exit(0)
-if info.get('device',{}).get('modelName')!='QE65S90DATXZT':raise SystemExit('TV model guard failed')
-fingerprint=ROOT/'.local/native-home/device-identity.sha256'
-if not fingerprint.exists() or hashlib.sha256(info['device']['id'].encode()).hexdigest()!=fingerprint.read_text().strip():raise SystemExit('TV identity guard failed')
-allowed=['CsTv9rK2mQ.CasaTV','xvvl3S1TT1.TizenTubeStandalone']
-if a.action=='apps':print(shell(host,'0 applist'));sys.exit(0)
-if a.action in ['launch','debug']:
- if a.target not in allowed:raise SystemExit('App not in the reviewed allowlist')
- if a.target=='CsTv9rK2mQ.CasaTV':
-  result=subprocess.run([sys.executable,str(ROOT/'scripts/tv/native-home/run.py'),a.action],capture_output=True,text=True)
-  print(result.stdout)
-  if result.returncode or 'successfully launched' not in result.stdout:raise SystemExit('Native launcher did not confirm app launch')
- else:print(shell(host,'0 '+('debug ' if a.action=='debug' else 'was_execute ')+a.target))
- sys.exit(0)
-p=Path(a.target).resolve();data=p.read_bytes()
-with zipfile.ZipFile(p) as z:
- if not {'author-signature.xml','signature1.xml'}.issubset(z.namelist()):raise SystemExit('Unsigned package refused')
- manifest=ET.fromstring(z.read('config.xml'));identity=manifest.find('{http://tizen.org/ns/widgets}application');appid=identity.get('id');pkg=identity.get('package')
- if appid not in allowed or not appid.startswith(pkg+'.'):raise SystemExit('Unreviewed package identity')
-remote='/home/owner/share/tmp/sdk_tools/CasaInstall-'+hashlib.sha256(data).hexdigest()[:12]+'.wgt'
-print('Uploading signed '+appid+' ('+str(len(data))+' bytes)',flush=True)
-push(host,remote,data)
-print('Upload verified; requesting installation',flush=True)
-with Sdb(host,'shell:0 vd_appinstall '+pkg+' '+remote,timeout=120) as channel:
- result=channel.collect(timeout=150).decode(errors='replace')
-print(result)
-if 'install completed' not in result.lower():raise SystemExit('TV did not confirm installation')
-if appid not in shell(host,'0 applist'):raise SystemExit('Installed app absent from registry')
-shell(host,'0 rmfile "'+remote+'"')
-print('Installation and app registry verified: '+appid)
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+import identity  # noqa: E402
+import tv  # noqa: E402
+from sdb_transport import Sdb, push, shell  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[2]
+WIDGETS = '{http://tizen.org/ns/widgets}'
+REMOTE_TMP = '/home/owner/share/tmp/sdk_tools/'
+INFO_FIELDS = ['name', 'modelName', 'OS', 'firmwareVersion', 'ip', 'wifiMac', 'developerMode', 'developerIP']
+
+
+def allowed_apps():
+    """Zeno itself, plus the YouTube client it can open."""
+    return [identity.load().app_id, 'xvvl3S1TT1.TizenTubeStandalone']
+
+
+def show_info(address):
+    info = tv.device_info(address)
+    for field in INFO_FIELDS:
+        print('%-16s %s' % (field, info.get(field, '')))
+
+
+def launch(address, action, app):
+    if app not in allowed_apps():
+        sys.exit('This app is not on the allowed list')
+    if app != identity.load().app_id:
+        command = 'debug ' if action == 'debug' else 'was_execute '
+        print(shell(address, '0 ' + command + app))
+        return
+    # Zeno is started through the native helper, which waits for the launch to be confirmed.
+    helper = ROOT / 'scripts/tv/native-home/run.py'
+    result = subprocess.run([sys.executable, str(helper), action], capture_output=True, text=True)
+    print(result.stdout)
+    if result.returncode or 'successfully launched' not in result.stdout:
+        sys.exit('The TV did not confirm that the app started')
+
+
+def package_identity(path):
+    """App and package id of a signed .wgt, refusing unsigned or unexpected ones."""
+    with zipfile.ZipFile(path) as archive:
+        if not {'author-signature.xml', 'signature1.xml'}.issubset(archive.namelist()):
+            sys.exit('Refusing an unsigned package')
+        manifest = ET.fromstring(archive.read('config.xml'))
+    application = manifest.find(WIDGETS + 'application')
+    app, package = application.get('id'), application.get('package')
+    if app not in allowed_apps() or not app.startswith(package + '.'):
+        sys.exit('Unexpected app id in the package: ' + str(app))
+    return app, package
+
+
+def install(address, path):
+    path = Path(path).resolve()
+    data = path.read_bytes()
+    app, package = package_identity(path)
+    remote = REMOTE_TMP + 'ZenoInstall-' + hashlib.sha256(data).hexdigest()[:12] + '.wgt'
+
+    print('Uploading signed %s (%d bytes)' % (app, len(data)), flush=True)
+    push(address, remote, data)
+    print('Upload verified; installing', flush=True)
+    with Sdb(address, 'shell:0 vd_appinstall ' + package + ' ' + remote, timeout=120) as channel:
+        result = channel.collect(timeout=150).decode(errors='replace')
+    print(result)
+
+    if 'install completed' not in result.lower():
+        sys.exit('The TV did not confirm the installation')
+    if app not in shell(address, '0 applist'):
+        sys.exit('The app is missing from the TV app list after installing')
+    shell(address, '0 rmfile "' + remote + '"')
+    print('Installed and found in the app list: ' + app)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument('action', choices=['info', 'install', 'launch', 'apps', 'debug'])
+    parser.add_argument('target', nargs='?')
+    args = parser.parse_args()
+
+    address = tv.host()
+    if args.action == 'info':
+        show_info(address)
+        return
+    try:
+        tv.check(tv.device_info(address))
+    except tv.WrongTV as error:
+        sys.exit(str(error))
+
+    if args.action == 'apps':
+        print(shell(address, '0 applist'))
+    elif args.action in ('launch', 'debug'):
+        launch(address, args.action, args.target or identity.load().app_id)
+    elif not args.target:
+        sys.exit('install needs the path of a signed .wgt')
+    else:
+        install(address, args.target)
+
+
+if __name__ == '__main__':
+    main()

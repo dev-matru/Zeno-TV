@@ -1,0 +1,7 @@
+app/locales/
+app/assets/
+dist/
+.local/
+node_modules/
+*.md
+*.json

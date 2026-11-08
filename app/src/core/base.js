@@ -1,9 +1,9 @@
 /* Shared namespace plus the handful of value and DOM helpers every module leans on. */
 (function (root) {
   'use strict';
-  var Z = root.Zeno = root.Zeno || {};
+  var Z = (root.Zeno = root.Zeno || {});
 
-  var util = Z.util = {
+  var util = (Z.util = {
     clamp: function (value, low, high) {
       var v = value > high ? high : value;
       return v < low ? low : v;
@@ -21,7 +21,8 @@
     /* Case-insensitive lookup in a list of allowed values; returns the canonical spelling. */
     oneOf: function (value, allowed, fallback) {
       var wanted = String(value || '').toLowerCase();
-      for (var i = 0; i < allowed.length; i++) if (String(allowed[i]).toLowerCase() === wanted) return allowed[i];
+      for (var i = 0; i < allowed.length; i++)
+        if (String(allowed[i]).toLowerCase() === wanted) return allowed[i];
       return fallback;
     },
     find: function (list, test) {
@@ -32,14 +33,22 @@
       for (var i = 0; i < list.length; i++) if (test(list[i], i)) return i;
       return -1;
     }
-  };
+  });
 
   var ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
 
-  var dom = Z.dom = {
-    byId: function (id) { return document.getElementById(id); },
-    escape: function (text) { return String(text).replace(/[&<>"]/g, function (c) { return ENTITIES[c]; }); },
-    px: function (n) { return n.toFixed(2) + 'px'; },
+  var dom = (Z.dom = {
+    byId: function (id) {
+      return document.getElementById(id);
+    },
+    escape: function (text) {
+      return String(text).replace(/[&<>"]/g, function (c) {
+        return ENTITIES[c];
+      });
+    },
+    px: function (n) {
+      return n.toFixed(2) + 'px';
+    },
 
     /* Writes markup only when it differs from what the element already holds. */
     html: function (el, markup) {
@@ -62,9 +71,15 @@
     /* Reconciles absolutely positioned children by key. Existing nodes are updated in
        place so their transforms animate; nodes whose key disappeared are removed. */
     reconcile: function (parent, items, update) {
-      var pool = parent.__pool || (parent.__pool = {}), live = {}, key, node, fresh;
+      var pool = parent.__pool || (parent.__pool = {}),
+        live = {},
+        key,
+        node,
+        fresh;
       for (var i = 0; i < items.length; i++) {
-        key = items[i].key; node = pool[key]; fresh = !node;
+        key = items[i].key;
+        node = pool[key];
+        fresh = !node;
         if (fresh) node = pool[key] = document.createElement('div');
         update(node, items[i], i);
         if (fresh) parent.appendChild(node);
@@ -78,7 +93,9 @@
     },
 
     /* The live node reconcile() keeps for a key, if any. */
-    child: function (parent, key) { return parent.__pool ? parent.__pool[key] : undefined; },
+    child: function (parent, key) {
+      return parent.__pool ? parent.__pool[key] : undefined;
+    },
 
     /* Pointer targets carry their zone, index and semantic action as data attributes. */
     target: function (el, zone, index, action) {
@@ -86,15 +103,23 @@
       el.setAttribute('data-i', String(index));
       el.setAttribute('data-action', action);
     }
-  };
+  });
 
   function watchNativeIcon(img) {
     var holder = img.parentNode;
-    function shown() { holder.classList.add('has-native-icon'); }
-    function hidden() { img.style.display = 'none'; holder.classList.remove('has-native-icon'); }
+    function shown() {
+      holder.classList.add('has-native-icon');
+    }
+    function hidden() {
+      img.style.display = 'none';
+      holder.classList.remove('has-native-icon');
+    }
     img.onload = shown;
     img.onerror = hidden;
-    if (img.complete) { if (img.naturalWidth) shown(); else hidden(); }
+    if (img.complete) {
+      if (img.naturalWidth) shown();
+      else hidden();
+    }
   }
 
   Z.util = util;

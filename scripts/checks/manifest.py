@@ -4,6 +4,7 @@ Most files are found by following index.html and the stylesheets. Wallpapers,
 their materials and the interface icons are named at runtime, so those are
 derived from the wallpaper registry and listed explicitly.
 """
+
 import json
 import re
 import sys
@@ -12,7 +13,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / 'app'
-PACKAGE_ID, APP_ID = 'CsTv9rK2mQ', 'CsTv9rK2mQ.CasaTV'   # what the TV has installed; changing it means a new app
+PACKAGE_ID, APP_ID = (
+    'ZenoTV0000',
+    'ZenoTV0000.ZenoTV',
+)  # what the TV has installed; changing it means a new app
 W3C, TIZEN = '{http://www.w3.org/ns/widgets}', '{http://tizen.org/ns/widgets}'
 MATERIALS = ['glass-soft', 'field-blur', 'field-frost', 'field-clear']
 ICONS = ['apps', 'art', 'home', 'pc', 'settings', 'tv']

@@ -14,4 +14,6 @@ const files = [];
   }
 })(join(root, 'app'));
 for (const file of files) execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
-console.log('Syntax OK for ' + files.length + ' runtime scripts (' + relative(root, join(root, 'app')) + ').');
+console.log(
+  'Syntax OK for ' + files.length + ' runtime scripts (' + relative(root, join(root, 'app')) + ').'
+);

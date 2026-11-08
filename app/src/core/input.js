@@ -5,19 +5,43 @@
 (function (Z) {
   'use strict';
 
-  var INTENTS = { 13: 'ok', 36: 'home', 37: 'left', 38: 'up', 39: 'right', 40: 'down', 8: 'back', 27: 'back', 461: 'back', 10009: 'back' };
-  var ENTER = 13, TAB = 9, LONG_PRESS = 650;
+  var INTENTS = {
+    13: 'ok',
+    36: 'home',
+    37: 'left',
+    38: 'up',
+    39: 'right',
+    40: 'down',
+    8: 'back',
+    27: 'back',
+    461: 'back',
+    10009: 'back'
+  };
+  var ENTER = 13,
+    TAB = 9,
+    LONG_PRESS = 650;
 
   /* hooks: press(intent), holdable() -> id|null, hold(id) */
   function attach(hooks) {
-    var down = {}, pending = null;
+    var down = {},
+      pending = null;
 
-    function cancelHold() { if (pending) clearTimeout(pending.timer); pending = null; }
-    function forget() { down = {}; cancelHold(); }
+    function cancelHold() {
+      if (pending) clearTimeout(pending.timer);
+      pending = null;
+    }
+    function forget() {
+      down = {};
+      cancelHold();
+    }
 
     document.addEventListener('keydown', function (ev) {
-      var code = ev.keyCode, intent = INTENTS[code];
-      if (code === TAB) { ev.preventDefault(); return; }
+      var code = ev.keyCode,
+        intent = INTENTS[code];
+      if (code === TAB) {
+        ev.preventDefault();
+        return;
+      }
       if (!intent || ev.metaKey || ev.ctrlKey || ev.altKey) return;
       ev.preventDefault();
       if (intent === 'ok' || intent === 'back') {
@@ -26,11 +50,15 @@
       }
       var id = intent === 'ok' ? hooks.holdable() : null;
       if (id) {
-        pending = { id: id, long: false, timer: setTimeout(function () {
-          if (!pending || hooks.holdable() !== id) return;
-          pending.long = true;
-          hooks.hold(id);
-        }, LONG_PRESS) };
+        pending = {
+          id: id,
+          long: false,
+          timer: setTimeout(function () {
+            if (!pending || hooks.holdable() !== id) return;
+            pending.long = true;
+            hooks.hold(id);
+          }, LONG_PRESS)
+        };
         return;
       }
       if (intent !== 'ok') cancelHold();
@@ -52,26 +80,48 @@
   /* Counts down only while active() is true, so time spent in menus or with the TV
      app in the background does not count towards the period. */
   function activeCountdown(opts) {
-    var spent = 0, since = 0, timer = 0, identity = '';
+    var spent = 0,
+      since = 0,
+      timer = 0,
+      identity = '';
     function pause() {
-      if (since) { spent += Date.now() - since; since = 0; }
-      clearTimeout(timer); timer = 0;
+      if (since) {
+        spent += Date.now() - since;
+        since = 0;
+      }
+      clearTimeout(timer);
+      timer = 0;
     }
-    function reset() { pause(); spent = 0; identity = ''; }
+    function reset() {
+      pause();
+      spent = 0;
+      identity = '';
+    }
     function sync() {
       var id = opts.identity();
       pause();
-      if (id !== identity) { spent = 0; identity = id; }
+      if (id !== identity) {
+        spent = 0;
+        identity = id;
+      }
       if (!opts.active()) return;
       since = Date.now();
-      timer = setTimeout(function () {
-        pause(); spent = 0;
-        if (opts.active()) opts.elapsed();
-      }, Math.max(10, opts.period() - spent));
+      timer = setTimeout(
+        function () {
+          pause();
+          spent = 0;
+          if (opts.active()) opts.elapsed();
+        },
+        Math.max(10, opts.period() - spent)
+      );
     }
     return {
-      pause: pause, reset: reset, sync: sync,
-      status: function () { return { activeMs: spent + (since ? Date.now() - since : 0), active: !!since }; }
+      pause: pause,
+      reset: reset,
+      sync: sync,
+      status: function () {
+        return { activeMs: spent + (since ? Date.now() - since : 0), active: !!since };
+      }
     };
   }
 

@@ -8,6 +8,7 @@ at every file Git would add plus every path reachable in history.
 It is a safety net, not a licence review or a complete secret scanner. Matches are
 reported by file name only, so a failing run never prints the secret itself.
 """
+
 import hashlib
 import json
 import re
@@ -21,11 +22,21 @@ FONT_TYPES = {'.ttf', '.otf', '.woff', '.woff2', '.eot'}
 PRIVATE_TYPES = {'.p12', '.pem', '.key', '.csr', '.wgt'}
 PRIVATE_DIRS = ('.local/', 'dist/', 'node_modules/', 'app/assets/private-fonts/')
 PRIVATE_NAMES = {'.env', 'certificate-password.txt', 'profiles.xml', 'session.json'}
-SECRETS = re.compile('|'.join([
-    r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----',
-    r'gh[pousr]_[A-Za-z0-9]{25,}', r'github_pat_[A-Za-z0-9_]{25,}', r'AKIA[A-Z0-9]{16}',
-]))
-LICENCES = ['app/assets/manrope-OFL.txt', 'app/assets/fonts/geist/OFL.txt', 'app/assets/fonts/newsreader/OFL.txt']
+SECRETS = re.compile(
+    '|'.join(
+        [
+            r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----',
+            r'gh[pousr]_[A-Za-z0-9]{25,}',
+            r'github_pat_[A-Za-z0-9_]{25,}',
+            r'AKIA[A-Z0-9]{16}',
+        ]
+    )
+)
+LICENCES = [
+    'app/assets/manrope-OFL.txt',
+    'app/assets/fonts/geist/OFL.txt',
+    'app/assets/fonts/newsreader/OFL.txt',
+]
 
 
 def git(*args):
@@ -34,8 +45,12 @@ def git(*args):
 
 def private_path(name):
     path = Path(name)
-    return (name.startswith(PRIVATE_DIRS) or path.suffix.lower() in PRIVATE_TYPES
-            or path.name in PRIVATE_NAMES or path.name.startswith('.env.'))
+    return (
+        name.startswith(PRIVATE_DIRS)
+        or path.suffix.lower() in PRIVATE_TYPES
+        or path.name in PRIVATE_NAMES
+        or path.name.startswith('.env.')
+    )
 
 
 def known_fonts():

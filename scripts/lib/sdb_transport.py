@@ -1,4 +1,5 @@
 """Small SDB transport for an owner-authorized developer connection on ARM Macs."""
+
 import socket
 import struct
 import time
@@ -19,7 +20,8 @@ class Sdb:
                 break
             except (EOFError, ConnectionResetError):
                 self.sock.close()
-                if attempt == 3: raise
+                if attempt == 3:
+                    raise
                 time.sleep(0.2 * (attempt + 1))
                 self.sock = socket.create_connection((host, 26101), timeout=timeout)
                 self.sock.settimeout(timeout)
@@ -31,7 +33,9 @@ class Sdb:
 
     def send(self, command, a, b, data=b''):
         code = int.from_bytes(command.encode(), 'little')
-        self.sock.sendall(struct.pack('<6I', code, a, b, len(data), sum(data) & 0xffffffff, code ^ 0xffffffff) + data)
+        self.sock.sendall(
+            struct.pack('<6I', code, a, b, len(data), sum(data) & 0xFFFFFFFF, code ^ 0xFFFFFFFF) + data
+        )
 
     def exact(self, length):
         result = bytearray()
@@ -44,10 +48,10 @@ class Sdb:
 
     def receive(self):
         c, a, b, n, checksum, magic = struct.unpack('<6I', self.exact(24))
-        if magic != c ^ 0xffffffff or n > 1048576:
+        if magic != c ^ 0xFFFFFFFF or n > 1048576:
             raise RuntimeError('Invalid SDB header')
         data = self.exact(n)
-        if sum(data) & 0xffffffff != checksum:
+        if sum(data) & 0xFFFFFFFF != checksum:
             raise RuntimeError('Invalid SDB checksum')
         return c.to_bytes(4, 'little').decode(), a, b, data
 
@@ -67,7 +71,7 @@ class Sdb:
 
     def write(self, data):
         for start in range(0, len(data), 4096):
-            self.send('WRTE', 1, self.remote, data[start:start + 4096])
+            self.send('WRTE', 1, self.remote, data[start : start + 4096])
             while self.event() != 'OKAY':
                 if self.closed:
                     raise RuntimeError('SDB closed while writing')
@@ -128,7 +132,7 @@ def push(host, path, data):
         name = (path + ',33188').encode()
         channel.write(b'SEND' + struct.pack('<I', len(name)) + name)
         for start in range(0, len(data), 32768):
-            chunk = data[start:start + 32768]
+            chunk = data[start : start + 32768]
             channel.write(b'DATA' + struct.pack('<I', len(chunk)) + chunk)
         channel.write(b'DONE' + struct.pack('<I', int(time.time())))
         kind, length = struct.unpack('<4sI', channel.read(8))

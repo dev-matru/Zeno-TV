@@ -36,11 +36,16 @@ const icon = `<style>html,body{margin:0}
 
 const browser = await chromium.launch();
 try {
-  const page = await browser.newPage({ viewport: { width: 1200, height: 1200 }, deviceScaleFactor: 2 });
+  const page = await browser.newPage({
+    viewport: { width: 1200, height: 1200 },
+    deviceScaleFactor: 2
+  });
   for (const [name, ink] of Object.entries(INK)) {
     await page.setContent(lockup(ink));
     await page.evaluate(() => document.fonts.ready);
-    await page.locator('.lockup').screenshot({ path: root + 'docs/images/logo-' + name + '.png', omitBackground: true });
+    await page
+      .locator('.lockup')
+      .screenshot({ path: root + 'docs/images/logo-' + name + '.png', omitBackground: true });
     console.log('docs/images/logo-' + name + '.png');
   }
   const flat = await browser.newPage({ viewport: { width: 1024, height: 1024 } });

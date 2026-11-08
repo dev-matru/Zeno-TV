@@ -4,7 +4,7 @@
   'use strict';
   Z.builtinApps = [
     { id: 'tv', name: 'TV', appId: 'org.tizen.tv-viewer' },
-    { id: 'pc', name: 'PC', appId: 'casa.pc' },
+    { id: 'pc', name: 'PC', appId: 'zeno.pc' },
     { id: 'youtube', name: 'YouTube', appId: 'xvvl3S1TT1.TizenTubeStandalone' },
     { id: 'netflix', name: 'Netflix', appId: 'org.tizen.netflix-app' },
     { id: 'primevideo', name: 'Prime Video', appId: 'org.tizen.primevideo' },
@@ -14,5 +14,8 @@
     { id: 'now', name: 'NOW', appId: 'jcz0WrZYdy.NOWTV' },
     { id: 'dazn', name: 'DAZN', appId: 'yu1NM3vHsU.DAZN' },
     { id: 'appletv', name: 'Apple TV', appId: 'com.samsung.tv.aria-video' }
-  ].map(function (a) { a.mark = true; return a; });
+  ].map(function (a) {
+    a.mark = true;
+    return a;
+  });
 })(window.Zeno);

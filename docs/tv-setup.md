@@ -19,8 +19,10 @@ Then tell the scripts where the TV is:
 
 ```json
 // .local/device.json
-{"host": "192.168.1.50"}
+{"host": "192.168.1.50", "model": "QE55S90DATXXN"}
 ```
+
+`model` is the model name your TV reports (`npm run tv:info` shows it). Commands that install or change something refuse to run on any other model.
 
 ## 3. Certificates
 
@@ -38,15 +40,31 @@ Back up the author certificate. Without it you can't update the installed app; y
 
 ## 4. Your own app identity
 
-`app/config.xml` contains the package and application IDs of the reference install. For your own TV, generate new ones with the SDK. Then update the same IDs in `package.json` (`tv:launch`), `scripts/tv/control.py` and `scripts/tv/native-home/`. The model check in `scripts/tv/control.py` also needs your TV's model name.
+The repository uses placeholder ids (`ZenoTV0000.ZenoTV`). Generate your own package id with the SDK (ten letters and digits) and put it in `.local/personal/identity.json`:
+
+```json
+{"package": "Ab12Cd34Ef", "app": "ZenoTV", "signingProfile": "ZenoTV"}
+```
+
+`signingProfile` is the name of your profile in `profiles.xml`. Your build and every TV command then use these ids; the source files never need to change. Keep them the same from then on: a different id installs as a separate app, without your settings.
 
 ## 5. Build, install, open
+
+The first time, record which TV this is. Later commands refuse to touch a different one:
+
+```sh
+python3 scripts/tv/native-home/run.py inspect
+```
+
+Then:
 
 ```sh
 npm run package      # dist/ZenoTV.wgt, signed
 npm run tv:install   # upload and install, then confirm it is in the app list
 npm run tv:launch    # open it
 ```
+
+On macOS, if the TV commands fail with "No route to host" while `ping` works, the Python you are using has no permission for the local network. Allow it in System Settings → Privacy & Security → Local Network, or run the scripts with another Python (for example Homebrew's).
 
 ## Optional: open Zeno with the Home button
 

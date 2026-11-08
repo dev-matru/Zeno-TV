@@ -5,7 +5,7 @@ import { root } from '../../lib/browser.mjs';
 /* Built-in Home apps in their default order, with the TV app IDs they launch. */
 export const BUILTIN = [
   ['tv', 'org.tizen.tv-viewer', 'TV'],
-  ['pc', 'casa.pc', 'PC'],
+  ['pc', 'zeno.pc', 'PC'],
   ['youtube', 'xvvl3S1TT1.TizenTubeStandalone', 'YouTube'],
   ['netflix', 'org.tizen.netflix-app', 'Netflix'],
   ['primevideo', 'org.tizen.primevideo', 'Prime Video'],
@@ -26,11 +26,16 @@ export const SPOTIFY = 'rJeHak5zRg.Spotify';
 
 /* What the fake TV reports as installed. The last three must never be listed:
    Zeno itself, a background service and a second YouTube. */
-export const INSTALLED = BUILTIN.map(([, appId, name]) => ({ id: appId, name, show: true, iconPath: '' })).concat([
+export const INSTALLED = BUILTIN.map(([, appId, name]) => ({
+  id: appId,
+  name,
+  show: true,
+  iconPath: ''
+})).concat([
   { id: FAMILY, name: FAMILY_NAME, show: true, iconPath: '' },
   { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
   { id: '5b8c3eb16b.BeamCTVDev', name: 'HBO Max', show: true, iconPath: '' },
-  { id: 'CsTv9rK2mQ.CasaTV', name: 'Zeno TV', show: true },
+  { id: 'ZenoTV0000.ZenoTV', name: 'Zeno TV', show: true },
   { id: 'AbCdEf1234.worker', name: 'Background worker', show: true },
   { id: 'com.samsung.tv.cobalt-yt', name: 'YouTube', show: true }
 ]);
@@ -42,8 +47,16 @@ export const WALLS = JSON.parse(readFileSync(root + 'app/assets/wallpapers/SOURC
 /* A saved Home in the current schema, with optional overrides. */
 export function savedHome(patch = {}) {
   return {
-    casaVersion: 4, dock: HOME_IDS.slice(), wallpaper: WALLS[0].id, mode: 'fixed', lastApp: 'netflix',
-    theme: 'shore', font: 'manrope', apps: 'both', controls: 'both', ...patch
+    homeVersion: 4,
+    dock: HOME_IDS.slice(),
+    wallpaper: WALLS[0].id,
+    mode: 'fixed',
+    lastApp: 'netflix',
+    theme: 'shore',
+    font: 'manrope',
+    apps: 'both',
+    controls: 'both',
+    ...patch
   };
 }
 

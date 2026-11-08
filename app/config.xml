@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://local.casa-tv/app" version="1.0.0" viewmodes="maximized">
-  <tizen:application id="CsTv9rK2mQ.CasaTV" package="CsTv9rK2mQ" required_version="6.5"/>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/dev-matru/Zeno-TV" version="1.0.0" viewmodes="maximized">
+  <tizen:application id="ZenoTV0000.ZenoTV" package="ZenoTV0000" required_version="6.5"/>
   <content src="index.html"/>
   <name>Zeno TV</name>
   <icon src="icon.png" width="1024" height="1024"/>
@@ -11,7 +11,7 @@
   <tizen:privilege name="http://developer.samsung.com/privilege/network.public"/>
   <tizen:privilege name="http://tizen.org/privilege/tv.window"/>
   <feature name="http://tizen.org/feature/web.service"/>
-  <tizen:service id="CsTv9rK2mQ.NetworkService" auto-restart="false" on-boot="false">
+  <tizen:service id="ZenoTV0000.NetworkService" auto-restart="false" on-boot="false">
     <tizen:content src="service/index.js"/>
     <tizen:name>Zeno TV Network</tizen:name>
     <tizen:description>Rete locale per Zeno TV</tizen:description>

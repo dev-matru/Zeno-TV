@@ -1,4 +1,4 @@
 set -eu
-printf 'CASA_HOME_INSPECT_BEGIN\n'
-/usr/bin/dotnet /home/owner/share/tmp/sdk_tools/CasaHomeControl.dll apply /home/owner/share/tmp/sdk_tools/CasaHomeOriginal.json
-printf 'CASA_HOME_INSPECT_END\n'
+printf 'ZENO_HOME_INSPECT_BEGIN\n'
+/usr/bin/dotnet /home/owner/share/tmp/sdk_tools/ZenoHomeControl.dll apply /home/owner/share/tmp/sdk_tools/ZenoHomeOriginal.json __ZENO_APP__
+printf 'ZENO_HOME_INSPECT_END\n'

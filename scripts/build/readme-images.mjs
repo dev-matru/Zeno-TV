@@ -7,14 +7,25 @@ import { openPreview, root } from '../lib/browser.mjs';
 const out = root + 'docs/images/';
 mkdirSync(out, { recursive: true });
 
-const weather = { mode: 'auto', placeKey: '', name: 'Milan', temperature: 14, code: 2, isDay: true };
+const weather = {
+  mode: 'auto',
+  placeKey: '',
+  name: 'Milan',
+  temperature: 14,
+  code: 2,
+  isDay: true
+};
 async function stagePage(browser, baseURL, scale) {
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: scale, locale: 'en-US' });
+  const page = await browser.newPage({
+    viewport: { width: 1920, height: 1080 },
+    deviceScaleFactor: scale,
+    locale: 'en-US'
+  });
   await page.clock.install({ time: new Date('2026-05-16T18:40:00') });
   await page.addInitScript(w => {
-    window.CASA_OFFLINE_TEST = true;
+    window.ZENO_OFFLINE_TEST = true;
     localStorage.setItem('zeno.language.v1', 'en');
-    localStorage.setItem('casa.weather.v1', JSON.stringify(Object.assign({ at: Date.now() }, w)));
+    localStorage.setItem('zeno.weather.v1', JSON.stringify(Object.assign({ at: Date.now() }, w)));
   }, weather);
   await page.goto(baseURL + '/home/');
   await page.waitForFunction(() => window.ZenoQA && ZenoQA.ready());
@@ -26,7 +37,12 @@ try {
   const ready = page => page.waitForFunction(() => ZenoQA.ready());
   const shot = async (page, name) => {
     await page.waitForTimeout(500);
-    await page.screenshot({ path: out + name + '.jpg', type: 'jpeg', quality: 86, animations: 'disabled' });
+    await page.screenshot({
+      path: out + name + '.jpg',
+      type: 'jpeg',
+      quality: 86,
+      animations: 'disabled'
+    });
     console.log('docs/images/' + name + '.jpg');
   };
 

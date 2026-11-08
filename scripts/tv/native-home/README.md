@@ -24,7 +24,7 @@ not need root. Build the C# part with the .NET SDK kept in `.local/`:
 
 ```sh
 DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_CLI_HOME="$PWD/.local/native-home/cli" \
-  .local/native-home/dotnet-sdk/dotnet build scripts/tv/native-home/Control.csproj -c Release \
+  .local/dotnet-sdk/dotnet build scripts/tv/native-home/Control.csproj -c Release \
   -p:BaseIntermediateOutputPath="$PWD/.local/native-home/obj/" -o .local/native-home/out
 ```
 

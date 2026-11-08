@@ -25,11 +25,14 @@
     "export:public": "python3 scripts/build/export-public.py",
     "tv:info": "python3 scripts/tv/control.py info",
     "tv:install": "python3 scripts/tv/control.py install dist/ZenoTV.wgt",
-    "tv:launch": "python3 scripts/tv/control.py launch CsTv9rK2mQ.CasaTV"
+    "tv:launch": "python3 scripts/tv/control.py launch",
+    "format": "prettier --write \"app/**/*.{js,css}\" \"scripts/**/*.{js,mjs}\"",
+    "check:format": "prettier --check \"app/**/*.{js,css}\" \"scripts/**/*.{js,mjs}\""
   },
   "devDependencies": {
     "acorn": "^8.15.0",
-    "playwright": "1.64.1"
+    "playwright": "1.64.1",
+    "prettier": "3.3.3"
   },
   "license": "MIT"
 }

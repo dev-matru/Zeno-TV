@@ -16,8 +16,14 @@ if (unknown.length) throw new Error('Unknown wallpaper: ' + unknown.join(', '));
 
 /* Soft-glass darkness picked by eye for the first photos; later ones use the computed value. */
 const REVIEWED_TINT = {
-  misty: 0.43303399, cove: 0.389543, forest: 0.43034609, valley: 0.51301798,
-  night: 0.46650529, peaks: 0.36319971, bridge: 0.30784841, ridge: 0.6
+  misty: 0.43303399,
+  cove: 0.389543,
+  forest: 0.43034609,
+  valley: 0.51301798,
+  night: 0.46650529,
+  peaks: 0.36319971,
+  bridge: 0.30784841,
+  ridge: 0.6
 };
 
 const out = root + '.local/materials/builder/';
@@ -34,7 +40,8 @@ try {
   for (const id of ids) {
     const { files, tint } = await page.evaluate(
       ([url, reviewed]) => window.ZenoMaterialRecipe(url, reviewed),
-      ['/home/assets/wallpapers/' + id + '.jpg', REVIEWED_TINT[id] ?? null]);
+      ['/home/assets/wallpapers/' + id + '.jpg', REVIEWED_TINT[id] ?? null]
+    );
     for (const [suffix, data] of Object.entries(files)) {
       const bytes = Buffer.from(data, 'base64');
       writeFileSync(out + id + '-' + suffix + '.jpg', bytes);
