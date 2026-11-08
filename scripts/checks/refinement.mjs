@@ -68,28 +68,28 @@ try {
     const ids = [
       'tv',
       'pc',
-      'youtube',
-      'netflix',
-      'primevideo',
-      'disneyplus',
-      'raiplay',
-      'infinity',
-      'now',
-      'dazn',
-      'appletv'
+      'DemoApps12.Videos',
+      'DemoApps02.Cinema',
+      'DemoApps10.Series',
+      'DemoApps04.Kids',
+      'DemoApps07.News',
+      'DemoApps05.LiveTV',
+      'DemoApps11.Sports',
+      'DemoApps01.Arcade',
+      'DemoApps06.Music'
     ];
     const native = [
       'org.tizen.tv-viewer',
       'zeno.pc',
-      'xvvl3S1TT1.TizenTubeStandalone',
-      'org.tizen.netflix-app',
-      'org.tizen.primevideo',
-      'MCmYXNxgcu.DisneyPlus',
-      '5im3FztIhW.RaiTVtizen',
-      'g3zzYA7yO8.InfinityNew',
-      'jcz0WrZYdy.NOWTV',
-      'yu1NM3vHsU.DAZN',
-      'com.samsung.tv.aria-video'
+      'DemoApps12.Videos',
+      'DemoApps02.Cinema',
+      'DemoApps10.Series',
+      'DemoApps04.Kids',
+      'DemoApps07.News',
+      'DemoApps05.LiveTV',
+      'DemoApps11.Sports',
+      'DemoApps01.Arcade',
+      'DemoApps06.Music'
     ];
     const records = Array.from({ length: 24 }, (_, i) => ({
       id: 'ZenoTest' + String(i).padStart(2, '0') + '.App',
@@ -154,7 +154,7 @@ try {
           return { id, name: id, version: '1.2.3', packageId: id.split('.')[0] };
         },
         getAppsContext(ok) {
-          ok([{ id: '123', appId: 'xvvl3S1TT1.TizenTubeStandalone' }]);
+          ok([{ id: '123', appId: 'DemoApps12.Videos' }]);
         },
         launch(id, ok) {
           __calls.push({ method: 'launch', id });
@@ -309,12 +309,12 @@ try {
   await page.evaluate(() => ZenoQA.scene('settings'));
   check('Sidebar slogan is removed', (await page.locator('.zeno-sidebar-footer').count()) === 0);
   await nav('home');
-  await holdHome('youtube');
+  await holdHome('DemoApps12.Videos');
   await act('homeaction.color');
   await act('card.color.mint');
   check(
     'Each card keeps a custom tint without changing the grid default',
-    (await state()).gridStyle === 'glass' && (await state()).cardColors.youtube === 'mint'
+    (await state()).gridStyle === 'glass' && (await state()).cardColors['DemoApps12.Videos'] === 'mint'
   );
   await page.evaluate(() => ZenoQA.scene('settings'));
   await act('settings.category.applications');
@@ -550,7 +550,7 @@ try {
   check(
     'Source profiles and custom card colors survive reload',
     (await page.evaluate(() => ZenoSources.get('HDMI-1').name)) === 'GAME' &&
-      (await state()).cardColors.youtube === 'mint'
+      (await state()).cardColors['DemoApps12.Videos'] === 'mint'
   );
   await page.evaluate(() => ZenoQA.scene('settings'));
   await act('settings.group.layout');
@@ -610,7 +610,7 @@ try {
   for (const layout of ['grid', 'dock', 'list']) {
     await page.evaluate(layout => ZenoQA.look({ layout }), layout);
     await ready();
-    await focusHome('youtube');
+    await focusHome('DemoApps12.Videos');
     await page.evaluate(() => (__calls = []));
     await page.keyboard.down('Enter');
     await page.waitForTimeout(700);
@@ -646,7 +646,7 @@ try {
           : JSON.stringify((await state()).home) !== JSON.stringify(beforeMove.home))
     );
     var committed = await state();
-    await holdHome('youtube');
+    await holdHome('DemoApps12.Videos');
     await act('homeaction.move');
     await nav(layout === 'list' ? 'up' : 'left');
     await nav('back');
@@ -658,12 +658,12 @@ try {
   }
   await page.evaluate(() => ZenoQA.look({ layout: 'grid' }));
   await ready();
-  await holdHome('youtube');
+  await holdHome('DemoApps12.Videos');
   await act('homeaction.move');
   await nav('right', 'home');
   check('Home cancels an unfinished move', (await state()).homeMove === null);
 
-  await holdHome('youtube');
+  await holdHome('DemoApps12.Videos');
   await act('homeaction.move');
   await nav('right');
   const failedMove = await state();
@@ -700,13 +700,13 @@ try {
   await act('settings.group.inputs');
   await act('input.configure.HDMI-1');
   await act('input.home');
-  await focusHome('youtube');
+  await focusHome('DemoApps12.Videos');
   await page.evaluate(() => (__calls = []));
   await page.keyboard.press('Enter');
   check(
     'Short OK still launches an app once',
     (await page.evaluate(
-      () => __calls.filter(c => c.method === 'launch' && c.id === 'xvvl3S1TT1.TizenTubeStandalone').length
+      () => __calls.filter(c => c.method === 'launch' && c.id === 'DemoApps12.Videos').length
     )) === 1
   );
   await page.evaluate(() => ZenoQA.scene('settings'));
@@ -714,7 +714,7 @@ try {
   await act('home.lock.on');
   check('Home lock is enabled explicitly', (await state()).homeLocked);
   const lockedHome = (await state()).home;
-  await holdHome('youtube');
+  await holdHome('DemoApps12.Videos');
   check(
     'Locked app context hides edit actions',
     (await page

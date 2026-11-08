@@ -1,6 +1,6 @@
 // Starting up: reading saved preferences (current, older and broken) and staying
 // usable when parts of the platform are missing.
-import { FAMILY, WALLS, savedHome, same } from './fixtures.mjs';
+import { CINEMA, FAMILY, VIDEOS, WALLS, same, savedHome } from './fixtures.mjs';
 
 export default async function startup(suite) {
   await suite.section('Saved preferences from earlier versions', async t => {
@@ -8,19 +8,19 @@ export default async function startup(suite) {
       await t.open({
         seed: savedHome({
           theme,
-          dock: ['youtube', 'netflix'],
+          dock: [VIDEOS, CINEMA],
           wallpaper: WALLS[1].id,
-          lastApp: 'youtube',
+          lastApp: VIDEOS,
           mode: '15'
         })
       });
       const s = await t.state();
       t.expect(
         `"${theme}" keeps the app order, photo, rotation and last app`,
-        same(s.dock, ['youtube', 'netflix']) &&
+        same(s.dock, [VIDEOS, CINEMA]) &&
           s.wallpaper === WALLS[1].id &&
           s.mode === '15' &&
-          s.lastApp === 'youtube',
+          s.lastApp === VIDEOS,
         s
       );
       const wantList = theme === 'list';
@@ -33,25 +33,25 @@ export default async function startup(suite) {
 
     await t.open({
       seed: undefined,
-      earlier: savedHome({ theme: 'list', dock: ['netflix'], lastApp: 'netflix' })
+      earlier: savedHome({ theme: 'list', dock: [CINEMA], lastApp: CINEMA })
     });
     let s = await t.state();
     t.expect('A Home saved under an older key is picked up', s.dock.length === 1 && s.look.layout === 'list');
     await t.look({ controls: 'text' });
-    t.expect('The next change is written under the current key', (await t.saved()).dock[0] === 'netflix');
+    t.expect('The next change is written under the current key', (await t.saved()).dock[0] === CINEMA);
     await t.reload();
     s = await t.state();
-    t.expect('The migrated Home survives a reload', s.look.controls === 'text' && s.dock[0] === 'netflix');
+    t.expect('The migrated Home survives a reload', s.look.controls === 'text' && s.dock[0] === CINEMA);
   });
 
   await suite.section('Broken or invalid preferences', async t => {
     await t.open({
       seed: '{broken',
-      earlier: savedHome({ dock: ['netflix'], lastApp: 'netflix' })
+      earlier: savedHome({ dock: [CINEMA], lastApp: CINEMA })
     });
     t.expect(
       'Unreadable current preferences fall back to the older key',
-      same((await t.state()).dock, ['netflix'])
+      same((await t.state()).dock, [CINEMA])
     );
 
     await t.open({
@@ -68,7 +68,7 @@ export default async function startup(suite) {
     );
 
     await t.open({
-      seed: savedHome({ dock: [FAMILY, 'netflix'], lastApp: FAMILY }),
+      seed: savedHome({ dock: [FAMILY, CINEMA], lastApp: FAMILY }),
       catalogFailure: true
     });
     await t.allApps();

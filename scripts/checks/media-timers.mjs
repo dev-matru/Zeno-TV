@@ -283,7 +283,7 @@ try {
   await page.mouse.click(1900, 1000);
   await pressMedia(10252);
   await page.waitForFunction(() => ZenoWidgets.player().playing && ZenoWidgets.player().duration > 0);
-  check(await page.evaluate(() => ZenoWidgets.player().tracks === 1), 'Explicit Play/Pause starts demo');
+  check(await page.evaluate(() => ZenoWidgets.player().tracks === 6), 'Explicit Play/Pause starts the music');
   await media(10252);
   await media(10252, true, true);
   check(await page.evaluate(() => !ZenoWidgets.player().playing), 'Held Play/Pause toggles only once');
@@ -300,11 +300,16 @@ try {
   );
   await pressMedia(412);
   check(await page.evaluate(() => ZenoWidgets.player().position < 0.2), 'Rewind −10 seconds');
+  const firstTrack = await page.evaluate(() => ZenoWidgets.player().id);
   await pressMedia(10233);
+  check(
+    await page.evaluate(id => !ZenoWidgets.player().playing && ZenoWidgets.player().id !== id, firstTrack),
+    'Next track while paused changes track and stays quiet'
+  );
   await pressMedia(10232);
   check(
-    await page.evaluate(() => !ZenoWidgets.player().playing && ZenoWidgets.player().tracks === 1),
-    'Single-track next/previous stay quiet'
+    await page.evaluate(id => !ZenoWidgets.player().playing && ZenoWidgets.player().id === id, firstTrack),
+    'Previous track goes back'
   );
   await pressMedia(415);
   await page.waitForFunction(() => ZenoWidgets.player().playing);
@@ -324,6 +329,29 @@ try {
     await page.evaluate(() => registered.includes('MediaPlayPause')),
     'Default restores media registration'
   );
+  await page.evaluate(() => document.dispatchEvent(new Event('zeno-timer-ended')));
+  check(
+    await page.evaluate(() => {
+      var a = testAudios[testAudios.length - 1];
+      return ZenoWidgets.ringing() && a.loop && /alarm\.wav$/.test(a.src);
+    }),
+    'A finished timer rings in a loop'
+  );
+  await page.keyboard.press('ArrowDown');
+  check(await page.evaluate(() => !ZenoWidgets.ringing()), 'Any key silences the alarm');
+  await page.evaluate(() => ZenoQA.scene('home'));
+  await settings();
+  await act('settings.group.desktopwidgets');
+  await act('widget.open.player');
+  await act('widget.track.rain');
+  await page.waitForFunction(() => ZenoWidgets.player().playing);
+  check(
+    await page.evaluate(
+      () => ZenoWidgets.player().id === 'rain' && testAudios.some(a => /rain\.m4a$/.test(a.src))
+    ),
+    'Picking a track plays it'
+  );
+  await page.evaluate(() => ZenoWidgets.pauseAudio());
   check(errors.length === 0, 'No runtime errors: ' + errors);
   await page.screenshot({ path: root + '.local/qa/preview-Zeno-Timer.png' });
   console.log(count + ' media, exact-second timer, HEX/accent and command-card checks passed.');

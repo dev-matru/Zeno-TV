@@ -30,7 +30,21 @@
     { id: 'Australia/Sydney', name: 'Sydney' }
   ];
 
-  var PLAYLIST = [{ id: 'lounge', title: 'Jazz lounge', src: 'assets/audio/lounge.m4a' }];
+  /* Original tracks made by scripts/build/build-demo-audio.py; each one loops. */
+  var PLAYLIST = [
+    { id: 'lounge', title: 'Jazz lounge', note: 'Piano elettrico e contrabbasso' },
+    { id: 'piano', title: 'Pianoforte', note: 'Arpeggi lenti con eco' },
+    { id: 'pad', title: 'Ambient', note: 'Accordi morbidi che vanno e vengono' },
+    { id: 'rain', title: 'Pioggia', note: 'Pioggia leggera e costante' },
+    { id: 'waves', title: 'Onde del mare', note: 'Risacca lenta' },
+    { id: 'noise', title: 'Rumore marrone', note: 'Fruscio profondo per concentrarsi o dormire' }
+  ].map(function (track) {
+    track.src = 'assets/audio/' + track.id + '.m4a';
+    return track;
+  });
+
+  var ALARM_SRC = 'assets/audio/alarm.wav';
+  var ALARM_LIMIT_MS = 10 * 60 * 1000; // a forgotten alarm stops by itself
 
   var settings = {
     seconds: false,
@@ -391,7 +405,9 @@
       duration: audio && isFinite(audio.duration) ? audio.duration : 0,
       track: trackIndex,
       tracks: PLAYLIST.length,
-      title: PLAYLIST[trackIndex].title
+      id: PLAYLIST[trackIndex].id,
+      title: PLAYLIST[trackIndex].title,
+      note: PLAYLIST[trackIndex].note
     };
   }
 
@@ -478,11 +494,18 @@
   }
 
   function changeTrack(delta) {
-    if (PLAYLIST.length < 2) return true;
+    return selectTrack((trackIndex + delta + PLAYLIST.length) % PLAYLIST.length);
+  }
+
+  /* Switch to track `index`, carrying on playing if music was playing. */
+  function selectTrack(index) {
+    if (!(index >= 0 && index < PLAYLIST.length)) return false;
+    if (index === trackIndex) return true;
     var wasPlaying = audio && !audio.paused;
     pauseAudio();
     pendingSeek = 0;
-    trackIndex = (trackIndex + delta + PLAYLIST.length) % PLAYLIST.length;
+    audioError = '';
+    trackIndex = index;
     if (audio) {
       audio.src = PLAYLIST[trackIndex].src;
       audio.load();
@@ -534,12 +557,40 @@
     return true;
   }
 
-  /* The short sound when a timer ends. */
-  function chime() {
+  /* ---- Timer alarm ----
+     It rings in a loop until any key is pressed, or for ten minutes at most.
+     Music pauses while it rings. */
+
+  var alarm = null;
+  var alarmTimer = null;
+
+  function silence() {
+    if (!alarm) return;
+    clearTimeout(alarmTimer);
+    window.removeEventListener('keydown', silence, true);
     try {
-      var playing = new Audio('assets/audio/chime.wav').play();
-      if (playing && playing.catch) playing.catch(function () {});
+      alarm.pause();
     } catch (ignore) {}
+    alarm = null;
+    changed();
+  }
+
+  function ring() {
+    silence();
+    pauseAudio();
+    try {
+      alarm = new Audio(ALARM_SRC);
+      alarm.loop = true;
+      var playing = alarm.play();
+      if (playing && playing.catch) playing.catch(function () {});
+    } catch (e) {
+      alarm = null;
+      return;
+    }
+    alarmTimer = setTimeout(silence, ALARM_LIMIT_MS);
+    // Capture phase: the key that silences the alarm still does its usual job.
+    window.addEventListener('keydown', silence, true);
+    changed();
   }
 
   try {
@@ -547,7 +598,10 @@
   } catch (ignore) {}
 
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) pauseAudio();
+    if (document.hidden) {
+      pauseAudio();
+      silence();
+    }
   });
 
   window.ZenoWidgets = {
@@ -576,7 +630,17 @@
     player: player,
     toggleAudio: toggleAudio,
     pauseAudio: pauseAudio,
-    chime: chime,
+    selectTrack: selectTrack,
+    tracks: function () {
+      return PLAYLIST.map(function (track) {
+        return { id: track.id, title: track.title, note: track.note };
+      });
+    },
+    ring: ring,
+    silence: silence,
+    ringing: function () {
+      return !!alarm;
+    },
     // How often the clock needs a tick, in ms.
     interval: function () {
       return settings.seconds || settings.timer ? 1000 : 60000;

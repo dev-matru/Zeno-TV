@@ -2,45 +2,36 @@
 import { readFileSync } from 'node:fs';
 import { root } from '../../lib/browser.mjs';
 
-/* Built-in Home apps in their default order, with the TV app IDs they launch. */
-export const BUILTIN = [
-  ['tv', 'org.tizen.tv-viewer', 'TV'],
-  ['pc', 'zeno.pc', 'PC'],
-  ['youtube', 'xvvl3S1TT1.TizenTubeStandalone', 'YouTube'],
-  ['netflix', 'org.tizen.netflix-app', 'Netflix'],
-  ['primevideo', 'org.tizen.primevideo', 'Prime Video'],
-  ['disneyplus', 'MCmYXNxgcu.DisneyPlus', 'Disney+'],
-  ['raiplay', '5im3FztIhW.RaiTVtizen', 'RaiPlay'],
-  ['infinity', 'g3zzYA7yO8.InfinityNew', 'Mediaset Infinity'],
-  ['now', 'jcz0WrZYdy.NOWTV', 'NOW'],
-  ['dazn', 'yu1NM3vHsU.DAZN', 'DAZN'],
-  ['appletv', 'com.samsung.tv.aria-video', 'Apple TV']
-];
-export const HOME_IDS = BUILTIN.map(b => b[0]);
-export const appIdOf = id => BUILTIN.find(b => b[0] === id)[1];
+/* The demo apps (scripts/dev/demo/apps.json): made-up names, as the TV would list them. */
+export const DEMO = JSON.parse(readFileSync(root + 'scripts/dev/demo/apps.json', 'utf8'));
+const demo = name => DEMO.find(a => a.name === name).id;
+export const ARCADE = demo('Arcade'),
+  CINEMA = demo('Cinema'),
+  MUSIC = demo('Music'),
+  SERIES = demo('Series'),
+  SPORTS = demo('Sports'),
+  VIDEOS = demo('Videos');
 
-/* An installed app with no built-in entry, whose name tries to inject markup. */
+/* The Home the checks start from: the two inputs and nine installed apps. */
+export const HOME_IDS = ['tv', 'pc'].concat(DEMO.slice(0, 9).map(a => a.id));
+
+/* An installed app not on that Home, whose name tries to inject markup. */
 export const FAMILY = 'AbCdEf1234.FamilyApp';
 export const FAMILY_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
-export const SPOTIFY = 'rJeHak5zRg.Spotify';
+export const PLAYER = 'QaPlayer01.Player';
 
-/* What the fake TV reports as installed. The last three must never be listed:
-   Zeno itself, a background service and a second YouTube. */
-export const INSTALLED = BUILTIN.map(([, appId, name]) => ({
-  id: appId,
-  name,
-  show: true,
-  iconPath: ''
-})).concat([
+/* What the fake TV reports as installed. The last four must never be listed:
+   Zeno itself, a background service, the system YouTube player and a hidden app. */
+export const INSTALLED = DEMO.map(a => ({ id: a.id, name: a.name, show: true, iconPath: '' })).concat([
   { id: FAMILY, name: FAMILY_NAME, show: true, iconPath: '' },
-  { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
-  { id: '5b8c3eb16b.BeamCTVDev', name: 'HBO Max', show: true, iconPath: '' },
+  { id: PLAYER, name: 'Player', show: true, iconPath: '' },
   { id: 'ZenoTV0000.ZenoTV', name: 'Zeno TV', show: true },
   { id: 'AbCdEf1234.worker', name: 'Background worker', show: true },
-  { id: 'com.samsung.tv.cobalt-yt', name: 'YouTube', show: true }
+  { id: 'com.samsung.tv.cobalt-yt', name: 'Player (system)', show: true },
+  { id: 'QaHidden01.Hidden', name: 'Hidden', show: false }
 ]);
 /* Apps All apps should list from INSTALLED. */
-export const LISTED_COUNT = 12;
+export const LISTED_COUNT = DEMO.length + 2;
 
 export const WALLS = JSON.parse(readFileSync(root + 'app/assets/wallpapers/SOURCES.json', 'utf8'));
 
@@ -51,7 +42,7 @@ export function savedHome(patch = {}) {
     dock: HOME_IDS.slice(),
     wallpaper: WALLS[0].id,
     mode: 'fixed',
-    lastApp: 'netflix',
+    lastApp: CINEMA,
     theme: 'shore',
     font: 'manrope',
     apps: 'both',

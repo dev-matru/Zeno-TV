@@ -15,23 +15,30 @@ const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(source, ctx);
 const colors = ctx.window.ZenoCardColors;
-const apps = ['youtube', 'netflix', 'primevideo', 'disneyplus', 'raiplay', 'infinity', 'appletv'].map(id => ({
-    id,
-    brand: id
-  })),
+// Apps with the colour of their icon (or a personal style), and two without one.
+const apps = [
+    ['DemoApps12.Videos', '214,48,49'],
+    ['DemoApps02.Cinema', '178,34,52'],
+    ['DemoApps10.Series', '37,99,200'],
+    ['DemoApps04.Kids', ''],
+    ['DemoApps07.News', ''],
+    ['DemoApps06.Music', '120,60,190']
+  ].map(([id, color]) => ({ id, appId: id, color })),
   sources = [
     { id: 'tv', sourceIcon: 'tv' },
-    { id: 'pc', brand: 'pc', sourceKey: 'HDMI-2' },
-    { id: 'source.HDMI-1', brand: 'pc', sourceKey: 'HDMI-1' },
-    { id: 'source.HDMI-3', brand: 'pc', sourceKey: 'HDMI-3' }
+    { id: 'pc', sourceKey: 'HDMI-2' },
+    { id: 'source.HDMI-1', sourceKey: 'HDMI-1' },
+    { id: 'source.HDMI-3', sourceKey: 'HDMI-3' }
   ],
   records = apps.concat(sources),
   auto = colors.resolve(records);
 check(
-  'Service hues remain recognizable',
-  auto.youtube.split(',').map(Number)[0] > 150 &&
-    auto.netflix.split(',').map(Number)[0] > 150 &&
-    auto.primevideo.split(',').map(Number)[2] > 150
+  'An app keeps the colour of its icon',
+  apps.every(a => !a.color || auto[a.id] === a.color)
+);
+check(
+  'Apps without a colour get one from the palette',
+  apps.every(a => a.color || /^\d+,\d+,\d+$/.test(auto[a.id]))
 );
 check(
   'Sources receive distinct coordinated tints',
@@ -56,6 +63,12 @@ check(
   colors.fallback({ id: 'unknown.app' }) === colors.fallback({ id: 'unknown.app' })
 );
 check('Inherited object names are safe service IDs', typeof colors.fallback({ id: 'toString' }) === 'string');
+check(
+  'Changing the icon colour gives the card the new colour',
+  colors.resolve(records.map(a => (a.id === 'DemoApps04.Kids' ? { ...a, color: '1,2,3' } : a)))[
+    'DemoApps04.Kids'
+  ] === '1,2,3'
+);
 const preview = await openPreview({ publicOnly: process.env.ZENO_PERSONAL !== '1' });
 try {
   const page = await preview.browser.newPage({ viewport: { width: 1920, height: 1080 } }),
@@ -98,7 +111,7 @@ try {
   await page.evaluate(() =>
     ZenoQA.look({
       gridStyle: 'glass',
-      cardColors: { youtube: 'ink', netflix: '#123456', pc: 'rose' }
+      cardColors: { 'DemoApps12.Videos': 'ink', 'DemoApps02.Cinema': '#123456', pc: 'rose' }
     })
   );
   await ready();
@@ -150,11 +163,11 @@ try {
         )
       );
   const beforeArt = await art();
-  await page.evaluate(() => ZenoQA.look({ cardColors: { youtube: 'mint' } }));
+  await page.evaluate(() => ZenoQA.look({ cardColors: { 'DemoApps12.Videos': 'mint' } }));
   const afterArt = await art();
   check(
     'Local color changes still leave all other cards alone',
-    Object.keys(beforeArt).every(k => k === 'home.app.youtube' || beforeArt[k] === afterArt[k])
+    Object.keys(beforeArt).every(k => k === 'home.app.DemoApps12.Videos' || beforeArt[k] === afterArt[k])
   );
   await page.evaluate(() => {
     ZenoQA.scene('settings');
@@ -169,7 +182,7 @@ try {
     (await page.evaluate(() => {
       ZenoQA.activate('cards.auto');
       return ZenoQA.state().homeLocked;
-    })) && (await state()).cardColors.youtube === 'mint'
+    })) && (await state()).cardColors['DemoApps12.Videos'] === 'mint'
   );
   await page.evaluate(() => {
     ZenoQA.scene('settings');
@@ -229,7 +242,7 @@ try {
       (await state()).weatherPanel === 'none' &&
       (await state()).sourcesPanel === 'none' &&
       (await state()).settingsPanel === 'none' &&
-      (await state()).cardColors.youtube === 'mint'
+      (await state()).cardColors['DemoApps12.Videos'] === 'mint'
   );
   check('No runtime errors', !errors.length);
   console.log(passed + ' automatic color and header surface checks passed.');

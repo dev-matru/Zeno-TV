@@ -12,7 +12,6 @@
   var RECENT_MAX = 5,
     RECORD_MAX = 256,
     NAME_MAX = 160;
-  var LOGO_BRANDS = ['hbomax', 'spotify', 'tubi'];
   var RESERVED = { constructor: 1, prototype: 1, __proto__: 1 };
   var oneOf = Z.util.oneOf;
 
@@ -88,13 +87,10 @@
         env.find(r.id)
       )
         return;
-      var logo = LOGO_BRANDS.indexOf(r.brand) >= 0;
       env.adopt({
         id: r.id,
         appId: r.appId,
         name: r.name.slice(0, NAME_MAX),
-        brand: logo ? r.brand : '',
-        mark: logo,
         icon: iconPath(r.icon)
       });
     });
@@ -106,8 +102,7 @@
     source.forEach(function (id) {
       if (!isId(id) || home.indexOf(id) >= 0 || home.length >= env.cap) return;
       /* An id that looks like a platform app id survives even before the catalogue loads. */
-      if (!env.find(id) && id.indexOf('.') > 0)
-        env.adopt({ id: id, appId: id, name: id.split('.').pop(), mark: false });
+      if (!env.find(id) && id.indexOf('.') > 0) env.adopt({ id: id, appId: id, name: id.split('.').pop() });
       if (env.find(id)) home.push(id);
     });
     if (!home.length) home = env.primary.slice();
@@ -154,6 +149,12 @@
     var chosen = env.wall(look.wall || stored.wallpaper);
     c.wall = chosen ? chosen.id : env.firstWall();
     c.homeVersion = SCHEMA_VERSION;
+    /* A new Home starts with TV and PC and is filled once with the installed apps,
+       as soon as the TV lists them. A saved Home was already filled. */
+    c.homeSeeded =
+      typeof stored.homeSeeded === 'boolean'
+        ? stored.homeSeeded
+        : Array.isArray(stored.home) || Array.isArray(stored.dock);
     c.home = home;
     c.recent = recent;
     c.lastApp = home.indexOf(stored.lastApp) >= 0 ? stored.lastApp : home[0];
@@ -181,7 +182,6 @@
         id: a.id,
         appId: a.appId,
         name: a.name,
-        brand: a.brand || '',
         icon: a.icon || ''
       });
     });

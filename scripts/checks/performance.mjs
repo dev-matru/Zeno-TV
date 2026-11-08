@@ -20,15 +20,15 @@ const FRAME_60HZ = 16.7,
   KEY_GAP = 55,
   SETTLE = 240;
 
-/* Fake TV app inventory: a few real-looking apps plus fourteen generic ones. */
+/* Fake TV app inventory: a few named apps plus fourteen generic ones. */
 function installFakeTV() {
   const apps = [
-    ['IkWsFHtOY9.Stremio', 'Stremio'],
-    ['org.tizen.netflix-app', 'Netflix'],
-    ['MCmYXNxgcu.DisneyPlus', 'Disney+'],
-    ['9Ur5IzDKqV.TizenYouTube', 'YouTube'],
-    ['com.samsung.tv.aria-video', 'Apple TV'],
-    ['org.tizen.primevideo', 'Prime Video'],
+    ['QaLibrary0.Library', 'Library'],
+    ['DemoApps02.Cinema', 'Cinema'],
+    ['DemoApps04.Kids', 'Kids'],
+    ['DemoApps12.Videos', 'Videos'],
+    ['DemoApps06.Music', 'Music'],
+    ['DemoApps10.Series', 'Series'],
     ['TestApp001.Alpha', 'Alpha'],
     ['TestApp002.Beta', 'Beta'],
     ['TestApp003.Gamma', 'Gamma']
@@ -49,11 +49,18 @@ function installFakeTV() {
   localStorage.setItem(
     'zeno.home.v1',
     JSON.stringify({
-      dock: ['stremio', 'netflix', 'disneyplus', 'youtube', 'appletv', 'primevideo'],
+      dock: [
+        'QaLibrary0.Library',
+        'DemoApps02.Cinema',
+        'DemoApps04.Kids',
+        'DemoApps12.Videos',
+        'DemoApps06.Music',
+        'DemoApps10.Series'
+      ],
       wallpaper: 'misty',
       mode: 'fixed',
       theme: 'shore',
-      lastApp: 'netflix'
+      lastApp: 'DemoApps02.Cinema'
     })
   );
 }
@@ -330,7 +337,7 @@ try {
   await scenario('All apps grid', ['down', 'down', 'right', 'up', 'up', 'left']);
   await scene('editor');
   await scenario('Home editor', ['down', 'down', 'down', 'up', 'up', 'up']);
-  await qa('activate', 'editor.move.netflix');
+  await qa('activate', 'editor.move.DemoApps02.Cinema');
   await scenario('Moving an app in the editor', ['down', 'up'], 6);
   await qa('nav', 'back');
   await scene('appearance');

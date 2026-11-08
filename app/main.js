@@ -23,12 +23,15 @@
   var FULL = 'La Home contiene 64 app. Rimuovine una prima.',
     LAST = 'Mantieni almeno una app';
 
+  /* TV and PC are always there. Installed apps join APPS when the TV lists them
+     (or from the saved Home before that), each under its own platform id. */
   var PRIMARY_APPS = Zeno.builtinApps;
   var PRIMARY = PRIMARY_APPS.map(function (a) {
       return a.id;
     }),
     APPS = PRIMARY_APPS.slice(),
     ALPHA = [];
+  var SEED_APPS = 12; // installed apps put on a brand-new Home
   var WALLS = window.ZenoWallpapers || [
     {
       id: 'misty',
@@ -287,7 +290,9 @@
     return Glyphs.appMark(a, w, h, size, S.c.bg === 'light');
   }
   function appVisualKey(a) {
-    return a.sourceIcon ? [a.sourceIcon, a.sourceBadge, a.sourceShowBadge].join('|') : '';
+    return a.sourceIcon
+      ? [a.sourceIcon, a.sourceBadge, a.sourceShowBadge].join('|')
+      : (a.logo || '') + '|' + (a.icon || '');
   }
   function smallMark(a) {
     return appMark(a, 56, 44, 36);
@@ -372,7 +377,7 @@
       return app(id);
     },
     adopt: function (record) {
-      APPS.push(record);
+      APPS.push(withStyle(record));
     },
     wall: wall,
     firstWall: function () {
@@ -431,6 +436,7 @@
     c.recent = recent;
     c.lastApp = S.c.lastApp;
     c.mode = S.c.mode;
+    c.homeSeeded = !!S.c.homeSeeded;
     return c;
   }
   function snap() {
@@ -631,23 +637,46 @@
   }
 
   /* ---------- Installed apps catalogue ---------- */
-  /* Known services keep their own id and name so Home entries survive reinstalls;
-     everything else is keyed by its platform id. */
+  /* Personal logo and colour for an app, if this build has any. */
+  function withStyle(a) {
+    var style = Zeno.appStyle(a.appId);
+    a.logo = style.logo || '';
+    a.color = style.color || '';
+    return a;
+  }
+  /* Whether a tile shows a drawn mark (logo, input or widget icon) rather than text. */
+  function hasMark(a) {
+    return !!(a.logo || a.sourceIcon || a.widget);
+  }
+  /* The colour of an app's card in the "brand" style: personal colour, else the
+     main colour of its own icon once measured, else none (the palette decides). */
+  function cardColor(a) {
+    return a.color || ZenoIconColors.get(a.appId, a.icon) || '';
+  }
   function adoptInstalled(entry) {
-    var known = PRIMARY.indexOf(entry.brand),
-      id = known >= 0 ? entry.brand : entry.appId;
-    if (!safeId(id) || !safeId(entry.appId) || ALPHA.indexOf(id) >= 0) return;
+    var id = entry.appId;
+    if (!safeId(id) || ALPHA.indexOf(id) >= 0) return;
     var a = app(id);
     if (!a) {
       a = { id: id };
       APPS.push(a);
     }
     a.appId = entry.appId;
-    a.brand = entry.brand || '';
-    a.mark = !!entry.brand;
     a.icon = safeIcon(entry.icon);
-    a.name = known >= 0 ? PRIMARY_APPS[known].name : String(entry.name).slice(0, 160);
+    a.name = String(entry.name).slice(0, 160);
+    withStyle(a);
     ALPHA.push(id);
+  }
+  /* The first time the TV lists its apps, a brand-new Home gets some of them. */
+  function seedHome(entries) {
+    if (S.c.homeSeeded) return;
+    var c = next(S.c.home.slice(), S.c.recent.slice());
+    entries.slice(0, SEED_APPS).forEach(function (entry) {
+      if (app(entry.appId) && c.home.indexOf(entry.appId) < 0 && c.home.length < CAP)
+        c.home.push(entry.appId);
+    });
+    c.homeSeeded = true;
+    write(c, 'First Home');
   }
   function refreshCatalog() {
     if (catalog.loading) return;
@@ -666,6 +695,7 @@
       var focused = top().id === 'apps' ? ALPHA[top().f.i] : null;
       ALPHA = ['pc'];
       entries.forEach(adoptInstalled);
+      seedHome(entries);
       ALPHA.sort(function (x, y) {
         return app(x).name.toLowerCase().localeCompare(app(y).name.toLowerCase());
       });
@@ -1553,7 +1583,7 @@
         icon: 'sliders'
       },
       { id: 'weather', label: 'Meteo', value: 'Località e visualizzazione', icon: 'art' },
-      { id: 'player', label: 'Musica', value: 'Demo lounge, solo su richiesta', icon: 'apps' },
+      { id: 'player', label: 'Musica', value: 'Sei brani originali, solo su richiesta', icon: 'apps' },
       {
         id: 'background',
         label: 'Sfondo e colori',
@@ -1868,6 +1898,11 @@
             };
           }),
           reason: 'Tieni premuto OK sulla Home per spostare o personalizzare una card.'
+        },
+        {
+          id: 'desktopwidgetsMusic',
+          title: '',
+          items: [{ action: 'widget.open.player', label: 'Musica', description: ZenoWidgets.player().title }]
         }
       ];
     if (t.group === 'clockhub')
@@ -2069,14 +2104,28 @@
       return [
         {
           id: 'player',
-          title: 'Jazz lounge',
+          title: 'Musica',
           items: [
             {
               action: 'widget.audio',
-              label: ZenoWidgets.player().playing ? 'Pausa' : 'Riproduci',
-              description: 'Demo originale · 24 secondi · in loop'
+              label:
+                (ZenoWidgets.player().playing ? 'Pausa' : 'Riproduci') + ' · ' + ZenoWidgets.player().title,
+              description: ZenoWidgets.player().note + ' · in loop'
             }
           ]
+        },
+        {
+          id: 'playerList',
+          title: 'Brani',
+          items: ZenoWidgets.tracks().map(function (track) {
+            return {
+              action: 'widget.track.' + track.id,
+              label: track.title,
+              description: track.note,
+              selected: ZenoWidgets.player().id === track.id,
+              option: true
+            };
+          })
         },
         {
           id: 'playerSeek',
@@ -3298,7 +3347,18 @@
       )
         message('Preferenze', 'Impossibile salvare. Riprova.');
     } else if (item.action.indexOf('widget.media.') === 0) ZenoWidgets.media(item.action.slice(13));
-    else if (item.action.indexOf('timer.') === 0) timerAction(t, item.action);
+    else if (item.action.indexOf('widget.track.') === 0) {
+      var trackIds = ZenoWidgets.tracks().map(function (track) {
+        return track.id;
+      });
+      ZenoWidgets.selectTrack(trackIds.indexOf(item.action.slice(13)));
+      ZenoWidgets.media('MediaPlay', function (e) {
+        if (e) {
+          message('Musica', 'Il TV non ha avviato l’audio.');
+          after();
+        }
+      });
+    } else if (item.action.indexOf('timer.') === 0) timerAction(t, item.action);
     else if (item.action === 'widget.audio') activateDesktopWidget('player');
     else if (item.action.indexOf('calendar.') === 0) {
       var cal = calendarDate(t),
@@ -4214,7 +4274,8 @@
     desktopPan = '',
     desktopWidgetKey = '',
     desktopPaletteKey = '',
-    desktopPalette = null;
+    desktopPalette = null,
+    iconColorsRevision = 0;
   function desktopSelection(d) {
     var ids = ZenoDesktop.ids(d, S.c.home);
     if (ids.indexOf(S.desktopSel) < 0) S.desktopSel = ids.indexOf(S.sel) >= 0 ? S.sel : ids[0];
@@ -4262,7 +4323,9 @@
       return (
         '<div class="desk-player"><span class="desk-music-art">♫</span><span class="desk-player-name">' +
         esc(p.title) +
-        '</span><small>Demo originale · 24 secondi</small><span class="desk-player-state">' +
+        '</span><small>' +
+        esc(p.note) +
+        '</small><span class="desk-player-state">' +
         esc(p.error || (p.playing ? 'Ⅱ  Pausa' : '▶  Riproduci')) +
         '</span></div>'
       );
@@ -4292,12 +4355,19 @@
     if (gridHome._deskTrack.style.top !== g.top + 'px') gridHome._deskTrack.style.top = g.top + 'px';
     gridHome.classList.toggle('peeks-hidden', !d.peeks);
     S.desktopCamera = ZenoDesktop.camera(d, selected, S.desktopCamera);
-    var paletteKey = S.c.home.join('|') + '|' + catalog.revision;
+    var paletteKey = S.c.home.join('|') + '|' + catalog.revision + '|' + iconColorsRevision;
     if (paletteKey !== desktopPaletteKey) {
       desktopPaletteKey = paletteKey;
       desktopPalette = ZenoCardColors.resolve(
         S.c.home.map(function (id) {
-          return app(id);
+          var a = app(id);
+          return {
+            id: a.id,
+            appId: a.appId,
+            color: cardColor(a),
+            sourceKey: a.sourceKey,
+            sourceIcon: a.sourceIcon
+          };
         })
       );
     }
@@ -4318,6 +4388,7 @@
         S.c.gridStyle,
         S.c.gridNames,
         JSON.stringify(S.c.cardColors),
+        paletteKey,
         JSON.stringify(d.sizes),
         S.c.clockPanel,
         S.c.weatherPanel,
@@ -4633,7 +4704,7 @@
       var id = ZenoSources.id(p.key),
         a = app(id);
       if (!a) {
-        a = { id: id, appId: 'zeno.source.' + p.key, mark: true, brand: 'pc' };
+        a = { id: id, appId: 'zeno.source.' + p.key };
         APPS.push(a);
       }
       a.sourceKey = p.key;
@@ -4685,7 +4756,7 @@
         name: onHome(t.app) ? 'Rimuovi dalla Home' : 'Aggiungi alla Home',
         note: 'L’app rimane installata'
       });
-    if (t.app === 'youtube')
+    if (app(t.app) && ZenoDevice.isYouTube(app(t.app).appId))
       actions.push({
         id: 'youtube',
         name: 'Impostazioni YouTube',
@@ -5472,7 +5543,7 @@
       if (onTiles && here) cls.push('is-focus');
       if (marked && here) cls.push('is-sel');
       if (g.broad && (x - off < -1 || x + g.tw - off > g.shelf + 1)) cls.push('is-partial');
-      if (!a.mark) cls.push('is-text');
+      if (!hasMark(a)) cls.push('is-text');
       if (S.press === it.id) cls.push('is-press');
       setContent(
         el,
@@ -6596,7 +6667,9 @@
       var relayout = fontChanged || target.apps !== S.c.apps || target.controls !== S.c.controls,
         reflowAt,
         fontAt;
-      Object.keys(target).forEach(function (k) {
+      /* Only the fields this change is about: the rest may have moved on while
+         images or fonts were loading (the Home being filled, for one). */
+      Object.keys(changes).forEach(function (k) {
         c[k] = target[k];
       });
       S.pending = null;
@@ -6933,6 +7006,10 @@
   document.addEventListener('zeno-control-change', function () {
     if (top().id === 'appearance') render();
   });
+  document.addEventListener('zeno-icon-colors', function () {
+    iconColorsRevision++;
+    if (S.c.layout === 'grid' && S.c.gridStyle === 'brand') render();
+  });
   document.addEventListener('zeno-source-change', function () {
     sourceSyncKey = '';
   });
@@ -6945,11 +7022,11 @@
     render();
   });
   document.addEventListener('zeno-timer-ended', function () {
-    ZenoWidgets.chime();
+    ZenoWidgets.ring();
     var timer = ZenoWidgets.lastTimer();
     message(
       (timer && timer.name) || 'Timer terminato',
-      'Il conto alla rovescia è finito.',
+      'Il conto alla rovescia è finito. Premi un tasto per spegnere la suoneria.',
       (timer && timer.note) || ''
     );
     after();
@@ -7212,4 +7289,5 @@
   focusStage();
   updateClock();
   syncRotation();
+  refreshCatalog(); // names and icons as the TV reports them, and a first Home
 })();

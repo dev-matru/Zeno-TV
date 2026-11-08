@@ -60,7 +60,7 @@
     );
   }
 
-  /* ---- Brand marks ---- */
+  /* ---- Logos (assets/icons/<name>.svg) ---- */
   var style = document.documentElement.style;
   var canMask = 'webkitMaskImage' in style || 'maskImage' in style;
   var probes = {};
@@ -166,8 +166,7 @@
   function appMark(a, w, h, size, lightSurface) {
     if (a.sourceIcon)
       return window.ZenoSourceIcons.mark(a.sourceIcon, a.sourceBadge, a.sourceShowBadge, w, h);
-    var id = a.brand || a.id;
-    if (a.mark && metricsFor(id) && (canMask || !lightSurface)) return brandMark(id, w, h, size);
+    if (a.logo && metricsFor(a.logo) && (canMask || !lightSurface)) return brandMark(a.logo, w, h, size);
     return monogram(a, w, h, size);
   }
 

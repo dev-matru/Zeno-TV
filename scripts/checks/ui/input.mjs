@@ -1,17 +1,17 @@
 // Real key presses, photo rotation over time and running in a plain browser.
-import { WALLS, savedHome } from './fixtures.mjs';
+import { CINEMA, WALLS, savedHome } from './fixtures.mjs';
 
 export default async function input(suite) {
   await suite.section('Held keys act once; Back goes up one level at a time', async t => {
     await t.open();
     await t.editor();
-    await t.removeFromHome('netflix');
+    await t.removeFromHome(CINEMA);
     await t.page.keyboard.down('Enter');
     await t.page.keyboard.down('Enter');
     let s = await t.state();
     t.expect(
       'Holding OK re-adds the app once and removes nothing',
-      s.dock.includes('netflix') && s.dock.length === 11
+      s.dock.includes(CINEMA) && s.dock.length === 11
     );
     await t.page.keyboard.up('Enter');
     await t.page.keyboard.down('Escape');
@@ -89,7 +89,7 @@ export default async function input(suite) {
     t.expect('The next cold start moves on again', (await t.state()).wallpaper === WALLS[2].id);
 
     await t.open({ mock: false });
-    await t.press('home.app.netflix');
+    await t.press('home.app.' + CINEMA);
     await t.waitFor(() => ZenoQA.where().view === 'message');
     t.expect('In a plain browser, launching says it needs the TV', /TV/.test(await t.text()));
     await t.keys('back');

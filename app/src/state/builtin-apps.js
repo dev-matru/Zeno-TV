@@ -1,21 +1,25 @@
-/* Apps Zeno knows by name. `id` is the stable key stored in preferences and used to
-   find a logo; `appId` is the platform application id it launches. */
+/* Tiles that are always available: the TV picture and the PC. They are inputs,
+   not installed apps, and they use Zeno's own icons (assets/icons/tv.svg, pc.svg).
+
+   Every installed app is described by what the TV reports (id, name, icon) and
+   uses its platform id as its id. Optional per-app logos and colours come from
+   window.ZenoAppStyles, which only a personal build provides. */
 (function (Z) {
   'use strict';
   Z.builtinApps = [
-    { id: 'tv', name: 'TV', appId: 'org.tizen.tv-viewer' },
-    { id: 'pc', name: 'PC', appId: 'zeno.pc' },
-    { id: 'youtube', name: 'YouTube', appId: 'xvvl3S1TT1.TizenTubeStandalone' },
-    { id: 'netflix', name: 'Netflix', appId: 'org.tizen.netflix-app' },
-    { id: 'primevideo', name: 'Prime Video', appId: 'org.tizen.primevideo' },
-    { id: 'disneyplus', name: 'Disney+', appId: 'MCmYXNxgcu.DisneyPlus' },
-    { id: 'raiplay', name: 'RaiPlay', appId: '5im3FztIhW.RaiTVtizen' },
-    { id: 'infinity', name: 'Mediaset Infinity', appId: 'g3zzYA7yO8.InfinityNew' },
-    { id: 'now', name: 'NOW', appId: 'jcz0WrZYdy.NOWTV' },
-    { id: 'dazn', name: 'DAZN', appId: 'yu1NM3vHsU.DAZN' },
-    { id: 'appletv', name: 'Apple TV', appId: 'com.samsung.tv.aria-video' }
-  ].map(function (a) {
-    a.mark = true;
-    return a;
-  });
+    { id: 'tv', name: 'TV', appId: 'org.tizen.tv-viewer', logo: 'tv' },
+    { id: 'pc', name: 'PC', appId: 'zeno.pc', logo: 'pc' }
+  ];
+
+  /* { logo, color } for an installed app, or an empty object. */
+  Z.appStyle = function (appId) {
+    var styles = window.ZenoAppStyles || {};
+    var style = Object.prototype.hasOwnProperty.call(styles, appId) ? styles[appId] : null;
+    if (!style || typeof style !== 'object') return {};
+    return {
+      logo: typeof style.logo === 'string' && /^[a-z0-9-]{1,40}$/.test(style.logo) ? style.logo : '',
+      color:
+        typeof style.color === 'string' && /^\d{1,3},\d{1,3},\d{1,3}$/.test(style.color) ? style.color : ''
+    };
+  };
 })(window.Zeno);

@@ -21,16 +21,24 @@ try {
           bg: 'photo',
           wall: 'misty',
           font: 'geist',
-          home: ['tv', 'youtube', 'netflix', 'primevideo', 'raiplay', 'infinity', 'pc'],
+          home: [
+            'tv',
+            'DemoApps12.Videos',
+            'DemoApps02.Cinema',
+            'DemoApps10.Series',
+            'DemoApps07.News',
+            'DemoApps05.LiveTV',
+            'pc'
+          ],
           lastApp: 'pc',
           desktop: {
             positions: {
               tv: { x: -1, y: 1 },
-              youtube: { x: 4, y: 1 },
-              netflix: { x: 1, y: -1 },
-              primevideo: { x: 1, y: 3 },
-              raiplay: { x: 2, y: 1 },
-              infinity: { x: 2, y: 2 },
+              'DemoApps12.Videos': { x: 4, y: 1 },
+              'DemoApps02.Cinema': { x: 1, y: -1 },
+              'DemoApps10.Series': { x: 1, y: 3 },
+              'DemoApps07.News': { x: 2, y: 1 },
+              'DemoApps05.LiveTV': { x: 2, y: 2 },
               pc: { x: 0, y: 1 }
             }
           }
@@ -67,7 +75,7 @@ try {
       var stage = document.getElementById('stage').getBoundingClientRect(),
         scale = stage.width / 1920,
         edges = {};
-      for (var id of ['tv', 'youtube', 'netflix', 'primevideo']) {
+      for (var id of ['tv', 'DemoApps12.Videos', 'DemoApps02.Cinema', 'DemoApps10.Series']) {
         var e = document.querySelector('[data-action="home.app.' + id + '"]'),
           r = e.querySelector('.desk-art').getBoundingClientRect();
         edges[id] = {
@@ -82,14 +90,17 @@ try {
       return edges;
     });
     check(
-      peek.tv.x < 0 && peek.tv.right > 0 && peek.youtube.x < 1920 && peek.youtube.right > 1920,
+      peek.tv.x < 0 &&
+        peek.tv.right > 0 &&
+        peek['DemoApps12.Videos'].x < 1920 &&
+        peek['DemoApps12.Videos'].right > 1920,
       'Left/right visible partial cards ' + width
     );
     check(
-      peek.netflix.y < 0 &&
-        peek.netflix.bottom > 0 &&
-        peek.primevideo.y < 1080 &&
-        peek.primevideo.bottom > 1080,
+      peek['DemoApps02.Cinema'].y < 0 &&
+        peek['DemoApps02.Cinema'].bottom > 0 &&
+        peek['DemoApps10.Series'].y < 1080 &&
+        peek['DemoApps10.Series'].bottom > 1080,
       'Top/bottom visible partial cards ' + width
     );
     check(

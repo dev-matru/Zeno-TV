@@ -1,0 +1,14 @@
+[
+  {"id": "DemoApps01.Arcade", "name": "Arcade"},
+  {"id": "DemoApps02.Cinema", "name": "Cinema"},
+  {"id": "DemoApps03.Docs", "name": "Docs"},
+  {"id": "DemoApps04.Kids", "name": "Kids"},
+  {"id": "DemoApps05.LiveTV", "name": "Live TV"},
+  {"id": "DemoApps06.Music", "name": "Music"},
+  {"id": "DemoApps07.News", "name": "News"},
+  {"id": "DemoApps08.Photos", "name": "Photos"},
+  {"id": "DemoApps09.Podcasts", "name": "Podcasts"},
+  {"id": "DemoApps10.Series", "name": "Series"},
+  {"id": "DemoApps11.Sports", "name": "Sports"},
+  {"id": "DemoApps12.Videos", "name": "Videos"}
+]

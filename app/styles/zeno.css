@@ -123,18 +123,6 @@
 .zeno-app-card.is-focus .zeno-app-name {
   opacity: 1;
 }
-.zeno-app-card.brand-youtube .zeno-app-art {
-  background: linear-gradient(140deg, rgba(112, 43, 55, 0.9), rgba(50, 20, 34, 0.91));
-}
-.zeno-app-card.brand-netflix .zeno-app-art {
-  background: linear-gradient(140deg, rgba(73, 31, 46, 0.92), rgba(22, 18, 29, 0.91));
-}
-.zeno-app-card.brand-primevideo .zeno-app-art {
-  background: linear-gradient(140deg, rgba(28, 75, 117, 0.91), rgba(17, 35, 68, 0.91));
-}
-.zeno-app-card.brand-disneyplus .zeno-app-art {
-  background: linear-gradient(140deg, rgba(28, 61, 115, 0.91), rgba(19, 24, 66, 0.91));
-}
 .zeno-grid-more {
   position: absolute;
   top: 706px;
@@ -775,34 +763,6 @@
     inset 0 1px 0 var(--zeno-edge),
     0 8px 24px rgba(0, 0, 0, 0.1);
 }
-.zeno-app-card.brand-youtube .zeno-app-art {
-  background: linear-gradient(
-    145deg,
-    rgba(155, 38, 57, var(--zeno-brand-alpha)),
-    rgba(70, 19, 34, var(--zeno-brand-low))
-  );
-}
-.zeno-app-card.brand-netflix .zeno-app-art {
-  background: linear-gradient(
-    145deg,
-    rgba(135, 24, 46, var(--zeno-brand-alpha)),
-    rgba(40, 15, 28, var(--zeno-brand-low))
-  );
-}
-.zeno-app-card.brand-primevideo .zeno-app-art {
-  background: linear-gradient(
-    145deg,
-    rgba(25, 106, 183, var(--zeno-brand-alpha)),
-    rgba(17, 45, 92, var(--zeno-brand-low))
-  );
-}
-.zeno-app-card.brand-disneyplus .zeno-app-art {
-  background: linear-gradient(
-    145deg,
-    rgba(30, 69, 171, var(--zeno-brand-alpha)),
-    rgba(20, 24, 92, var(--zeno-brand-low))
-  );
-}
 .stage[data-ink-tone='dark'] .zeno-app-art,
 .stage[data-grid-style='glass'] .zeno-app-art,
 .stage[data-grid-style='custom'] .zeno-app-art {
@@ -1013,18 +973,6 @@
 }
 .zeno-app-card {
   --zeno-card-rgb: 54, 65, 93;
-}
-.brand-youtube {
-  --zeno-card-rgb: 155, 38, 57;
-}
-.brand-netflix {
-  --zeno-card-rgb: 135, 24, 46;
-}
-.brand-primevideo {
-  --zeno-card-rgb: 25, 106, 183;
-}
-.brand-disneyplus {
-  --zeno-card-rgb: 30, 69, 171;
 }
 .stage[data-grid-style='brand'] .zeno-app-art {
   background: linear-gradient(

@@ -20,7 +20,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
 from personal_assets import personal_overlay  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
-MOUNTS = {'/home/': ROOT / 'app', '/build/': ROOT / 'scripts/build/materials'}
+MOUNTS = {
+    '/home/': ROOT / 'app',
+    '/build/': ROOT / 'scripts/build/materials',
+}
 
 
 def inside(base, relative):

@@ -9,32 +9,23 @@
 
   var TIMEOUT_MS = 10000;
 
-  // Apps Zeno knows by brand, in the order they appear in "All apps".
-  var KNOWN_APPS = {
-    tv: 'org.tizen.tv-viewer',
-    youtube: 'xvvl3S1TT1.TizenTubeStandalone',
-    netflix: 'org.tizen.netflix-app',
-    primevideo: 'org.tizen.primevideo',
-    disneyplus: 'MCmYXNxgcu.DisneyPlus',
-    raiplay: '5im3FztIhW.RaiTVtizen',
-    infinity: 'g3zzYA7yO8.InfinityNew',
-    now: 'jcz0WrZYdy.NOWTV',
-    dazn: 'yu1NM3vHsU.DAZN',
-    appletv: 'com.samsung.tv.aria-video'
-  };
-  // Other apps with a known logo.
-  var EXTRA_BRANDS = {
-    'rJeHak5zRg.Spotify': 'spotify',
-    '5b8c3eb16b.BeamCTVDev': 'hbomax',
-    '3KA0pm7a7V.TubiTV': 'tubi'
-  };
-  // Apps with platform-style ids that are still regular apps.
-  var REGULAR_PLATFORM_APPS = ['org.tizen.browser', 'com.microsoft.copilot', 'kIciSQlYEM.plex'];
+  var TV_APP = 'org.tizen.tv-viewer';
+  // Store apps with platform-style ids (org.tizen.*, com.samsung.*) that are still
+  // regular apps. Every other app with such an id is part of the system.
+  var REGULAR_PLATFORM_APPS = [
+    'org.tizen.browser',
+    'org.tizen.netflix-app',
+    'org.tizen.primevideo',
+    'com.samsung.tv.aria-video',
+    'com.microsoft.copilot',
+    'kIciSQlYEM.plex'
+  ];
   // Parts of the system that show up as apps but are not meant to be opened.
   var NOT_AN_APP =
-    /(?:service|worker|preview|promotion|plugin|launcher|installer|test|sdk|^ep[ -]|factory|daemon|ADPlayer|WebAccount|CastSettings|PrivacyChoices|cmsWebApp|emanual)/i;
+    /(?:service|worker|preview|promotion|plugin|launcher|installer|test|sdk|^ep[ -]|factory|daemon|ADPlayer|WebAccount|CastSettings|Privacy|cmsWebApp|emanual)/i;
 
-  // When the YouTube client is not installed on its own, it can run inside this loader.
+  // A YouTube client installed on its own, or run inside this loader when it is not.
+  var YOUTUBE_STANDALONE = 'xvvl3S1TT1.TizenTubeStandalone';
   var YOUTUBE_LOADER = 'xvvl3S1bvH.TizenBrewStandalone';
   var YOUTUBE_PLAYER = 'com.samsung.tv.cobalt-yt';
   var SAMSUNG_HOME = 'com.samsung.tv.csfs';
@@ -107,7 +98,7 @@
       return;
     }
     var finish = withTimeout(done);
-    launchById(KNOWN_APPS.youtube, function (error) {
+    launchById(YOUTUBE_STANDALONE, function (error) {
       if (!error) {
         finish(null);
         return;
@@ -141,9 +132,13 @@
     });
   }
 
+  function isYouTube(appId) {
+    return appId === YOUTUBE_STANDALONE || appId === YOUTUBE_LOADER;
+  }
+
   function launchApp(appId, done) {
-    if (appId === KNOWN_APPS.tv) switchInput('TV', 1, done);
-    else if (appId === KNOWN_APPS.youtube || appId === YOUTUBE_LOADER) launchYouTube(done);
+    if (appId === TV_APP) switchInput('TV', 1, done);
+    else if (isYouTube(appId)) launchYouTube(done);
     else launchById(appId, done);
   }
 
@@ -224,7 +219,7 @@
         tizen.tvwindow.setSource(
           selected,
           function () {
-            launchById(KNOWN_APPS.tv, finish);
+            launchById(TV_APP, finish);
           },
           function (error) {
             finish(failure(error));
@@ -238,52 +233,33 @@
 
   /* ---- Installed apps ---- */
 
-  function isListed(app, brands, seen, self) {
-    var known = !!brands[app.id];
+  function isListed(app, seen, self) {
     var regular =
       /^[A-Za-z0-9]{10}\.[A-Za-z0-9_-]+$/.test(app.id) || REGULAR_PLATFORM_APPS.indexOf(app.id) >= 0;
-    if (app.id === self || seen[app.id] || !app.name) return false;
-    if (!known && (!app.show || !regular)) return false;
-    if (!known && NOT_AN_APP.test(app.name + ' ' + app.id)) return false;
+    if (app.id === self || seen[app.id] || !app.name || !app.show || !regular) return false;
+    if (NOT_AN_APP.test(app.name + ' ' + app.id)) return false;
     return !/-dummy$/.test(app.id) && app.id !== YOUTUBE_PLAYER;
   }
 
-  /* Apps the user can open: known brands first, in their usual order, then the rest by name. */
+  /* Apps the user can open, by name, as the TV describes them. */
   function listApps(done) {
     if (!application()) {
       needsTV(done);
       return;
     }
     var finish = withTimeout(done);
-    var order = Object.keys(KNOWN_APPS);
     var self = ownAppId();
 
     function build(installed) {
-      var brands = {};
-      order.forEach(function (brand) {
-        brands[KNOWN_APPS[brand]] = brand;
-      });
-      var standaloneYouTube = installed.some(function (app) {
-        return app.id === KNOWN_APPS.youtube;
-      });
-      if (!standaloneYouTube) brands[YOUTUBE_LOADER] = 'youtube';
-
       var seen = {};
       var apps = [];
       installed.forEach(function (app) {
-        if (!isListed(app, brands, seen, self)) return;
+        if (!isListed(app, seen, self)) return;
         seen[app.id] = true;
-        var brand = brands[app.id];
-        apps.push({
-          appId: app.id,
-          name: brand === 'youtube' ? 'YouTube' : app.name,
-          brand: brand || EXTRA_BRANDS[app.id] || '',
-          icon: app.iconPath || '',
-          rank: brand ? order.indexOf(brand) : 30
-        });
+        apps.push({ appId: app.id, name: app.name, icon: app.iconPath || '' });
       });
       apps.sort(function (a, b) {
-        return a.rank - b.rank || a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
       });
       return apps;
     }
@@ -303,10 +279,8 @@
   }
 
   window.ZenoDevice = {
-    launch: function (brand, done) {
-      launchApp(KNOWN_APPS[brand], done);
-    },
     launchApp: launchApp,
+    isYouTube: isYouTube,
     youtube: launchYouTube,
     home: function (done) {
       launchById(SAMSUNG_HOME, done);

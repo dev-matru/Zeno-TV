@@ -36,6 +36,7 @@ scripts/
   tv/               install, launch and the optional native Home helper
   lib/              shared helpers (app identity, TV checks, SDB transport)
 docs/               this file, TV setup, credits
+scripts/dev/demo/   made-up apps and icons that stand in for a TV in screenshots
 ```
 
 The TV runs an older web engine, so code in `app/` stays ES5: `var`, `function`, no arrow functions, no modules. Each file in `src/` is a function that adds one object to `window` (`ZenoSources`, `ZenoWidgets`…) or to `window.Zeno`. Tools in `scripts/` can use modern JavaScript and Python.
@@ -66,6 +67,7 @@ Some things you may want on your own TV can't be shared: commercial fonts, servi
   online-wallpapers.json     {"entries": [...]} wallpapers downloaded on the TV
   identity.json              your app ids on the TV (see TV setup)
   storage.json               old saved-data names to carry over after a rename
+  apps.json                  your own logo or colour for some apps (see below)
   overlay/<path>             any file, used as if it were app/<path>
 ```
 
@@ -79,7 +81,13 @@ A `fonts.json` entry looks like this:
 ]
 ```
 
-For logos, put SVG files in `overlay/assets/icons/` and run `node scripts/build/build-icon-metrics.mjs` to measure them. Copy the result to `overlay/assets/icons/metrics.js`. Apps without a logo use the icon reported by the TV, or their initials.
+Zeno lists whatever the TV reports as installed: each app keeps its own name and icon, and in the "brand" card style its card takes the main colour of that icon. To give some apps your own logo or colour, add `apps.json`:
+
+```json
+{ "AbCdEf1234.SomeApp": { "logo": "someapp", "color": "200,40,60" } }
+```
+
+The key is the app id on the TV (`scripts/tv/native-home/run.py inspect` lists them), `logo` names an SVG in `overlay/assets/icons/`, `color` is "r,g,b". After adding logos, run `node scripts/build/build-icon-metrics.mjs` to measure them and copy the result to `overlay/assets/icons/metrics.js`.
 
 ## Wallpapers and glass
 

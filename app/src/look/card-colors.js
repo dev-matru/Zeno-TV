@@ -1,30 +1,15 @@
 /* Card colours for the "brand" card style.
  *
- * Known apps get their brand colour. Other apps get a colour from the palette,
- * picked by a hash of their id so it never changes. Input tiles (TV, PC, HDMI)
- * then take the palette colours that are furthest in hue from those already on
- * screen, so they stand apart from the apps.
+ * An app's card takes the colour it is given (card.color: from a personal
+ * style or measured from the app's own icon). Without one, it gets a colour
+ * from the palette, picked by a hash of its id so it never changes. Input tiles
+ * (TV, PC, HDMI) then take the palette colours that are furthest in hue from
+ * those already on screen, so they stand apart from the apps.
  *
  * Colours are "r,g,b" strings, used as rgba(var, alpha) in CSS.
  */
 (function () {
   'use strict';
-
-  var BRANDS = {
-    youtube: '194,42,53',
-    netflix: '165,30,46',
-    primevideo: '32,133,195',
-    disneyplus: '42,73,172',
-    raiplay: '38,94,188',
-    infinity: '164,51,151',
-    now: '27,145,103',
-    dazn: '175,183,38',
-    appletv: '67,77,91',
-    spotify: '37,157,85',
-    plex: '194,145,39',
-    hbomax: '100,63,177',
-    tubi: '191,153,40'
-  };
 
   // Thirteen hues around the colour wheel, at similar brightness.
   var PALETTE = [
@@ -63,8 +48,7 @@
   }
 
   function appColor(card) {
-    var brand = card.brand || card.id;
-    if (Object.prototype.hasOwnProperty.call(BRANDS, brand)) return BRANDS[brand];
+    if (card.color) return card.color;
     return PALETTE[hash(card.appId || card.id) % PALETTE.length];
   }
 
@@ -96,7 +80,7 @@
   /* Everything that affects a card's colour, to know when to recompute. */
   function signatureOf(card) {
     var input = isInput(card) ? card.sourceKey || card.id : 'app';
-    return [card.id, card.brand || '', input, card.appId || ''].join('~');
+    return [card.id, card.color || '', input, card.appId || ''].join('~');
   }
 
   /* The palette colour whose hue is furthest from the ones already used. */

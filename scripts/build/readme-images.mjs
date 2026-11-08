@@ -1,8 +1,18 @@
-// Render the README screenshots from the public source only (no personal assets).
-// The clock and the weather are pinned so the pictures stay stable between runs.
+// Render the README screenshots. The clock and the weather are pinned so the
+// pictures stay stable between runs, and the TV is simulated with a list of apps.
+// With .local/personal/screenshot-apps.json ([{"id", "name"}], the apps installed
+// on your TV) the pictures use your personal build: its logos and colours. Without
+// it, the made-up apps in scripts/dev/demo/apps.json are shown with their initials.
 // Usage: node scripts/build/readme-images.mjs
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { openPreview, root } from '../lib/browser.mjs';
+import { fakeTV } from '../checks/ui/fake-tv.mjs';
+
+const personalList = root + '.local/personal/screenshot-apps.json';
+const personal = existsSync(personalList);
+const apps = JSON.parse(
+  readFileSync(personal ? personalList : root + 'scripts/dev/demo/apps.json', 'utf8')
+).map(a => ({ id: a.id, name: a.name, show: true, iconPath: '' }));
 
 const out = root + 'docs/images/';
 mkdirSync(out, { recursive: true });
@@ -22,17 +32,23 @@ async function stagePage(browser, baseURL, scale) {
     locale: 'en-US'
   });
   await page.clock.install({ time: new Date('2026-05-16T18:40:00') });
+  await page.addInitScript(fakeTV, {
+    mock: true,
+    catalog: apps,
+    seed: { home: ['tv', 'pc'].concat(apps.map(a => a.id)), homeSeeded: true }
+  });
   await page.addInitScript(w => {
     window.ZENO_OFFLINE_TEST = true;
     localStorage.setItem('zeno.language.v1', 'en');
     localStorage.setItem('zeno.weather.v1', JSON.stringify(Object.assign({ at: Date.now() }, w)));
   }, weather);
   await page.goto(baseURL + '/home/');
-  await page.waitForFunction(() => window.ZenoQA && ZenoQA.ready());
+  await page.waitForFunction(() => window.ZenoQA && ZenoQA.ready && ZenoQA.ready());
+  await page.waitForFunction(() => ZenoQA.state().dock.length > 2);
   return page;
 }
 
-const preview = await openPreview({ publicOnly: true });
+const preview = await openPreview({ publicOnly: !personal });
 try {
   const ready = page => page.waitForFunction(() => ZenoQA.ready());
   const shot = async (page, name) => {

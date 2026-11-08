@@ -1,14 +1,5 @@
 // The installed-app list and launching apps through the TV.
-import {
-  FAMILY,
-  FAMILY_NAME,
-  HOME_IDS,
-  INSTALLED,
-  LISTED_COUNT,
-  SPOTIFY,
-  appIdOf,
-  same
-} from './fixtures.mjs';
+import { CINEMA, FAMILY, FAMILY_NAME, HOME_IDS, INSTALLED, LISTED_COUNT, PLAYER, same } from './fixtures.mjs';
 
 export default async function catalogue(suite) {
   await suite.section('Installed apps and launching', async t => {
@@ -16,9 +7,10 @@ export default async function catalogue(suite) {
     await t.allApps();
     const names = await t.page.locator('[data-action^="apps.open."] .label').allTextContents();
     t.expect(
-      'All apps hides services, Zeno itself and the second YouTube',
+      'All apps hides services, Zeno itself, system players and hidden apps',
       names.length === LISTED_COUNT &&
-        names.filter(n => n === 'YouTube').length === 1 &&
+        !names.includes('Player (system)') &&
+        !names.includes('Hidden') &&
         !names.includes('Zeno TV') &&
         !names.includes('Background worker'),
       names
@@ -30,19 +22,16 @@ export default async function catalogue(suite) {
     t.expect('No made-up apps appear', !names.includes('Plex') && !names.includes('Jellyfin'));
 
     const launches = n => t.waitFor(count => __tv.calls.length === count, n);
-    await t.press('apps.open.' + SPOTIFY);
+    await t.press('apps.open.' + PLAYER);
     await t.press('appdetail.open');
     await t.waitFor(() => __tv.calls.length > 0);
-    t.expect('An app from All apps launches by its installed ID', (await t.lastLaunch()).id === SPOTIFY);
+    t.expect('An app from All apps launches by its installed ID', (await t.lastLaunch()).id === PLAYER);
 
     await t.returnFromApp();
     await t.scene('home');
-    await t.press('home.app.netflix');
+    await t.press('home.app.' + CINEMA);
     await launches(2);
-    t.expect(
-      'A built-in Home app launches its known TV ID',
-      (await t.lastLaunch()).id === appIdOf('netflix')
-    );
+    t.expect('A Home app launches its installed ID', (await t.lastLaunch()).id === CINEMA);
 
     await t.returnFromApp();
     await t.scene('home');
@@ -80,9 +69,31 @@ export default async function catalogue(suite) {
       __tv.launchFailure = true;
     });
     await t.scene('home');
-    await t.press('home.app.netflix');
+    await t.press('home.app.' + CINEMA);
     await t.waitFor(() => ZenoQA.where().view === 'message');
     t.expect('A failed launch tells the user', /could not|unavailable|try again/i.test(await t.text()));
+  });
+
+  await suite.section('A brand-new Home', async t => {
+    await t.open({ seed: undefined });
+    await t.waitFor(() => ZenoQA.state().dock.length > 2);
+    const listed = INSTALLED.filter(
+      a => /^[A-Z]/.test(a.name) && a.show && !/Zeno|worker|system/.test(a.name)
+    )
+      .map(a => a)
+      .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+      .slice(0, 12)
+      .map(a => a.id);
+    let s = await t.state();
+    t.expect(
+      'A fresh install fills Home with the installed apps once',
+      same(s.dock, ['tv', 'pc'].concat(listed)),
+      s.dock
+    );
+    await t.editor();
+    await t.removeFromHome(listed[0]);
+    await t.reload();
+    t.expect('An app taken off a filled Home stays off', !(await t.state()).dock.includes(listed[0]));
   });
 
   await suite.section('App list failure and retry', async t => {

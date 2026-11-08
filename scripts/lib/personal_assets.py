@@ -13,6 +13,7 @@ and is layered over `app/` at preview or package time. It is never copied into
     online-wallpapers.json   {"entries": [...]} downloadable wallpaper catalogue
     storage.json             older localStorage keys to carry over (see personal_storage_script)
     identity.json            your app ids on the TV (see scripts/lib/identity.py)
+    apps.json                logo and card colour per app id (see personal_app_styles)
     overlay/<path>           any file, served or packaged as app/<path>
 """
 
@@ -103,36 +104,74 @@ def personal_overlay(root=ROOT, include_private=True):
     storage = root / '.local/personal/storage.json'
     if include_private and storage.is_file():
         personal_js += personal_storage_script(json.loads(storage.read_text()))
+    if include_private:
+        personal_js += personal_app_styles(root)
     assets['assets/personal-catalog.js'] = personal_js.encode()
     return assets
 
 
-# Runs before any module reads localStorage: copies values saved under old key
-# names to the current ones, and renames fields inside the saved home.
-_STORAGE_SCRIPT = """(function (keys, fields) {
+# Runs before any module reads localStorage, on every start (each step is a no-op
+# once done): copies values saved under old key names to the current ones, renames
+# fields inside the saved home, and replaces old app ids wherever the home and the
+# remote shortcuts store them.
+_STORAGE_SCRIPT = """(function (keys, fields, ids) {
+  function renamed(id) {
+    return Object.prototype.hasOwnProperty.call(ids, id) ? ids[id] : id;
+  }
+  function renameList(list) {
+    return Array.isArray(list) ? list.map(renamed) : list;
+  }
+  function renameKeys(object) {
+    if (!object || typeof object !== 'object') return object;
+    var out = {};
+    Object.keys(object).forEach(function (key) {
+      out[renamed(key)] = object[key];
+    });
+    return out;
+  }
+  function renameDesktop(desktop) {
+    if (desktop && typeof desktop === 'object') desktop.positions = renameKeys(desktop.positions);
+  }
   try {
     Object.keys(keys).forEach(function (key) {
       var old = localStorage.getItem(keys[key]);
       if (localStorage.getItem(key) === null && old !== null) localStorage.setItem(key, old);
     });
+
     var home = JSON.parse(localStorage.getItem('zeno.home.v1') || 'null');
-    if (!home) return;
-    var changed = false;
-    Object.keys(fields).forEach(function (field) {
-      if (home[field] === undefined && home[fields[field]] !== undefined) {
-        home[field] = home[fields[field]];
-        changed = true;
+    if (home) {
+      Object.keys(fields).forEach(function (field) {
+        if (home[field] === undefined && home[fields[field]] !== undefined) home[field] = home[fields[field]];
+      });
+      ['home', 'dock', 'recent'].forEach(function (name) {
+        home[name] = renameList(home[name]);
+      });
+      if (typeof home.lastApp === 'string') home.lastApp = renamed(home.lastApp);
+      home.cardColors = renameKeys(home.cardColors);
+      renameDesktop(home.desktop);
+      if (home.look && typeof home.look === 'object') {
+        home.look.cardColors = renameKeys(home.look.cardColors);
+        renameDesktop(home.look.desktop);
       }
-    });
-    if (changed) localStorage.setItem('zeno.home.v1', JSON.stringify(home));
+      localStorage.setItem('zeno.home.v1', JSON.stringify(home));
+    }
+
+    var remote = JSON.parse(localStorage.getItem('zeno.remote.v1') || 'null');
+    if (remote) {
+      Object.keys(remote).forEach(function (button) {
+        var target = remote[button];
+        if (typeof target === 'string' && target.indexOf('app.') === 0) remote[button] = 'app.' + renamed(target.slice(4));
+      });
+      localStorage.setItem('zeno.remote.v1', JSON.stringify(remote));
+    }
   } catch (ignore) {}
-})(%s, %s);
+})(%s, %s, %s);
 """
 
 
 def personal_storage_script(storage):
     """storage.json: earlierHomeKeys [old home keys], renamedKeys {new: old},
-    renamedHomeFields {new: old}."""
+    renamedHomeFields {new: old}, renamedAppIds {old: new}."""
     script = ''
     earlier = storage.get('earlierHomeKeys', [])
     if earlier:
@@ -141,10 +180,20 @@ def personal_storage_script(storage):
             + json.dumps(earlier)
             + ');\n'
         )
-    keys, fields = storage.get('renamedKeys', {}), storage.get('renamedHomeFields', {})
-    if keys or fields:
-        script += _STORAGE_SCRIPT % (json.dumps(keys), json.dumps(fields))
+    keys = storage.get('renamedKeys', {})
+    fields = storage.get('renamedHomeFields', {})
+    ids = storage.get('renamedAppIds', {})
+    if keys or fields or ids:
+        script += _STORAGE_SCRIPT % (json.dumps(keys), json.dumps(fields), json.dumps(ids))
     return script
+
+
+def personal_app_styles(root):
+    """apps.json: {appId: {"logo": name in overlay/assets/icons, "color": "r,g,b"}}."""
+    styles = root / '.local/personal/apps.json'
+    if not styles.is_file():
+        return ''
+    return 'window.ZenoAppStyles = ' + json.dumps(json.loads(styles.read_text())) + ';\n'
 
 
 def _apply_identity(app, overlay, ident):

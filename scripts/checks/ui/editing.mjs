@@ -1,6 +1,6 @@
 // Changing which apps are on Home: every step saves at once, can be undone,
 // and a failed save changes nothing.
-import { FAMILY, FAMILY_NAME, same } from './fixtures.mjs';
+import { CINEMA, FAMILY, FAMILY_NAME, same } from './fixtures.mjs';
 
 export default async function editing(suite) {
   await suite.section('Editing Home: save, undo, move and limits', async t => {
@@ -8,41 +8,41 @@ export default async function editing(suite) {
     await t.editor();
     const original = (await t.state()).dock;
 
-    await t.removeFromHome('netflix');
+    await t.removeFromHome(CINEMA);
     t.expect(
       'Removing an app saves at once and does not uninstall it',
-      !(await t.saved()).dock.includes('netflix') &&
-        (await t.run(() => __tv.catalog.some(a => a.id === 'org.tizen.netflix-app')))
+      !(await t.saved()).dock.includes(CINEMA) &&
+        (await t.run(id => __tv.catalog.some(a => a.id === id), CINEMA))
     );
     t.expect(
       'Focus moves to the add button of the removed app',
-      (await t.state()).focusAction === 'editor.add.netflix',
+      (await t.state()).focusAction === 'editor.add.' + CINEMA,
       (await t.state()).focusAction
     );
     await t.keys('ok');
     t.expect('Pressing OK again puts it back in the same place', same((await t.saved()).dock, original));
 
-    await t.removeFromHome('netflix');
+    await t.removeFromHome(CINEMA);
     await t.press('editor.undo');
     t.expect('Undo restores and saves the previous Home', same((await t.saved()).dock, original));
 
-    await t.press('editor.move.netflix');
+    await t.press('editor.move.' + CINEMA);
     await t.keys('down');
     t.expect('A move in progress is not saved', same((await t.saved()).dock, original));
     await t.keys('back');
     t.expect('Back drops the move in progress', same((await t.state()).dock, original));
 
-    await t.press('editor.move.netflix');
+    await t.press('editor.move.' + CINEMA);
     await t.keys('down', 'ok');
     const swapped = original.slice(),
-      at = swapped.indexOf('netflix');
+      at = swapped.indexOf(CINEMA);
     [swapped[at], swapped[at + 1]] = [swapped[at + 1], swapped[at]];
     t.expect('A finished move is saved at once', same((await t.saved()).dock, swapped));
 
     await t.press('editor.add.' + FAMILY);
     let s = await t.state();
     t.expect(
-      'Home can hold more than the eleven built-in apps',
+      'Home can hold more than its first eleven apps',
       s.dock.length === 12 && s.dock.includes(FAMILY)
     );
     t.expect(
@@ -74,7 +74,7 @@ export default async function editing(suite) {
     await t.run(() => {
       window.__failWrites = true;
     });
-    await t.removeFromHome('netflix');
+    await t.removeFromHome(CINEMA);
     t.expect(
       'A removal that cannot be saved is not applied',
       same((await t.state()).dock, before.dock) && same(await t.saved(), before)
@@ -87,7 +87,7 @@ export default async function editing(suite) {
       window.__failWrites = false;
     });
     await t.keys('ok');
-    t.expect('OK on the same control retries the save', !(await t.saved()).dock.includes('netflix'));
+    t.expect('OK on the same control retries the save', !(await t.saved()).dock.includes(CINEMA));
 
     await t.scene('home');
     const shown = await t.state(),
