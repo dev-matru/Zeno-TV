@@ -1,0 +1,1779 @@
+/* Zeno TV. Shared translucent glass over cached backdrops; no live blur. */
+.stage {
+  font-family: var(--zeno-font,Manrope),Arial,sans-serif;
+}
+.stage .home .clock,
+.stage .home .casa-date,
+.stage .home .casa-weather,
+.stage .home .ph-name,
+.stage .home .mark,
+.stage .home .tile .label,
+.stage .home .app-focus-name,
+.stage .home .quiet-utils .u,
+.stage .home .quiet-utils .u.is-focus,
+.stage .home .util-focus-label {
+  color: var(--zeno-ink)!important;
+}
+.stage .home .quiet-utils .u {
+  opacity: .72;
+}
+.stage .home .quiet-utils .u.is-focus {
+  opacity: 1;
+}
+.stage[data-ink-tone=dark] .home .clock,
+.stage[data-ink-tone=dark] .home .casa-date,
+.stage[data-ink-tone=dark] .home .casa-weather,
+.stage[data-ink-tone=dark] .home .ph-name {
+  text-shadow: 0 1px 3px rgba(255,255,255,.52);
+}
+.l-grid .dock,
+.l-grid .ph-scene,
+.l-grid .cue,
+.l-grid .app-focus-name {
+  display: none!important;
+}
+.zeno-grid {
+  position: absolute;
+  left: 112px;
+  top: 274px;
+  width: 1696px;
+  height: 746px;
+  font-family: var(--zeno-font);
+  color: var(--zeno-ink);
+}
+.zeno-grid-label {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 27px;
+  line-height: 36px;
+  font-weight: 400;
+  letter-spacing: .2px;
+}
+.zeno-grid-count {
+  font-size: 25px;
+  color: var(--zeno-muted);
+}
+.zeno-grid-view {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  width: 1696px;
+  height: 628px;
+  overflow: hidden;
+}
+.zeno-grid-track {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  width: 1696px;
+  transition: transform 220ms cubic-bezier(.2,.7,.2,1);
+}
+.zeno-app-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 388px;
+  height: 266px;
+  outline: none;
+  cursor: pointer;
+}
+.zeno-app-art {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 388px;
+  height: 208px;
+  background: linear-gradient(145deg,rgba(54,65,93,.82),rgba(15,23,39,.87));
+  border: 2px solid rgba(255,255,255,.15);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.13);
+  transform-origin: center center;
+  transition: transform 170ms ease,border-color 170ms ease,background-color 170ms ease;
+}
+.zeno-app-card .mark {
+  color: var(--zeno-ink);
+}
+.zeno-app-name {
+  display: block;
+  max-width: 100%;
+  margin-top: 17px;
+  padding: 0 6px;
+  overflow: hidden;
+  font-size: 31px;
+  line-height: 38px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: .8;
+}
+.zeno-app-card.is-focus .zeno-app-art {
+  border-color: var(--zeno-ink);
+  box-shadow: 0 0 0 4px rgba(230,239,255,.12),0 12px 28px rgba(0,0,0,.2);
+  transform: scale(1.035);
+}
+.zeno-app-card.is-focus .zeno-app-name {
+  opacity: 1;
+}
+.zeno-app-card.brand-youtube .zeno-app-art {
+  background: linear-gradient(140deg,rgba(112,43,55,.9),rgba(50,20,34,.91));
+}
+.zeno-app-card.brand-netflix .zeno-app-art {
+  background: linear-gradient(140deg,rgba(73,31,46,.92),rgba(22,18,29,.91));
+}
+.zeno-app-card.brand-primevideo .zeno-app-art {
+  background: linear-gradient(140deg,rgba(28,75,117,.91),rgba(17,35,68,.91));
+}
+.zeno-app-card.brand-disneyplus .zeno-app-art {
+  background: linear-gradient(140deg,rgba(28,61,115,.91),rgba(19,24,66,.91));
+}
+.zeno-grid-more {
+  position: absolute;
+  top: 706px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--zeno-muted);
+}
+.zeno-grid-more .ico {
+  width: 24px;
+  height: 24px;
+}
+.stage[data-ink-tone=dark] .zeno-app-art {
+  background: linear-gradient(145deg,rgba(247,249,255,.88),rgba(214,224,243,.87));
+}
+/* A persistent sidebar and a content canvas replace the old settings list. */
+.zeno-settings-window,
+.zeno-app-window {
+  position: absolute;
+  inset: 48px 72px;
+  overflow: hidden;
+  font-family: var(--zeno-font);
+  color: var(--zeno-ink);
+  background: var(--zeno-surface);
+  border-radius: 32px;
+  border: 1px solid var(--zeno-border);
+  box-shadow: 0 24px 100px rgba(0,0,0,.2);
+}
+.zeno-sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 350px;
+  padding: 46px 24px;
+  background: var(--zeno-side);
+  border-right: 1px solid var(--zeno-border);
+}
+.zeno-brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 18px;
+  font-size: 32px;
+  line-height: 42px;
+  font-weight: 500;
+  letter-spacing: -.6px;
+}
+.zeno-brand .zeno-logo {
+  flex: none;
+  width: 52px;
+  height: 38px;
+  color: currentColor;
+}
+.zeno-brand b {
+  font-weight: inherit;
+  color: #8cc3b2;
+}
+#stage[data-menu-theme="light"] .zeno-brand b {
+  color: #3f7564;
+}
+.zeno-sidebar-caption {
+  padding: 39px 20px 18px;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--zeno-muted);
+}
+.zeno-category {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  height: 78px;
+  margin-bottom: 10px;
+  padding: 0 20px;
+  font-size: 29px;
+  line-height: 36px;
+  font-weight: 400;
+  color: var(--zeno-muted);
+  border-radius: 16px;
+  border: 2px solid transparent;
+}
+.zeno-category .ico {
+  width: 30px;
+  height: 30px;
+}
+.zeno-category.is-current {
+  color: var(--zeno-ink);
+  background: rgba(138,164,218,.12);
+}
+.zeno-category.is-focus {
+  color: var(--zeno-ink);
+  background: rgba(138,164,218,.2);
+  border-color: var(--zeno-ink);
+}
+.zeno-sidebar-footer {
+  position: absolute;
+  left: 44px;
+  bottom: 38px;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--zeno-faint);
+}
+.zeno-settings-content {
+  position: absolute;
+  left: 350px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 62px 64px;
+}
+.zeno-eyebrow {
+  font-size: 21px;
+  line-height: 28px;
+  letter-spacing: 2.1px;
+  font-weight: 500;
+  color: var(--zeno-muted);
+}
+.zeno-settings-content h2 {
+  margin-top: 14px;
+  font-size: 50px;
+  line-height: 62px;
+  font-weight: 400;
+  letter-spacing: -1.5px;
+}
+.zeno-section-note {
+  margin-top: 14px;
+  font-size: 27px;
+  line-height: 38px;
+  color: var(--zeno-muted);
+}
+.zeno-setting-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 48px;
+}
+.zeno-setting-card {
+  position: relative;
+  height: 244px;
+  padding: 26px 30px;
+  background: rgba(147,167,211,.065);
+  border-radius: 23px;
+  border: 2px solid var(--zeno-border);
+  transition: background-color 150ms ease,border-color 150ms ease;
+}
+.zeno-setting-card.is-focus {
+  background: rgba(147,167,211,.16);
+  border-color: var(--zeno-ink);
+}
+.zeno-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  background: rgba(134,165,244,.14);
+  border-radius: 14px;
+}
+.zeno-card-icon .ico {
+  width: 32px;
+  height: 32px;
+}
+.zeno-card-title {
+  display: block;
+  margin-top: 22px;
+  font-size: 31px;
+  line-height: 39px;
+  letter-spacing: -.4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.zeno-card-sub {
+  display: block;
+  max-width: 100%;
+  margin-top: 8px;
+  overflow: hidden;
+  font-size: 24px;
+  line-height: 32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--zeno-muted);
+}
+.zeno-card-arrow {
+  position: absolute;
+  right: 24px;
+  top: 36px;
+  width: 26px;
+  height: 26px;
+  color: var(--zeno-faint);
+}
+.zeno-navigation-note {
+  position: absolute;
+  left: 64px;
+  bottom: 38px;
+  font-size: 22px;
+  line-height: 30px;
+  color: var(--zeno-faint);
+}
+/* Nested controls keep the committed Home preview and share the same glass language. */
+.appearance {
+  font-family: var(--zeno-font);
+  color: var(--zeno-ink);
+}
+.appearance::before {
+  content: "";
+  position: absolute;
+  inset: 40px 72px;
+  z-index: -1;
+  background: var(--zeno-surface);
+  border: 1px solid var(--zeno-border);
+  border-radius: 32px;
+}
+.settings-title {
+  font-weight: 400;
+  letter-spacing: -1.3px;
+}
+.setting-label {
+  font-size: 23px;
+  line-height: 32px;
+  letter-spacing: .3px;
+}
+.setting-choice {
+  font-weight: 400;
+  border: 1px solid transparent;
+}
+.setting-choice.is-focus {
+  color: var(--zeno-ink);
+  background: rgba(138,164,218,.15);
+  border-color: var(--zeno-ink);
+}
+.setting-choice.is-focus .setting-description,
+.setting-choice.is-focus .setting-forward {
+  color: var(--zeno-muted);
+}
+.setting-options .setting-choice:not(.setting-back) {
+  border-radius: 18px;
+}
+.setting-choice .zeno-swatch {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(128,128,128,.25);
+}
+.section-inkColor .setting-choice,
+.section-inkColor2 .setting-choice {
+  flex-direction: column;
+  gap: 8px;
+  min-height: 116px;
+  padding: 14px 8px 10px;
+  font-size: 22px;
+  line-height: 28px;
+}
+.section-inkColor .setting-tick,
+.section-inkColor2 .setting-tick {
+  position: absolute;
+  right: 5px;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+}
+.section-inkColor .setting-tick .ico,
+.section-inkColor2 .setting-tick .ico {
+  width: 18px;
+  height: 18px;
+}
+.section-inkColor .setting-name,
+.section-inkColor2 .setting-name {
+  font-size: 22px;
+  line-height: 28px;
+}
+.ed-home {
+  overflow: hidden;
+}
+/* App detail: actions, measurements and platform limits stay together. */
+.zeno-back {
+  position: absolute;
+  left: 42px;
+  top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 26px;
+  line-height: 32px;
+  color: var(--zeno-muted);
+  border-radius: 15px;
+}
+.zeno-back .ico {
+  width: 24px;
+  height: 24px;
+}
+.zeno-app-summary {
+  position: absolute;
+  left: 64px;
+  top: 128px;
+  right: 64px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  height: 170px;
+}
+.zeno-app-summary h2 {
+  margin: 10px 0;
+  font-size: 54px;
+  line-height: 66px;
+  letter-spacing: -1.4px;
+  font-weight: 400;
+}
+.zeno-app-summary p:not(.zeno-eyebrow) {
+  font-size: 25px;
+  line-height: 34px;
+  color: var(--zeno-muted);
+}
+.zeno-app-logo {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 156px;
+  background: rgba(129,159,219,.12);
+  border-radius: 26px;
+  border: 1px solid var(--zeno-border);
+}
+.zeno-app-actions {
+  position: absolute;
+  left: 64px;
+  top: 350px;
+  bottom: 48px;
+  width: 820px;
+  overflow: auto;
+}
+.zeno-app-action {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-height: 106px;
+  margin-bottom: 8px;
+  padding: 20px 58px 18px 24px;
+  font-size: 30px;
+  line-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 18px;
+}
+.zeno-app-action small {
+  font-size: 23px;
+  line-height: 30px;
+  color: var(--zeno-muted);
+}
+.zeno-app-action > .ico {
+  position: absolute;
+  right: 24px;
+  top: 38px;
+  width: 26px;
+  height: 26px;
+}
+.zeno-app-action.is-focus {
+  background: rgba(138,164,218,.15);
+  border-color: var(--zeno-ink);
+}
+.zeno-app-info {
+  position: absolute;
+  left: 962px;
+  right: 64px;
+  top: 366px;
+}
+.zeno-app-info dl {
+  margin-top: 24px;
+}
+.zeno-app-info dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 22px 0;
+  font-size: 26px;
+  line-height: 34px;
+  border-bottom: 1px solid var(--zeno-border);
+}
+.zeno-app-info dt {
+  color: var(--zeno-muted);
+}
+.zeno-app-info dd {
+  text-align: right;
+}
+.zeno-management-note {
+  max-width: 600px;
+  margin-top: 32px;
+  font-size: 23px;
+  line-height: 34px;
+  color: var(--zeno-muted);
+}
+@media (prefers-reduced-motion:reduce) {
+  .zeno-grid-track,
+  .zeno-app-art,
+  .zeno-setting-card {
+    transition: none!important;
+  }
+  .zeno-app-card.is-focus .zeno-app-art {
+    transform: none;
+  }
+}
+/* The detail frame belongs below the live Home preview, not over it. */
+.appearance::before {
+  display: none;
+}
+.at-appearance .sheet::after,
+.at-wallpaper .sheet::after,
+.at-apps #sheetView::before,
+.at-editor #sheetView::before {
+  content: "";
+  position: absolute;
+  inset: 40px 72px;
+  background: var(--zeno-surface);
+  border: 1px solid var(--zeno-border);
+  border-radius: 32px;
+  pointer-events: none;
+}
+.at-apps #sheetView,
+.at-editor #sheetView {
+  font-family: var(--zeno-font);
+}
+.zeno-app-name,
+.zeno-grid-label {
+  text-shadow: 0 1px 3px rgba(0,0,0,.65),0 2px 12px rgba(0,0,0,.25);
+}
+.stage[data-ink-tone=dark] .zeno-app-name,
+.stage[data-ink-tone=dark] .zeno-grid-label {
+  text-shadow: 0 1px 3px rgba(255,255,255,.65);
+}
+/* Three compact background cards leave rotation visible without a clipped label. */
+.detail-background .section-bg .setting-options {
+  flex-direction: row;
+  gap: 12px;
+}
+.detail-background .section-bg .setting-choice {
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 124px;
+  padding: 12px;
+  font-size: 28px;
+  line-height: 34px;
+}
+.detail-background .section-bg .setting-swatch {
+  width: 80px;
+  height: 46px;
+  margin: 0;
+}
+.detail-background .section-bg .setting-tick {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 22px;
+  height: 22px;
+}
+.detail-background .section-bg .setting-tick .ico {
+  width: 22px;
+  height: 22px;
+}
+/* Every menu uses the same glass, including legacy sheets and small dialogs.
+   The backdrop is already blurred on disk, so these are cheap alpha layers. */
+.stage {
+  --zeno-glass: linear-gradient(145deg,var(--zeno-sheen),rgba(255,255,255,.015) 55%,rgba(255,255,255,.045));
+  --zeno-glass-shadow: inset 0 1px 0 var(--zeno-edge),inset 0 0 0 1px rgba(255,255,255,.025),0 22px 70px rgba(0,0,0,.18);
+}
+.sheet-veil {
+  background: var(--zeno-veil);
+}
+.zeno-settings-window,
+.zeno-app-window,
+.pc-card,
+.zeno-message-window,
+.at-appearance .sheet::after,
+.at-wallpaper .sheet::after,
+.at-apps #sheetView::before,
+.at-editor #sheetView::before,
+.at-keyboard #sheetView::before {
+  font-family: var(--zeno-font);
+  color: var(--zeno-ink);
+  background-color: var(--zeno-surface);
+  background-image: var(--zeno-glass);
+  border: 1px solid var(--zeno-border);
+  border-radius: 32px;
+  box-shadow: var(--zeno-glass-shadow);
+}
+.zeno-sidebar {
+  background: linear-gradient(180deg,var(--zeno-sheen),rgba(255,255,255,0) 75%),var(--zeno-side);
+}
+.zeno-category.is-current {
+  background: var(--zeno-control);
+  box-shadow: inset 0 1px 0 var(--zeno-border);
+}
+.zeno-setting-card,
+.zeno-app-logo,
+.zeno-card-icon,
+.keyboard-value,
+.keyboard-key {
+  background: var(--zeno-control);
+  border: 1px solid var(--zeno-border);
+  box-shadow: inset 0 1px 0 var(--zeno-border);
+}
+.zeno-setting-card {
+  border-width: 2px;
+}
+.zeno-category.is-focus,
+.zeno-setting-card.is-focus,
+.zeno-app-action.is-focus,
+.stage .appearance .setting-choice.is-focus,
+.stage .sheet .btn.is-focus,
+.stage .sheet .gt.is-focus,
+.stage .sheet .eo.is-focus,
+.stage .sheet .er-name.is-focus,
+.stage .sheet .er-rm.is-focus,
+.stage .sheet .er.is-lifted .er-name,
+.stage .sheet .pc-option.is-focus,
+.stage .sheet .keyboard-key.is-focus {
+  color: var(--zeno-ink);
+  background: linear-gradient(145deg,var(--zeno-sheen),rgba(255,255,255,0) 70%),var(--zeno-focus);
+  box-shadow: inset 0 0 0 1px var(--zeno-ink),inset 0 1px 0 var(--zeno-edge);
+  opacity: 1;
+}
+.stage .appearance .setting-choice.is-focus .setting-description,
+.stage .appearance .setting-choice.is-focus .setting-forward,
+.stage .sheet .btn.is-idle.is-focus {
+  color: var(--zeno-muted);
+}
+.stage .sheet .er-rm.is-limit.is-focus {
+  color: var(--warn);
+}
+.stage .sheet .s-head .btn.is-focus::before {
+  display: none;
+}
+.stage .sheet .s-head .btn.is-focus {
+  transform: none;
+}
+.zeno-category.is-focus,
+.zeno-setting-card.is-focus,
+.zeno-app-action.is-focus,
+.stage .appearance .setting-choice.is-focus {
+  border-color: var(--zeno-border);
+}
+.at-keyboard #sheetView::before {
+  content: "";
+  position: absolute;
+  inset: 40px 72px;
+  pointer-events: none;
+}
+.keyboard-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.pc-card {
+  padding: 34px;
+  overflow: hidden;
+}
+.pc-option {
+  margin-top: 8px;
+  border: 1px solid transparent;
+}
+.zeno-message-window {
+  position: absolute;
+  left: 280px;
+  top: 50%;
+  width: 1360px;
+  max-height: 900px;
+  padding: 58px 64px;
+  overflow: auto;
+  transform: translateY(-50%);
+}
+.zeno-message-window .msg-title,
+.zeno-message-window .msg-line,
+.zeno-message-window .msg-note,
+.zeno-message-window .msg-acts {
+  position: static;
+  max-width: none;
+}
+.zeno-message-window .msg-title {
+  overflow-wrap: break-word;
+  font-size: 52px;
+  line-height: 64px;
+  font-weight: 400;
+  letter-spacing: -1.2px;
+}
+.zeno-message-window .msg-line {
+  margin-top: 24px;
+  font-size: 32px;
+  line-height: 44px;
+}
+.zeno-message-window .msg-note {
+  margin-top: 20px;
+  font-size: 26px;
+  line-height: 38px;
+  color: var(--zeno-muted);
+}
+.zeno-message-window .msg-note:empty {
+  display: none;
+}
+.zeno-message-window .msg-acts {
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+.stage .sheet .focus-status.dark-ink {
+  color: var(--warn);
+}
+/* The material setting drives panels and Home cards through the same tokens. */
+.zeno-app-art {
+  background: linear-gradient(145deg,rgba(54,65,93,var(--zeno-brand-alpha)),rgba(15,23,39,var(--zeno-brand-low)));
+  box-shadow: inset 0 1px 0 var(--zeno-edge),0 8px 24px rgba(0,0,0,.1);
+}
+.zeno-app-card.brand-youtube .zeno-app-art {
+  background: linear-gradient(145deg,rgba(155,38,57,var(--zeno-brand-alpha)),rgba(70,19,34,var(--zeno-brand-low)));
+}
+.zeno-app-card.brand-netflix .zeno-app-art {
+  background: linear-gradient(145deg,rgba(135,24,46,var(--zeno-brand-alpha)),rgba(40,15,28,var(--zeno-brand-low)));
+}
+.zeno-app-card.brand-primevideo .zeno-app-art {
+  background: linear-gradient(145deg,rgba(25,106,183,var(--zeno-brand-alpha)),rgba(17,45,92,var(--zeno-brand-low)));
+}
+.zeno-app-card.brand-disneyplus .zeno-app-art {
+  background: linear-gradient(145deg,rgba(30,69,171,var(--zeno-brand-alpha)),rgba(20,24,92,var(--zeno-brand-low)));
+}
+.stage[data-ink-tone=dark] .zeno-app-art,
+.stage[data-grid-style=glass] .zeno-app-art,
+.stage[data-grid-style=custom] .zeno-app-art {
+  background: var(--zeno-glass),var(--zeno-surface);
+}
+.zeno-app-card-title {
+  display: none;
+  padding: 20px;
+  overflow-wrap: break-word;
+  font-size: 38px;
+  line-height: 48px;
+  text-align: center;
+}
+.a-icons .zeno-app-name {
+  visibility: hidden;
+}
+.a-icons .zeno-app-card.is-focus .zeno-app-name {
+  visibility: visible;
+}
+.a-text .zeno-app-art > .mark,
+.a-text .zeno-app-name {
+  display: none;
+}
+.a-text .zeno-app-card-title {
+  display: block;
+}
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 24px;
+  font-size: 26px;
+  line-height: 36px;
+  border-bottom: 1px solid var(--zeno-border);
+}
+.setting-info-label {
+  font-size: 23px;
+  line-height: 30px;
+  color: var(--zeno-muted);
+}
+.setting-info-value {
+  overflow-wrap: break-word;
+  unicode-bidi: plaintext;
+  color: var(--zeno-ink);
+}
+.setting-copy {
+  flex: 1;
+  min-width: 0;
+}
+.setting-name {
+  overflow: hidden;
+  overflow-wrap: normal;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.setting-option-state {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 30px;
+}
+.setting-option-state .ico {
+  width: 24px;
+  height: 24px;
+}
+.section-hdmi .setting-choice {
+  gap: 4px;
+  padding: 12px 10px;
+  font-size: 28px;
+}
+.section-hdmi .setting-name {
+  white-space: nowrap;
+}
+.section-hdmi .setting-option-state {
+  width: 20px;
+}
+.detail-layout .setting-section + .setting-section {
+  margin-top: 32px;
+}
+.detail-language .setting-choice {
+  min-height: 80px;
+  font-size: 30px;
+  line-height: 40px;
+}
+.detail-language .setting-name {
+  font-family: var(--zeno-font),"Noto Sans Arabic","Noto Sans Devanagari","Noto Sans Bengali",sans-serif;
+  unicode-bidi: plaintext;
+}
+.keyboard-value {
+  width: 1500px;
+  min-width: 0;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+.keyboard-grid {
+  top: 380px;
+  gap: 12px;
+}
+.keyboard-key {
+  height: 76px;
+}
+.keyboard-error {
+  top: 910px;
+  max-width: 1500px;
+  font-size: 26px;
+}
+.is-rtl .zeno-settings-content,
+.is-rtl .zeno-sidebar,
+.is-rtl .setting-copy,
+.is-rtl .setting-info,
+.is-rtl .zeno-app-info,
+.is-rtl .zeno-message-window {
+  text-align: right;
+  direction: rtl;
+}
+.is-rtl .zeno-setting-card,
+.is-rtl .zeno-app-action {
+  text-align: right;
+  direction: rtl;
+}
+.is-rtl .zeno-setting-card {
+  padding-right: 30px;
+  padding-left: 58px;
+}
+.is-rtl .zeno-card-arrow {
+  right: auto;
+  left: 24px;
+  transform: scaleX(-1);
+}
+.is-rtl .zeno-category {
+  direction: rtl;
+}
+.is-rtl .zeno-setting-cards {
+  direction: rtl;
+}
+.is-rtl .setting-forward {
+  transform: scaleX(-1);
+}
+.is-rtl .keyboard-value {
+  direction: ltr;
+  text-align: left;
+}
+.is-rtl .zeno-app-action {
+  padding-left: 58px;
+  padding-right: 24px;
+}
+.is-rtl .zeno-app-action > .ico {
+  right: auto;
+  left: 24px;
+  transform: scaleX(-1);
+}
+.zeno-card-title {
+  font-size: 29px;
+  line-height: 37px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zeno-card-sub {
+  max-height: 64px;
+  white-space: normal;
+}
+.zeno-setting-card {
+  height: 244px;
+}
+.zeno-card-title {
+  margin-top: 16px;
+}
+.zeno-card-sub {
+  margin-top: 6px;
+  font-size: 23px;
+  line-height: 30px;
+}
+.zeno-settings-content h2 {
+  font-size: 46px;
+  line-height: 58px;
+}
+.zeno-section-note {
+  font-size: 25px;
+  line-height: 34px;
+}
+.zeno-app-art {
+  overflow: hidden;
+}
+.zeno-app-glass {
+  position: absolute;
+  inset: 0;
+  background-image: var(--zeno-card-field);
+  background-size: 1920px 1080px;
+  background-repeat: no-repeat;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.zeno-app-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.zeno-app-art > .mark,
+.zeno-app-card-title {
+  position: relative;
+  z-index: 1;
+}
+.zeno-app-card {
+  --zeno-card-rgb: 54,65,93;
+}
+.brand-youtube {
+  --zeno-card-rgb: 155,38,57;
+}
+.brand-netflix {
+  --zeno-card-rgb: 135,24,46;
+}
+.brand-primevideo {
+  --zeno-card-rgb: 25,106,183;
+}
+.brand-disneyplus {
+  --zeno-card-rgb: 30,69,171;
+}
+.stage[data-grid-style=brand] .zeno-app-art {
+  background: linear-gradient(145deg,rgba(var(--zeno-card-rgb),var(--zeno-brand-alpha)),rgba(var(--zeno-card-rgb),var(--zeno-brand-low)));
+}
+.zeno-setting-card {
+  height: 258px;
+}
+.zeno-card-sub {
+  max-height: 60px;
+}
+.zeno-card-title {
+  max-height: 74px;
+  overflow: hidden;
+}
+/* Keep physical Left/Right navigation aligned with the card columns in RTL. */
+.is-rtl .zeno-setting-cards {
+  direction: ltr;
+}
+/* Keep the glass bitmap stationary; only the small foreground mark animates. */
+.zeno-app-card.is-focus .zeno-app-art {
+  box-shadow: inset 0 0 0 1px var(--zeno-ink),inset 0 1px 0 var(--zeno-edge);
+  transform: none;
+}
+.zeno-app-art {
+  box-shadow: inset 0 1px 0 var(--zeno-edge);
+  transition: border-color 130ms linear;
+}
+.zeno-app-art > .mark {
+  opacity: 1;
+  transform: translateZ(0);
+  transition: transform 150ms ease;
+}
+.zeno-app-card.is-focus .zeno-app-art > .mark {
+  transform: translateZ(0) scale(1.045);
+}
+.stage .home .tile .mark,
+.stage .home .tile-content,
+.stage .home .ph-group,
+.stage .home .gt .mark {
+  opacity: 1;
+}
+.zeno-grid {
+  top: 274px;
+  height: 746px;
+}
+.zeno-grid-view {
+  top: 0;
+  height: 686px;
+}
+.zeno-grid-more {
+  top: 706px;
+}
+.stage.a-icons[data-grid-names=hidden] .zeno-app-name {
+  visibility: hidden;
+}
+.detail-layout .is-horizontal .setting-choice {
+  gap: 6px;
+  min-height: 82px;
+  padding: 12px 10px;
+  font-size: 28px;
+  line-height: 36px;
+}
+.detail-layout .is-horizontal .setting-name {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+.detail-layout .setting-tick {
+  width: 20px;
+}
+.detail-layout .setting-tick .ico {
+  width: 20px;
+  height: 20px;
+}
+.detail-layout .setting-section + .setting-section {
+  margin-top: 24px;
+}
+.appearance-desc {
+  top: 970px;
+  flex-wrap: nowrap;
+  gap: 0;
+  width: 1640px;
+  max-width: 1640px;
+  font-size: 22px;
+  line-height: 32px;
+}
+.zeno-remote-help {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  font-size: 22px;
+  line-height: 32px;
+  white-space: nowrap;
+  color: var(--zeno-muted);
+}
+.remote-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.zeno-remote-help .ico {
+  width: 26px;
+  height: 26px;
+  margin: 0;
+}
+.zeno-remote-help .remote-key {
+  height: 30px;
+  min-width: 38px;
+  padding: 0 6px;
+  font-size: 18px;
+  line-height: 24px;
+  border-width: 1.5px;
+  border-radius: 15px;
+}
+.stage[data-settings-group=about] .scene {
+  visibility: hidden;
+}
+.detail-about .appearance-rows {
+  width: 1640px;
+  height: 684px;
+  max-height: 684px;
+  overflow: hidden;
+}
+.detail-about .section-about .setting-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 44px;
+}
+.detail-about .setting-choice {
+  grid-column: 1 / -1;
+  width: 640px;
+  min-height: 76px;
+}
+.detail-about .setting-info {
+  justify-content: center;
+  min-height: 128px;
+  padding: 16px 24px;
+}
+.detail-about .setting-info-value {
+  overflow-wrap: anywhere;
+  font-size: 28px;
+  line-height: 38px;
+}
+.detail-about .appearance-desc {
+  width: 1640px;
+}
+.appearance-rows:not(.wallpaper-picker) {
+  height: 664px;
+  max-height: 664px;
+}
+/* Source labels are part of the vector, independent of Home's app-name setting. */
+.source-mark > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.source-mark .source-badge {
+  font-family: var(--zeno-font,Manrope),Arial,sans-serif;
+  letter-spacing: 0;
+}
+.detail-inputs .setting-choice,
+.detail-sourceappearance .setting-choice,
+.detail-sourceprofile .setting-choice {
+  gap: 20px;
+}
+.detail-sourceicon .setting-section + .setting-section {
+  margin-top: 16px;
+}
+.detail-sourceicon .setting-options {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 16px;
+}
+.detail-sourceicon .appearance-rows .setting-choice {
+  position: relative;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  height: 158px;
+  padding: 16px 8px 12px;
+  background: var(--zeno-control);
+  border: 1px solid var(--zeno-border);
+  border-radius: 20px;
+}
+.detail-sourceicon .setting-copy {
+  flex: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.detail-sourceicon .setting-name {
+  font-size: 22px;
+  line-height: 28px;
+  text-align: center;
+}
+.detail-sourceicon .setting-option-state {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+}
+.detail-sourceicon .setting-option-state .ico {
+  width: 20px;
+  height: 20px;
+}
+.detail-sourceicon .appearance-rows .setting-choice.is-applied {
+  border-color: var(--zeno-ink);
+}
+.detail-sourceicon .appearance-rows {
+  overflow: hidden;
+}
+.is-horizontal .setting-choice {
+  gap: 6px;
+  padding: 12px 10px;
+  font-size: 28px;
+  line-height: 36px;
+}
+.section-material .setting-choice:last-child {
+  flex: initial;
+}
+.section-material .setting-choice {
+  min-height: 82px;
+  font-size: 32px;
+  line-height: 42px;
+}
+.home {
+  --zeno-glass: linear-gradient(145deg,var(--zeno-sheen),rgba(255,255,255,.015) 55%,rgba(255,255,255,.045));
+}
+.pc-card {
+  top: 50%;
+  max-height: 928px;
+  transform: translateY(-50%);
+}
+.home-actions-list {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.pc-card .pc-hint {
+  margin: 20px 0 0;
+}
+.pc-card .zeno-remote-help {
+  gap: 16px;
+  font-size: 19px;
+}
+.home-edit-hint {
+  position: absolute;
+  left: 140px;
+  bottom: 16px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  max-width: 1640px;
+  min-height: 44px;
+  padding: 6px 18px;
+  font-size: 22px;
+  line-height: 32px;
+  color: var(--zeno-menu-ink);
+  background: var(--zeno-menu-surface);
+  border: 1px solid var(--zeno-border);
+  border-radius: 16px;
+}
+.home-edit-hint .zeno-remote-help {
+  color: inherit;
+}
+.home-moving-name {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.is-home-moving .zeno-app-card.is-focus .zeno-app-art {
+  border-style: dashed;
+}
+.is-home-moving .tile.is-focus,
+.is-home-moving .ph-row.is-focus {
+  border-radius: 20px;
+  outline: 2px dashed currentColor;
+  outline-offset: -2px;
+}
+.is-home-moving .zeno-grid-track,
+.is-home-moving .track,
+.is-home-moving .ph-rows {
+  transition: none;
+}
+/* Per-card tint is independent of grid defaults, menu theme and foreground ink. */
+.stage .zeno-app-card[data-card-tint=color] .zeno-app-art {
+  background: linear-gradient(145deg,rgba(var(--zeno-card-rgb),var(--zeno-brand-alpha)),rgba(var(--zeno-card-rgb),var(--zeno-brand-low)));
+}
+.stage .zeno-app-card[data-card-tint=glass] .zeno-app-art {
+  background: var(--zeno-glass),var(--zeno-surface);
+}
+/* Settings use single-line labels and supporting text, with measured font fitting. */
+.setting-name,
+.setting-description,
+.setting-reason,
+.setting-label,
+.zeno-card-title,
+.zeno-card-sub,
+.zeno-section-note {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.setting-copy {
+  display: block;
+}
+.setting-reason {
+  line-height: 32px;
+}
+.zeno-card-sub {
+  max-height: 32px;
+}
+.section-cardpalette0 .setting-choice,
+.section-cardpalette3 .setting-choice,
+.section-cardpalette6 .setting-choice,
+.section-cardpalette9 .setting-choice {
+  gap: 8px;
+  min-height: 86px;
+  padding: 16px 10px;
+}
+[class*=section-cardpalette] .zeno-swatch {
+  width: 28px;
+  height: 28px;
+}
+[class*=section-cardpalette] .setting-option-state {
+  flex: none;
+  width: 20px;
+}
+/* A quiet header: clock/date on the left, weather separated from app rows. */
+.weather-widget {
+  position: absolute;
+  right: 140px;
+  top: 146px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 440px;
+  height: 126px;
+  padding: 16px 24px;
+  color: var(--zeno-ink);
+  background: var(--zeno-glass),var(--zeno-surface);
+  border: 1px solid var(--zeno-edge);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--zeno-sheen);
+  pointer-events: none;
+}
+.weather-widget[hidden] {
+  display: none;
+}
+.weather-widget-art {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+}
+.weather-widget .weather-icon {
+  flex: none;
+  width: 72px;
+  height: 72px;
+}
+.weather-widget-copy {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 16px;
+  min-width: 0;
+}
+.weather-widget-place {
+  overflow: hidden;
+  font-size: 26px;
+  line-height: 34px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.weather-widget-temp {
+  grid-column: 2;
+  grid-row: 1/3;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 52px;
+}
+.weather-widget-description {
+  overflow: hidden;
+  font-size: 20px;
+  line-height: 28px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: .75;
+}
+.zeno-clock-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.clock-style-compact {
+  padding-top: 14px;
+}
+.caption .clock-style-compact .clock {
+  font-size: 62px;
+  line-height: 76px;
+  letter-spacing: -2px;
+}
+.clock-style-analog {
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+}
+.clock-style-analog .casa-date {
+  max-width: 560px;
+  overflow: hidden;
+  font-size: 28px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zeno-analog-clock {
+  flex: none;
+  width: 144px;
+  height: 144px;
+  overflow: visible;
+  color: var(--zeno-ink);
+}
+.clock-face {
+  fill: var(--zeno-surface);
+  stroke: var(--zeno-edge);
+  stroke-width: 1;
+}
+.clock-marks {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: .7;
+}
+.clock-hour,
+.clock-minute {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+}
+.clock-hour {
+  stroke-width: 5;
+}
+.clock-minute {
+  stroke-width: 3;
+}
+.l-list .zeno-clock-group {
+  align-items: flex-end;
+}
+.l-list .clock-style-analog {
+  flex-direction: row-reverse;
+  align-items: center;
+}
+.l-list .weather-widget {
+  top: 316px;
+}
+.zeno-clock-group .casa-date {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.l-grid .weather-widget {
+  top: 130px;
+  height: 120px;
+}
+.is-sheet .weather-icon * {
+  animation-play-state: paused;
+}
+/* Reserve the top-right shortcut labels above the weather widget. */
+.weather-widget,
+.l-grid .weather-widget {
+  top: 196px;
+  height: 124px;
+}
+.l-list .weather-widget {
+  top: 316px;
+}
+.l-grid .zeno-grid {
+  top: 350px;
+  height: 670px;
+}
+.l-grid .zeno-grid-view {
+  height: 620px;
+}
+.l-grid .zeno-grid-more {
+  top: 630px;
+}
+.l-grid .caption,
+.l-dock .caption {
+  top: 184px;
+}
+.l-grid .caption .full-name {
+  display: none;
+}
+.l-grid .zeno-grid-view {
+  height: 580px;
+}
+/* Modular header. Full widgets use the exact 388 × 208 app-card module. */
+.zeno-header-glass {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background-image: var(--zeno-card-field);
+  background-size: 1920px 1080px;
+  background-repeat: no-repeat;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.l-grid .caption,
+.l-dock .caption {
+  left: 124px;
+  right: auto;
+  top: 74px;
+  justify-content: center;
+  width: 388px;
+  height: 208px;
+  max-width: 388px;
+  padding: 24px 30px;
+  overflow: hidden;
+  background: none;
+  border: 2px solid var(--zeno-edge);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--zeno-edge);
+}
+.l-grid .caption .zeno-header-glass,
+.l-dock .caption .zeno-header-glass {
+  display: block;
+  background-position: -124px -74px;
+}
+.l-grid .caption::after,
+.l-dock .caption::after,
+.l-grid .weather-widget::after,
+.l-dock .weather-widget::after,
+.l-grid .quiet-utils .u::after,
+.l-dock .quiet-utils .u::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--zeno-glass),var(--zeno-surface);
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--zeno-edge);
+  pointer-events: none;
+}
+.l-grid .zeno-clock-group,
+.l-dock .zeno-clock-group {
+  position: relative;
+  z-index: 1;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 100%;
+}
+.l-grid .clock-style-compact,
+.l-dock .clock-style-compact {
+  padding-top: 0;
+}
+.l-grid .caption .casa-date,
+.l-dock .caption .casa-date {
+  max-width: 100%;
+  margin-top: 4px;
+  font-size: 23px;
+  line-height: 32px;
+  opacity: .8;
+}
+.l-grid .clock-style-analog,
+.l-dock .clock-style-analog {
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+}
+.l-grid .zeno-analog-clock,
+.l-dock .zeno-analog-clock {
+  width: 136px;
+  height: 136px;
+}
+.l-grid .clock-style-analog .casa-date,
+.l-dock .clock-style-analog .casa-date {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 30px;
+  white-space: normal;
+}
+.clock-date-weekday,
+.clock-date-long {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.clock-date-weekday {
+  font-size: 20px;
+  opacity: .8;
+}
+.clock-date-long {
+  font-size: 23px;
+}
+.l-grid .weather-widget,
+.l-dock .weather-widget {
+  left: 548px;
+  right: auto;
+  top: 74px;
+  display: block;
+  width: 388px;
+  height: 208px;
+  padding: 24px 30px;
+  overflow: hidden;
+  background: none;
+  border-width: 2px;
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--zeno-edge);
+}
+.l-grid .weather-widget[hidden],
+.l-dock .weather-widget[hidden] {
+  display: none;
+}
+.l-grid .weather-widget .zeno-header-glass,
+.l-dock .weather-widget .zeno-header-glass {
+  display: block;
+  background-position: -548px -74px;
+}
+.l-grid .weather-widget-art,
+.l-dock .weather-widget-art {
+  position: absolute;
+  z-index: 1;
+  right: 24px;
+  top: 28px;
+  width: 72px;
+}
+.l-grid .weather-widget-copy,
+.l-dock .weather-widget-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+}
+.l-grid .weather-widget-temp,
+.l-dock .weather-widget-temp {
+  order: 0;
+  max-width: 210px;
+  font-size: 68px;
+  line-height: 80px;
+  font-weight: 300;
+}
+.l-grid .weather-widget-place,
+.l-dock .weather-widget-place {
+  order: 1;
+  width: 100%;
+  font-size: 25px;
+  line-height: 34px;
+}
+.l-grid .weather-widget-description,
+.l-dock .weather-widget-description {
+  order: 2;
+  width: 100%;
+  font-size: 22px;
+  line-height: 30px;
+}
+/* Two half modules occupy the fourth header column; the third is free. */
+.l-grid .quiet-utils,
+.l-dock .quiet-utils {
+  left: 1396px;
+  right: auto;
+  top: 74px;
+  align-items: stretch;
+  gap: 24px;
+  width: 388px;
+  height: 208px;
+}
+.stage.l-grid .home .quiet-utils .u,
+.stage.l-dock .home .quiet-utils .u {
+  position: relative;
+  display: flex;
+  flex: 0 0 182px;
+  width: 182px;
+  height: 208px;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  text-shadow: none;
+  background: none;
+  border: 2px solid var(--zeno-edge);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--zeno-edge);
+  opacity: 1;
+  transition: border-color 130ms linear;
+}
+.l-grid .quiet-utils .u .zeno-header-glass,
+.l-dock .quiet-utils .u .zeno-header-glass {
+  display: block;
+  background-position: -1396px -74px;
+}
+.l-grid .quiet-utils .u:nth-child(2) .zeno-header-glass,
+.l-dock .quiet-utils .u:nth-child(2) .zeno-header-glass {
+  background-position: -1602px -74px;
+}
+.l-grid .quiet-utils .u-content,
+.l-dock .quiet-utils .u-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 18px 12px;
+  transform: none!important;
+}
+.l-grid .quiet-utils .u .ico,
+.l-dock .quiet-utils .u .ico {
+  width: 48px;
+  height: 48px;
+  transform: none!important;
+}
+.l-grid .quiet-utils .u-label,
+.l-dock .quiet-utils .u-label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 23px;
+  line-height: 30px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stage.l-grid .home .quiet-utils .u.is-focus,
+.stage.l-dock .home .quiet-utils .u.is-focus {
+  background: none;
+  border-color: var(--zeno-ink);
+  box-shadow: inset 0 0 0 1px var(--zeno-ink),inset 0 1px 0 var(--zeno-edge);
+}
+.l-grid .ut-lens,
+.l-dock .ut-lens {
+  display: none!important;
+}
+.l-dock .caption .full-name {
+  display: none;
+}
+.l-grid .quiet-utils .u-label,
+.l-dock .quiet-utils .u-label {
+  font-size: var(--header-label-size,23px);
+}
+/* Hiding a header surface keeps its module and foreground in place. */
+.stage[data-clock-panel=none] #caption,
+.stage[data-weather-panel=none] #weatherWidget {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.stage[data-clock-panel=none] #caption::after,
+.stage[data-weather-panel=none] #weatherWidget::after {
+  background: none;
+  box-shadow: none;
+}
+.stage[data-clock-panel=none] #caption > .zeno-header-glass,
+.stage[data-weather-panel=none] #weatherWidget > .zeno-header-glass {
+  display: none;
+}
+.stage[data-sources-panel=none] #utils [data-action="util.sources"],
+.stage[data-settings-panel=none] #utils [data-action="util.settings"] {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  transition: none;
+}
+.stage[data-sources-panel=none] #utils [data-action="util.sources"]::after,
+.stage[data-settings-panel=none] #utils [data-action="util.settings"]::after {
+  background: none;
+  box-shadow: none;
+}
+.stage[data-sources-panel=none] #utils [data-action="util.sources"] > .zeno-header-glass,
+.stage[data-settings-panel=none] #utils [data-action="util.settings"] > .zeno-header-glass {
+  display: none;
+}
+.stage[data-sources-panel=none] #utils [data-action="util.sources"].is-focus,
+.stage[data-settings-panel=none] #utils [data-action="util.settings"].is-focus {
+  border-color: var(--zeno-ink);
+  box-shadow: none;
+}

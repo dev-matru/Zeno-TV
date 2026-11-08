@@ -1,0 +1,812 @@
+/* Sparse desktop: cached registered backdrop fields, persistent keyed card DOM.
+   Direction keys change focus/transform only; no live blur or pixel sampling. */
+.l-grid #caption,
+.l-grid #weatherWidget,
+.l-grid #utils,
+.l-grid .util-focus-label {
+  display: none!important;
+}
+.zeno-desktop {
+  --desk-focus: var(--zeno-ink);
+  position: absolute;
+  inset: 0;
+  font-family: var(--zeno-font);
+  color: var(--zeno-ink);
+}
+.desk-viewport {
+  position: absolute;
+  left: 106px;
+  top: 56px;
+  width: 1696px;
+  height: 879px;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: content-box;
+}
+.desk-track {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 1660px;
+  height: 870px;
+  transition: transform 200ms cubic-bezier(.2,.7,.2,1);
+}
+.desk-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 388px;
+  height: 258px;
+  outline: none;
+  transform-origin: 0 0;
+  cursor: pointer;
+}
+.desk-art {
+  position: relative;
+  display: block;
+  width: 388px;
+  height: 208px;
+  overflow: hidden;
+  border: 2px solid var(--zeno-edge);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--zeno-edge),0 6px 16px rgba(0,0,0,.1);
+}
+.desk-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--zeno-glass),linear-gradient(140deg,rgba(var(--zeno-card-rgb),var(--zeno-brand-alpha)),rgba(var(--zeno-card-rgb),var(--zeno-brand-low)));
+  pointer-events: none;
+}
+.desk-card[data-card-tint=glass] .desk-art::after {
+  background: var(--zeno-glass),var(--zeno-surface);
+}
+.desk-glass {
+  position: absolute;
+  inset: 0;
+  background-image: var(--zeno-card-field);
+  background-repeat: no-repeat;
+  opacity: var(--zeno-field-alpha);
+  pointer-events: none;
+}
+.desk-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.desk-card .mark,
+.desk-app-title {
+  color: var(--zeno-ink);
+  opacity: 1;
+}
+.desk-app-title {
+  display: none;
+  max-width: 338px;
+  overflow: hidden;
+  font-size: 34px;
+  line-height: 44px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stage.a-both .desk-app-title,
+.stage.a-text .desk-app-title {
+  display: block;
+}
+.stage.a-both .desk-app-mark {
+  height: 110px;
+  transform: scale(.82);
+}
+.stage.a-text .desk-app-mark {
+  display: none;
+}
+.desk-label {
+  display: none;
+  max-width: 388px;
+  margin-top: 10px;
+  overflow: hidden;
+  font-size: 28px;
+  line-height: 40px;
+  text-overflow: ellipsis;
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,.5);
+  white-space: nowrap;
+}
+.stage[data-grid-names=focus] .desk-card.is-focus:not(.is-widget) .desk-label {
+  display: block;
+}
+.desk-card.is-focus .desk-art {
+  border-color: var(--desk-focus);
+  box-shadow: 0 0 0 4px var(--zeno-sheen),0 8px 22px rgba(0,0,0,.16);
+}
+.desk-card.is-no-panel .desk-art {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.desk-card.is-no-panel .desk-art::after,
+.desk-card.is-no-panel .desk-glass {
+  display: none;
+}
+.desk-card.is-no-panel.is-focus .desk-art {
+  border-color: var(--desk-focus);
+  box-shadow: none;
+}
+.zeno-desktop.is-moving .desk-track {
+  transition: none;
+}
+.zeno-desktop.is-moving .desk-card.is-focus .desk-art {
+  border-style: dashed;
+}
+.desk-edge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zeno-ink);
+  opacity: .65;
+}
+.desk-edge .ico {
+  width: 26px;
+  height: 26px;
+}
+.edge-left {
+  left: 56px;
+  top: 510px;
+}
+.edge-right {
+  right: 56px;
+  top: 510px;
+}
+.edge-up {
+  left: 944px;
+  top: 22px;
+}
+.edge-down {
+  left: 944px;
+  bottom: 48px;
+}
+.desk-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 22px 26px;
+}
+.widget-clock-digital {
+  display: flex;
+  align-items: baseline;
+  font-size: 78px;
+  line-height: 88px;
+  letter-spacing: -2.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.has-seconds .widget-clock-digital {
+  font-size: 65px;
+  line-height: 80px;
+  letter-spacing: -2px;
+}
+.widget-clock-seconds {
+  margin-left: 3px;
+  font-size: 40px;
+  letter-spacing: -1px;
+}
+.widget-date-main {
+  max-width: 334px;
+  overflow: hidden;
+  font-size: 23px;
+  line-height: 32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: .85;
+}
+.widget-zone-name {
+  font-size: 19px;
+  line-height: 26px;
+  white-space: nowrap;
+  opacity: .7;
+}
+.desk-clock-compact .widget-clock-digital {
+  font-size: 58px;
+  line-height: 70px;
+}
+.desk-clock-analog {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+}
+.desk-clock-analog .zeno-analog-clock {
+  width: 140px;
+  height: 140px;
+}
+.desk-clock-analog .widget-date-main {
+  width: 142px;
+  max-height: 102px;
+  font-size: 25px;
+  line-height: 34px;
+  white-space: normal;
+}
+.widget-hand-second {
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.desk-weather {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 22px 26px;
+  overflow: hidden;
+}
+.desk-weather strong {
+  font-size: 70px;
+  line-height: 78px;
+  font-weight: 400;
+  letter-spacing: -2px;
+}
+.desk-weather-icon {
+  position: absolute;
+  right: 26px;
+  top: 22px;
+  width: 96px;
+  height: 96px;
+}
+.desk-weather-icon svg {
+  width: 96px;
+  height: 96px;
+}
+.desk-weather-city {
+  max-width: 310px;
+  overflow: hidden;
+  font-size: 28px;
+  line-height: 36px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desk-weather-description {
+  max-width: 315px;
+  overflow: hidden;
+  font-size: 22px;
+  line-height: 30px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: .8;
+}
+.weather-detailed {
+  justify-content: flex-start;
+  padding-top: 14px;
+  padding-bottom: 12px;
+}
+.weather-detailed strong {
+  font-size: 52px;
+  line-height: 59px;
+}
+.weather-detailed .desk-weather-city {
+  font-size: 25px;
+  line-height: 32px;
+}
+.weather-detailed .desk-weather-description {
+  font-size: 19px;
+  line-height: 25px;
+}
+.weather-detailed .desk-weather-icon {
+  top: 10px;
+  width: 80px;
+  height: 80px;
+}
+.weather-detailed .desk-weather-icon svg {
+  width: 80px;
+  height: 80px;
+}
+.desk-weather-metrics {
+  display: flex;
+  gap: 18px;
+  width: 100%;
+  margin-top: 8px;
+}
+.desk-weather-metrics > span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  white-space: nowrap;
+}
+.desk-weather-metrics b {
+  font-size: 23px;
+  line-height: 27px;
+  font-weight: 500;
+}
+.desk-weather-metrics small {
+  font-size: 15px;
+  line-height: 19px;
+  opacity: .72;
+}
+.desk-player {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 22px 26px;
+}
+.desk-music-art {
+  position: absolute;
+  right: 26px;
+  top: 24px;
+  font-size: 58px;
+  opacity: .8;
+}
+.desk-player-name {
+  font-size: 33px;
+  line-height: 42px;
+}
+.desk-player small {
+  font-size: 20px;
+  line-height: 30px;
+  opacity: .7;
+}
+.desk-player-state {
+  max-width: 328px;
+  margin-top: 18px;
+  overflow: hidden;
+  font-size: 25px;
+  line-height: 34px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desk-command {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+.desk-command > .ico {
+  width: 60px;
+  height: 60px;
+}
+.desk-command > span {
+  font-size: 28px;
+  line-height: 36px;
+}
+.zeno-calendar {
+  width: 100%;
+  padding: 0 4px;
+}
+.zeno-calendar h3 {
+  margin: 18px 0;
+  font-size: 30px;
+  line-height: 40px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  gap: 5px;
+  text-align: center;
+}
+.calendar-weekday {
+  font-size: 19px;
+  line-height: 30px;
+  opacity: .65;
+}
+.calendar-day {
+  height: 55px;
+  line-height: 55px;
+  font-size: 25px;
+  border-radius: 50%;
+}
+.calendar-day.is-today {
+  background: var(--zeno-selected);
+  outline: 2px solid var(--zeno-ink);
+}
+.zeno-sidebar nav {
+  margin-top: 38px;
+}
+.zeno-setting-card .zeno-card-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.weather-static .weather-icon * {
+  animation: none!important;
+}
+@media (prefers-reduced-motion:reduce) {
+  .desk-track {
+    transition: none;
+  }
+  .weather-icon * {
+    animation: none!important;
+  }
+}
+/* Widget variants share the cell system and retain legible, undistorted content. */
+.desk-card,
+.desk-art {
+  width: var(--desk-card-width,388px);
+}
+.desk-art {
+  height: var(--desk-card-height,208px);
+}
+.desk-card[data-size=half] .desk-clock,
+.desk-card[data-size=quarter] .desk-clock {
+  align-items: center;
+  padding: 16px;
+  text-align: center;
+}
+.desk-card[data-size=half] .widget-clock-digital {
+  font-size: 44px;
+  line-height: 54px;
+  letter-spacing: -1.5px;
+}
+.desk-card[data-size=half] .widget-clock-seconds {
+  font-size: 24px;
+}
+.desk-card[data-size=half] .has-seconds .widget-clock-digital {
+  font-size: 35px;
+  letter-spacing: -1px;
+}
+.desk-card[data-size=half] .widget-date-main {
+  font-size: 19px;
+  line-height: 27px;
+  white-space: normal;
+}
+.desk-card[data-size=half] .widget-zone-name {
+  font-size: 16px;
+  line-height: 22px;
+}
+.desk-card[data-size=half] .desk-clock-analog {
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+.desk-card[data-size=half] .desk-clock-analog svg {
+  width: 108px;
+  height: 108px;
+}
+.desk-card[data-size=half] .desk-clock-analog .widget-date-main {
+  font-size: 15px;
+  line-height: 20px;
+}
+.desk-card[data-size=half] .desk-weather {
+  justify-content: flex-end;
+  padding: 16px;
+}
+.desk-card[data-size=half] .desk-weather-icon {
+  top: 10px;
+  right: 14px;
+}
+.desk-card[data-size=half] .desk-weather-icon,
+.desk-card[data-size=half] .desk-weather-icon svg {
+  width: 58px;
+  height: 58px;
+}
+.desk-card[data-size=half] .desk-weather strong {
+  font-size: 49px;
+  line-height: 55px;
+}
+.desk-card[data-size=half] .desk-weather-city {
+  max-width: 140px;
+  font-size: 23px;
+  line-height: 32px;
+}
+.desk-card[data-size=half] .desk-weather-description {
+  max-width: 140px;
+  font-size: 17px;
+  line-height: 24px;
+}
+.desk-card[data-size=half] .desk-weather-metrics {
+  display: none;
+}
+.desk-card[data-size=half] .desk-player {
+  padding: 18px;
+}
+.desk-card[data-size=half] .desk-music-art {
+  position: static;
+  font-size: 37px;
+  line-height: 44px;
+}
+.desk-card[data-size=half] .desk-player-name {
+  font-size: 24px;
+  line-height: 34px;
+}
+.desk-card[data-size=half] .desk-player small {
+  display: none;
+}
+.desk-card[data-size=half] .desk-player-state {
+  max-width: 138px;
+  margin-top: 12px;
+  font-size: 19px;
+  line-height: 28px;
+}
+.desk-card[data-size=half] .desk-command {
+  gap: 18px;
+}
+.desk-card[data-size=half] .desk-command > .ico {
+  width: 48px;
+  height: 48px;
+}
+.desk-card[data-size=half] .desk-command > span {
+  font-size: 21px;
+  line-height: 28px;
+}
+.desk-card[data-size=quarter] .desk-clock {
+  padding: 9px 12px;
+}
+.desk-card[data-size=quarter] .widget-clock-digital {
+  font-size: 39px;
+  line-height: 48px;
+  letter-spacing: -1px;
+}
+.desk-card[data-size=quarter] .has-seconds .widget-clock-digital {
+  font-size: 32px;
+  line-height: 44px;
+}
+.desk-card[data-size=quarter] .widget-clock-seconds {
+  font-size: 22px;
+}
+.desk-card[data-size=quarter] .widget-date-main,
+.desk-card[data-size=quarter] .widget-zone-name {
+  display: none;
+}
+.desk-card[data-size=quarter] .desk-clock-analog svg {
+  width: 70px;
+  height: 70px;
+}
+.desk-card[data-size=quarter] .desk-clock-analog {
+  gap: 0;
+  padding: 8px;
+}
+.desk-card[data-size=quarter] .desk-weather {
+  justify-content: center;
+  padding: 9px 12px;
+}
+.desk-card[data-size=quarter] .desk-weather strong {
+  font-size: 31px;
+  line-height: 39px;
+}
+.desk-card[data-size=quarter] .desk-weather-city {
+  max-width: 100px;
+  font-size: 18px;
+  line-height: 24px;
+}
+.desk-card[data-size=quarter] .desk-weather-icon {
+  top: 15px;
+  right: 8px;
+}
+.desk-card[data-size=quarter] .desk-weather-icon,
+.desk-card[data-size=quarter] .desk-weather-icon svg {
+  width: 47px;
+  height: 47px;
+}
+.desk-card[data-size=quarter] .desk-weather-description,
+.desk-card[data-size=quarter] .desk-weather-metrics {
+  display: none;
+}
+.desk-card[data-size=quarter] .desk-player {
+  padding: 10px 14px;
+}
+.desk-card[data-size=quarter] .desk-player-name {
+  font-size: 22px;
+  line-height: 29px;
+}
+.desk-card[data-size=quarter] .desk-player-state {
+  margin-top: 0;
+  font-size: 18px;
+  line-height: 28px;
+}
+.desk-card[data-size=quarter] .desk-music-art,
+.desk-card[data-size=quarter] .desk-player small {
+  display: none;
+}
+.desk-card[data-size=quarter] .desk-command {
+  flex-direction: row;
+  gap: 9px;
+  padding: 10px;
+}
+.desk-card[data-size=quarter] .desk-command > .ico {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+.desk-card[data-size=quarter] .desk-command > span {
+  font-size: 17px;
+  line-height: 24px;
+  white-space: nowrap;
+}
+/* Command cards obey the same icon/text axis as the retained Home controls. */
+.stage.u-icons .desk-command > span {
+  display: none;
+}
+.stage.u-text .desk-command > .ico {
+  display: none;
+}
+.desk-command > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Center the nominal cell area; the stage itself clips a continuous desktop,
+   leaving real neighbouring cards visible on all four sides. No raster effects. */
+.desk-viewport {
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  padding: 0;
+  overflow: hidden;
+}
+.desk-track {
+  left: 0;
+  top: 0;
+}
+.desk-card.is-peek {
+  opacity: .42;
+}
+.desk-edge {
+  opacity: .45;
+  pointer-events: none;
+}
+.edge-left {
+  left: 28px;
+  top: 526px;
+}
+.edge-right {
+  right: 28px;
+  top: 526px;
+}
+.edge-up {
+  left: 946px;
+  top: 22px;
+}
+.edge-down {
+  left: 946px;
+  bottom: 22px;
+}
+/* Clock face size is independent from its digital/analog style and card size. */
+.desk-clock-digital.density-standard .widget-clock-digital {
+  font-size: 96px;
+  line-height: 104px;
+  letter-spacing: -3px;
+}
+.desk-clock-digital.density-standard.has-seconds .widget-clock-digital {
+  font-size: 80px;
+  line-height: 96px;
+  letter-spacing: -2.5px;
+}
+.desk-clock-digital.density-standard .widget-clock-seconds {
+  font-size: 44px;
+}
+.desk-clock-digital.density-compact .widget-clock-digital {
+  font-size: 67px;
+  line-height: 78px;
+  letter-spacing: -2px;
+}
+.desk-clock-digital.density-compact .widget-clock-seconds {
+  font-size: 34px;
+}
+.desk-clock-analog.density-standard {
+  gap: 16px;
+  padding: 20px;
+}
+.desk-clock-analog.density-standard .zeno-analog-clock {
+  width: 162px;
+  height: 162px;
+}
+.desk-clock-analog.density-standard .widget-date-main {
+  width: 144px;
+  font-size: 25px;
+}
+.desk-clock-analog.density-compact .zeno-analog-clock {
+  width: 126px;
+  height: 126px;
+}
+.desk-clock-analog.density-compact .widget-date-main {
+  font-size: 21px;
+}
+.desk-card[data-size=half] .desk-clock-digital .widget-clock-digital {
+  font-size: 44px;
+  line-height: 54px;
+  letter-spacing: -1.5px;
+}
+.desk-card[data-size=half] .desk-clock-digital.has-seconds .widget-clock-digital {
+  font-size: 35px;
+  letter-spacing: -1px;
+}
+.desk-card[data-size=half] .desk-clock-digital .widget-clock-seconds {
+  font-size: 24px;
+}
+.desk-card[data-size=half] .desk-clock-digital.density-compact .widget-clock-digital {
+  font-size: 36px;
+  line-height: 48px;
+}
+.desk-card[data-size=half] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
+  font-size: 30px;
+}
+.desk-card[data-size=half] .desk-clock-digital.density-compact .widget-clock-seconds {
+  font-size: 21px;
+}
+.desk-card[data-size=half] .desk-clock-analog.density-standard {
+  gap: 4px;
+  padding: 10px;
+}
+.desk-card[data-size=half] .desk-clock-analog.density-standard .zeno-analog-clock {
+  width: 110px;
+  height: 110px;
+}
+.desk-card[data-size=half] .desk-clock-analog.density-standard .widget-date-main {
+  font-size: 16px;
+  line-height: 22px;
+}
+.desk-card[data-size=half] .desk-clock-analog.density-compact .zeno-analog-clock {
+  width: 88px;
+  height: 88px;
+}
+.desk-card[data-size=quarter] .desk-clock-digital .widget-clock-digital {
+  font-size: 39px;
+  line-height: 48px;
+  letter-spacing: -1px;
+}
+.desk-card[data-size=quarter] .desk-clock-digital.has-seconds .widget-clock-digital {
+  font-size: 32px;
+  line-height: 44px;
+}
+.desk-card[data-size=quarter] .desk-clock-digital .widget-clock-seconds {
+  font-size: 22px;
+}
+.desk-card[data-size=quarter] .desk-clock-digital.density-compact .widget-clock-digital {
+  font-size: 32px;
+  line-height: 40px;
+}
+.desk-card[data-size=quarter] .desk-clock-digital.density-compact.has-seconds .widget-clock-digital {
+  font-size: 28px;
+}
+.desk-card[data-size=quarter] .desk-clock-analog .zeno-analog-clock {
+  width: 70px;
+  height: 70px;
+}
+.desk-card[data-size=quarter] .desk-clock-analog.density-compact .zeno-analog-clock {
+  width: 58px;
+  height: 58px;
+}
+.zeno-desktop.peeks-hidden .desk-card.is-peek {
+  visibility: hidden;
+  pointer-events: none;
+}
+.desk-weather.is-empty {
+  justify-content: center;
+}
+.desk-weather.is-empty strong {
+  font-size: 54px;
+  line-height: 60px;
+}
+.desk-weather.is-empty small {
+  font-size: 18px;
+  line-height: 24px;
+  opacity: .7;
+}
+.desk-card[data-size=half] .desk-weather.is-empty strong {
+  font-size: 48px;
+  line-height: 56px;
+}
+.desk-card[data-size=quarter] .desk-weather.is-empty strong {
+  font-size: 31px;
+  line-height: 39px;
+}
+.desk-card[data-size=quarter] .desk-weather.is-empty small {
+  display: none;
+}

@@ -1,0 +1,72 @@
+"""Prepare small, static palette hints from thumbnails; no pixel analysis on the TV.
+
+Bundled wallpapers are written to app/assets/zeno-colors.js. When a personal
+online catalogue exists in .local/personal, a combined file is written to the
+personal overlay instead, so the public source only describes bundled photos.
+"""
+from pathlib import Path
+import colorsys
+import concurrent.futures
+import json
+import urllib.request
+
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parents[2]
+PERSONAL = ROOT / '.local/personal'
+CACHE = ROOT / '.local/wallpaper-colors'
+CACHE.mkdir(parents=True, exist_ok=True)
+
+bundled = json.loads((ROOT / 'app/assets/wallpapers/SOURCES.json').read_text())
+catalog_path = PERSONAL / 'online-wallpapers.json'
+catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {'entries': []}
+
+
+def thumbnail(entry):
+    if not entry.get('download'):
+        return Image.open(ROOT / 'app' / entry['thumb'])
+    cached = CACHE / (entry['id'] + '.jpg')
+    if not cached.exists():
+        with urllib.request.urlopen(entry['thumb'], timeout=20) as response:
+            cached.write_bytes(response.read(1000000))
+    return Image.open(cached)
+
+
+def analyse(entry):
+    try:
+        image = thumbnail(entry).convert('RGB').resize((32, 18))
+        pixels = list(image.getdata())
+        r, g, b = [sum(p[k] for p in pixels) / len(pixels) / 255 for k in range(3)]
+        hue, light, sat = colorsys.rgb_to_hls(r, g, b)
+        family = ('sand' if hue < .17 else 'mint' if hue < .49 else 'ice' if hue < .67
+                  else 'lilac' if hue < .83 else 'rose')
+
+        def tone(level):
+            return '#' + ''.join('%02x' % round(c * 255)
+                                 for c in colorsys.hls_to_rgb(hue, level, max(.48, min(.78, sat))))
+
+        # Automatic mode picks readable light or dark ink; harmony uses a gentle hue.
+        return entry['id'], {'accent': tone(.68), 'accentDark': tone(.36),
+                             'neutral': 'ink' if light > .69 else 'pearl',
+                             'harmony': 'ink' if light > .76 else family,
+                             'lightness': round(light, 3)}
+    except Exception:
+        return entry['id'], {'neutral': 'pearl', 'harmony': 'ice', 'lightness': .4}
+
+
+def write(path, palettes):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('window.ZenoWallpaperColors = ' + json.dumps(palettes, separators=(',', ':')) + ';\n')
+
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+    palettes = dict(pool.map(analyse, bundled + catalog['entries']))
+
+write(ROOT / 'app/assets/zeno-colors.js', {e['id']: palettes[e['id']] for e in bundled})
+if catalog['entries']:
+    for entry in catalog['entries']:
+        entry['palette'] = palettes[entry['id']]
+        entry.setdefault('format', 'jpg')
+    catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + '\n')
+    write(PERSONAL / 'overlay/assets/zeno-colors.js', palettes)
+print('Static palettes prepared for', len(palettes), 'wallpapers')

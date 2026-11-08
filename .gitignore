@@ -1,0 +1,21 @@
+# Everything personal or machine-specific lives here: SDK, certificates,
+# device settings, personal assets and notes.
+/.local/
+
+# Build output and dependencies
+/dist/
+/node_modules/
+*.wgt
+
+# Never commit secrets
+.env
+.env.*
+*.p12
+*.pem
+*.key
+*.csr
+
+# System and tool noise
+.DS_Store
+__pycache__/
+*.pyc

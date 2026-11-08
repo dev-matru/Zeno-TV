@@ -1,0 +1,97 @@
+# Development
+
+## Run it
+
+You need Node.js 22+ and Python 3.10+.
+
+```sh
+npm ci
+npm run dev          # http://localhost:4795/home/
+```
+
+The preview serves `app/`, the same files that go into the TV package. Use the arrow keys, Enter (OK) and Escape (Back). Hold Enter for the context menu. Anything that needs the TV (launching apps, switching inputs) says so instead of pretending to work.
+
+`npm run dev:public` serves only what is in the repository, without your personal assets. Use it to see what a fresh clone looks like.
+
+## Layout
+
+```
+app/                the TV app (HTML, CSS, ES5 JavaScript)
+  main.js           screens, focus, preferences
+  zeno-*.js         desktop grid, widgets, sources, remote keys, languages…
+  device.js         everything that talks to Tizen
+  service/          background service on the TV (local network, wallpaper cache)
+  locales/          translations, one file per language
+  assets/           fonts, photos, glass materials, icons
+scripts/
+  dev/              local preview server
+  build/            packaging, materials, translations, audio
+  checks/           syntax, manifest and browser tests
+  tv/               install, launch and the optional native Home helper
+  lib/              shared helpers
+docs/               this file, TV setup, credits
+```
+
+The TV runs an older web engine, so code in `app/` stays ES5: `var`, `function`, no arrow functions, no modules. Tools in `scripts/` can use modern JavaScript and Python.
+
+The stage is a fixed 1920×1080 canvas scaled to the screen. Check changes at 1920×1080 and 1280×720.
+
+## Checks
+
+```sh
+npm run check            # syntax of every app script + manifest and bundled files
+npm run check:public     # nothing personal or secret is tracked by Git
+npx playwright install chromium
+npm run check:browser    # navigation, settings, persistence in a real browser
+```
+
+More focused browser tests are listed in `package.json` (`check:widgets`, `check:desktop`, `check:palette`…). They run against a private preview with a fresh browser profile and never contact a TV.
+
+## Personal assets
+
+Some things you may want on your own TV can't be shared: commercial fonts, service logos, a wallpaper catalogue you don't own. Put them in `.local/personal/`, which Git ignores. The preview and `npm run package` layer that folder over `app/`. The public source never contains them.
+
+```
+.local/personal/
+  fonts.json                 fonts to offer in Settings → Typography
+  fonts/<folder>/<files>     the font files named in fonts.json
+  online-wallpapers.json     {"entries": [...]} wallpapers downloaded on the TV
+  overlay/<path>             any file, used as if it were app/<path>
+```
+
+A `fonts.json` entry looks like this:
+
+```json
+[
+  {"id": "myfont", "name": "My Font", "family": "My Font", "folder": "myfont",
+   "files": [["MyFont-Light.woff2", 300], ["MyFont-Regular.woff2", 400]],
+   "metrics": "", "display": 300, "ui": 400, "clock": 300}
+]
+```
+
+For logos, put SVG files in `overlay/assets/icons/` and run `node scripts/build/build-icon-metrics.mjs` to measure them. Copy the result to `overlay/assets/icons/metrics.js`. Apps without a logo use the icon reported by the TV, or their initials.
+
+## Wallpapers and glass
+
+The glass effect is not live blur: the TV is too slow for that. Every wallpaper ships with pre-rendered versions (blurred, frosted, clear, soft), and cards show the matching crop of those images. Changing focus only moves and fades things.
+
+To add a photo:
+
+1. Add it to `app/assets/wallpapers/SOURCES.json` with its credit.
+2. Prepare the background and thumbnail: `python3 scripts/build/prepare-wallpapers.py /path/to/originals --ids <id>`.
+3. Render the materials: `node scripts/build/build-materials.mjs <id>`. The output goes to `.local/materials/builder/`. Check it, then copy `*-panel.jpg` to `app/assets/wallpapers/` and the rest to `app/assets/materials/`.
+4. Add the entry to `app/assets/wallpapers/catalog.js`.
+5. Update the colour hints: `python3 scripts/build/build-wallpaper-colors.py`.
+6. Credit it in `docs/credits.md`.
+
+Downloaded wallpapers work differently. The service on the TV fetches them through an image proxy that produces the same blurred variants, then keeps them in the TV's private storage.
+
+## Preferences
+
+Preferences are stored in the TV's `localStorage`. The main key is `zeno.home.v1`. Widgets, sources, remote keys and language each have their own `zeno.*` key. Older keys from earlier versions are read once and migrated, so updating never resets the Home.
+
+## Packaging
+
+`npm run package` builds and signs `dist/ZenoTV.wgt` with the Tizen SDK and certificates in `.local/`. See [TV setup](tv-setup.md).
+
+`npm run export:public` builds an unsigned package from the public source only. It needs no certificates and never contacts a TV.

@@ -1,0 +1,35 @@
+{
+  "name": "zeno-tv",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A calm, photographic home screen for Samsung Tizen TVs, made for the remote.",
+  "scripts": {
+    "dev": "python3 scripts/dev/preview.py",
+    "dev:public": "python3 scripts/dev/preview.py --public",
+    "check": "node scripts/checks/syntax.mjs && python3 scripts/checks/manifest.py",
+    "check:public": "python3 scripts/checks/public.py",
+    "check:browser": "node scripts/checks/ui/run.mjs",
+    "check:integrations": "node scripts/checks/integrations.mjs",
+    "check:zeno": "node scripts/checks/zeno.mjs",
+    "check:refinement": "node scripts/checks/refinement.mjs",
+    "check:widgets": "node scripts/checks/widget-state.mjs && node scripts/checks/widgets.mjs",
+    "check:header": "node scripts/checks/header.mjs",
+    "check:palette": "node scripts/checks/palette.mjs",
+    "check:desktop": "node scripts/checks/desktop.mjs",
+    "check:media": "node scripts/checks/media-timers.mjs",
+    "check:world": "node scripts/checks/desktop-world.mjs",
+    "check:alignment": "node scripts/checks/compact-alignment.mjs",
+    "check:cache": "node scripts/checks/wallpaper-cache.mjs",
+    "check:network": "node scripts/checks/network.mjs",
+    "package": "python3 scripts/build/package.py",
+    "export:public": "python3 scripts/build/export-public.py",
+    "tv:info": "python3 scripts/tv/control.py info",
+    "tv:install": "python3 scripts/tv/control.py install dist/ZenoTV.wgt",
+    "tv:launch": "python3 scripts/tv/control.py launch CsTv9rK2mQ.CasaTV"
+  },
+  "devDependencies": {
+    "acorn": "^8.15.0",
+    "playwright": "1.64.1"
+  },
+  "license": "MIT"
+}

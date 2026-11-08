@@ -1,0 +1,640 @@
+/* Full-screen sheets (All apps, Settings, editor, messages).
+   A sheet is one opaque layer; Home is hidden while it is open. */
+.sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: #0f1416;
+}
+.bg-dark .sheet,
+.bg-light .sheet {
+  background: var(--ground);
+}
+.bg-dark .sheet-bg,
+.bg-light .sheet-bg,
+.bg-dark .sheet-veil,
+.bg-light .sheet-veil {
+  display: none;
+}
+.at-appearance .sheet,
+.at-wallpaper .sheet {
+  z-index: 1;
+}
+.bg-photo.m-tint .sheet {
+  --plate: rgba(14,12,10,.42);
+  --lift: rgba(14,12,10,.62);
+  --plate-edge: none;
+}
+.sheet-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  max-width: none;
+  object-fit: cover;
+}
+.sheet-veil {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: rgba(8,12,14,.42);
+}
+.view {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+}
+.s-title {
+  position: absolute;
+  left: 140px;
+  top: 72px;
+  font-size: 56px;
+  line-height: 64px;
+  font-weight: 500;
+  letter-spacing: -1.6px;
+  white-space: nowrap;
+}
+.s-sub {
+  position: absolute;
+  left: 140px;
+  top: 148px;
+  max-width: 1080px;
+  font-size: 30px;
+  line-height: 40px;
+  font-weight: 500;
+  letter-spacing: -.2px;
+  color: var(--mute);
+}
+.s-head {
+  position: absolute;
+  right: 112px;
+  top: 72px;
+  display: flex;
+  gap: 12px;
+}
+.s-label {
+  position: absolute;
+  left: 140px;
+  font-size: 30px;
+  line-height: 40px;
+  font-weight: 600;
+  letter-spacing: -.2px;
+  color: var(--faint);
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  height: 64px;
+  padding: 0 30px 0 24px;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  color: var(--mute);
+  background: none;
+  border-radius: 32px;
+  transition: background-color 140ms linear,color 140ms linear;
+}
+.btn .ico {
+  width: 30px;
+  height: 30px;
+}
+.s-head .btn {
+  max-width: 660px;
+}
+.s-head .btn > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn.is-focus {
+  color: var(--solid-ink);
+  background: var(--solid);
+}
+.btn.is-idle {
+  color: var(--faint);
+}
+.btn.is-idle.is-focus {
+  color: var(--solid-mute);
+}
+.s-count {
+  display: inline;
+  margin-left: 20px;
+  font-size: 24px;
+  line-height: 40px;
+  font-weight: 500;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+/* All apps grid */
+.grid-view {
+  position: absolute;
+  left: 112px;
+  top: 232px;
+  width: 1696px;
+  height: 720px;
+  overflow: hidden;
+}
+.grid-view.is-manage {
+  top: 496px;
+  height: 480px;
+}
+.grid-before,
+.grid-after {
+  left: 940px;
+}
+.grid-before {
+  top: 192px;
+}
+.grid-before.is-manage {
+  top: 452px;
+}
+.grid-after {
+  top: 976px;
+}
+.grid-in {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1696px;
+  transition: transform 220ms var(--ease);
+  will-change: transform;
+}
+.gt {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 216px;
+  border-radius: 32px;
+  transition: background-color 140ms linear;
+}
+.gt.is-focus {
+  background: var(--plate);
+  box-shadow: var(--plate-edge);
+}
+.gt .mark {
+  position: absolute;
+  left: 100px;
+  top: 30px;
+  opacity: .88;
+  transition: opacity 160ms linear,transform var(--t) var(--ease);
+}
+.gt.is-focus .mark {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.04);
+}
+.gt .label {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 114px;
+  overflow: hidden;
+  font-size: 34px;
+  line-height: 44px;
+  font-weight: 500;
+  letter-spacing: -.6px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gt .state {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 164px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--mute);
+}
+.gt.is-focus .state {
+  color: var(--ink);
+}
+.badge {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--ink);
+}
+.badge-tick {
+  stroke: var(--knock);
+}
+.badge.is-off {
+  color: var(--faint);
+}
+.verb {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.verb.is-off {
+  color: var(--warn);
+}
+.strip {
+  position: absolute;
+  left: 112px;
+  top: 260px;
+  width: 1696px;
+  height: 136px;
+}
+/* Panels scale an inner wrapper on focus, so the outer box never moves. */
+.gt .panel-content {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+  transition: transform var(--t) var(--ease);
+}
+.er-name .panel-content,
+.eo .panel-content {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  height: 100%;
+  transform-origin: 0 50%;
+  transition: transform var(--t) var(--ease);
+}
+.er-name .er-text {
+  min-width: 0;
+}
+.f-type .sheet .gt,
+.f-type .sheet .er-name,
+.f-type .sheet .eo {
+  background: none;
+  box-shadow: none;
+  opacity: .70;
+  transition: opacity 160ms linear,transform var(--t) var(--ease);
+}
+.f-type .sheet .gt.is-focus,
+.f-type .sheet .er-name.is-focus,
+.f-type .sheet .eo.is-focus,
+.f-type .sheet .er.is-lifted .er-name {
+  background: none;
+  box-shadow: none;
+  opacity: 1;
+}
+.f-type .sheet .gt .mark {
+  opacity: 1;
+  transform: none;
+}
+.f-type .sheet .gt.is-focus .panel-content {
+  transform: scale(1.05);
+}
+.f-type .sheet .er-name.is-focus .panel-content,
+.f-type .sheet .eo.is-focus .panel-content {
+  transform: scale(1.03);
+}
+.f-type .sheet .er.is-lifted .panel-content {
+  transform: none;
+}
+/* Remote key hints drawn as small outlined keycaps. */
+.remote-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 21px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 17px;
+}
+/* Home editor: Home apps on one side, everything else on the other. */
+.z-home,
+.z-other {
+  top: 216px;
+}
+.z-other {
+  left: 1068px;
+}
+.ed-home {
+  position: absolute;
+  left: 112px;
+  top: 264px;
+  width: 880px;
+  height: 752px;
+}
+.er {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  gap: 8px;
+  width: 880px;
+  height: 72px;
+  transition: transform var(--t) var(--ease);
+}
+.er-name {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  padding: 0 24px 0 16px;
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -.5px;
+  white-space: nowrap;
+  border-radius: 24px;
+  transition: background-color 140ms linear;
+}
+.er-num {
+  width: 36px;
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--mute);
+}
+.er-name.is-focus .er-num,
+.er.is-lifted .er-num {
+  color: var(--ink);
+}
+.er-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.er-move {
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  opacity: 0;
+}
+.er-move .ico {
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.8;
+}
+.er-name.is-focus {
+  background: var(--plate);
+  box-shadow: var(--plate-edge);
+}
+.er.is-lifted .er-name {
+  background: var(--lift);
+  box-shadow: var(--plate-edge);
+}
+.er.is-lifted .er-move {
+  opacity: 1;
+}
+.er-rm {
+  display: flex;
+  visibility: hidden;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 304px;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -.3px;
+  color: var(--mute);
+  border-radius: 24px;
+  transition: background-color 140ms linear,color 140ms linear;
+}
+.er.is-active .er-rm {
+  visibility: visible;
+}
+.er-rm.is-focus {
+  color: var(--solid-ink);
+  background: var(--solid);
+}
+.er-rm.is-limit {
+  color: var(--warn);
+}
+.er-rm.is-limit.is-focus {
+  color: var(--solid-warn);
+}
+.er.is-lifted .er-rm {
+  visibility: hidden;
+}
+.ed-other-view {
+  position: absolute;
+  left: 1040px;
+  top: 264px;
+  width: 768px;
+  height: 752px;
+  overflow: hidden;
+}
+.ed-other {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 768px;
+  transition: transform var(--t) var(--ease);
+}
+.eo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 768px;
+  height: 72px;
+  padding: 0 16px 0 24px;
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -.5px;
+  white-space: nowrap;
+  border-radius: 24px;
+  transition: background-color 140ms linear;
+}
+.eo.is-focus {
+  background: var(--plate);
+  box-shadow: var(--plate-edge);
+}
+.eo-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eo-verb {
+  flex: none;
+  margin-left: auto;
+}
+.eo-verb:empty {
+  display: none;
+}
+.eo-sep {
+  position: absolute;
+  left: 28px;
+  top: 0;
+  height: 56px;
+  line-height: 60px;
+  font-size: 28px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--faint);
+}
+.ed-origin {
+  position: absolute;
+  left: 96px;
+  top: 0;
+  width: 6px;
+  height: 40px;
+  background: var(--faint);
+  border-radius: 3px;
+  opacity: 0;
+}
+.ed-origin.is-on {
+  opacity: 1;
+}
+.ed-order-break {
+  position: absolute;
+  left: 140px;
+  top: 0;
+  display: none;
+  align-items: center;
+  gap: 16px;
+  width: 824px;
+  height: 24px;
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: .1px;
+  color: var(--faint);
+}
+.ed-order-break.is-on {
+  display: flex;
+}
+.ed-order-break::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.editor-before,
+.editor-after {
+  left: 1408px;
+  width: 32px;
+}
+.editor-before {
+  top: 264px;
+}
+.editor-after {
+  top: 976px;
+}
+/* Save errors sit next to the control that failed. */
+.focus-status {
+  position: absolute;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -.2px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--warn);
+  pointer-events: none;
+}
+.focus-status.is-on {
+  display: flex;
+}
+.focus-status.dark-ink {
+  color: var(--solid-warn);
+}
+.focus-status.photo-status {
+  background: none;
+}
+.er-rm.has-local-status > span {
+  font-size: 26px;
+  transform: translateY(-13px);
+}
+.u.has-local-status .u-label,
+.btn.has-local-status > span {
+  font-size: 26px;
+  transform: translateY(-12px);
+}
+.er-name.has-local-status .er-text,
+.eo.has-local-status .eo-text,
+.set-row.has-local-status > span {
+  transform: translateY(-12px);
+}
+.eo.has-local-status .eo-verb,
+.gt.has-local-status .state {
+  visibility: hidden;
+}
+/* Message sheet */
+.msg-title {
+  position: absolute;
+  left: 140px;
+  top: 300px;
+  max-width: 1500px;
+  font-size: 72px;
+  line-height: 84px;
+  font-weight: 500;
+  letter-spacing: -2px;
+}
+.msg-line {
+  position: absolute;
+  left: 140px;
+  top: 420px;
+  max-width: 1200px;
+  font-size: 36px;
+  line-height: 52px;
+  color: var(--ink);
+}
+.msg-note {
+  position: absolute;
+  left: 140px;
+  top: 540px;
+  max-width: 1200px;
+  font-size: 30px;
+  line-height: 42px;
+  color: var(--mute);
+}
+.msg-acts {
+  position: absolute;
+  left: 112px;
+  top: 660px;
+  display: flex;
+  gap: 12px;
+}
+@media (prefers-reduced-motion:reduce) {
+  .stage,
+  .stage * {
+    transition: none!important;
+    animation: none!important;
+  }
+  .tile .mark,
+  .tile .label,
+  .gt .mark {
+    transform: none!important;
+    animation: none!important;
+  }
+  .l-list .ph-row,
+  .l-list .ph-group,
+  .l-list .ph-rows,
+  .l-list .ph-plate,
+  .l-list .ph-field,
+  .quiet-utils .u,
+  .quiet-utils .u::after,
+  .util-focus-label {
+    transition: opacity 120ms linear!important;
+  }
+  .quiet-utils .u .ico {
+    transform: none!important;
+  }
+}

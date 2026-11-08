@@ -1,0 +1,258 @@
+/* Zeno look: lighter glass, more air, and a pure black background option. */
+.caption {
+  top: 74px;
+  gap: 0;
+  max-width: 900px;
+}
+.caption .clock {
+  font-size: 82px;
+  line-height: 96px;
+  font-weight: 300;
+  letter-spacing: -4px;
+  opacity: .96;
+}
+.casa-date,
+.casa-weather {
+  font-family: "Zeno Geist",Manrope,Arial,sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 36px;
+  letter-spacing: -.35px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.2);
+  color: inherit;
+  opacity: .72;
+}
+.casa-date {
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+.casa-weather {
+  margin-top: 9px;
+  opacity: .88;
+}
+.bg-dark {
+  --ground: #000;
+  --ink: #eeeef0;
+  background: #000;
+}
+.bg-dark .scene,
+.bg-dark .sheet {
+  background: #000;
+}
+.bg-dark .casa-date,
+.bg-dark .casa-weather {
+  text-shadow: none;
+  color: #e9e9ed;
+}
+.casa-motion {
+  animation: casa-float 140s ease-in-out infinite alternate;
+}
+.at-appearance .casa-motion,
+.at-wallpaper .casa-motion {
+  animation: none;
+}
+@keyframes casa-float {
+  0% {
+    transform: translate3d(0,0,0);
+  }
+  35% {
+    transform: translate3d(5px,-4px,0);
+  }
+  70% {
+    transform: translate3d(-4px,5px,0);
+  }
+  100% {
+    transform: translate3d(3px,2px,0);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .casa-motion {
+    animation: none;
+  }
+}
+.is-sheet .casa-motion {
+  animation-play-state: paused;
+}
+.casa-weather {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.weather-icon {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+.weather-icon .weather-sun {
+  transform-origin: 21px 19px;
+  animation: weather-sun 22s linear infinite;
+}
+.weather-icon .weather-cloud {
+  animation: weather-cloud 6s ease-in-out infinite;
+}
+.weather-partly .weather-cloud {
+  fill: rgba(110,130,145,.8);
+}
+.weather-icon .weather-drops {
+  animation: weather-drops 1.8s ease-in-out infinite;
+}
+.weather-icon .weather-snow {
+  animation: weather-snow 4s ease-in-out infinite;
+}
+.weather-icon .weather-fog,
+.weather-icon .weather-moon {
+  animation: weather-cloud 7s ease-in-out infinite;
+}
+.weather-icon .weather-bolt {
+  animation: weather-bolt 5s ease-in-out infinite;
+}
+@keyframes weather-sun {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes weather-cloud {
+  50% {
+    transform: translateX(2px);
+  }
+}
+@keyframes weather-drops {
+  0%,
+  100% {
+    opacity: .5;
+    transform: translateY(-1px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+}
+@keyframes weather-snow {
+  50% {
+    opacity: .55;
+    transform: translate(2px,2px);
+  }
+}
+@keyframes weather-bolt {
+  0%,
+  82%,
+  100% {
+    opacity: .5;
+  }
+  85%,
+  91% {
+    opacity: 1;
+  }
+}
+.weather-paused .weather-icon * {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion:reduce) {
+  .weather-icon * {
+    animation: none!important;
+  }
+}
+/* Settings rows scroll inside a fixed box that stops above the remote hint. */
+.appearance-rows:not(.wallpaper-picker) {
+  height: 684px;
+  max-height: 684px;
+  padding-bottom: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  scrollbar-width: none;
+}
+.appearance-rows::-webkit-scrollbar {
+  display: none;
+}
+.appearance-desc {
+  z-index: 2;
+  max-width: 680px;
+}
+.pc-card {
+  position: absolute;
+  left: 626px;
+  top: 270px;
+  width: 668px;
+  padding: 34px;
+  background: var(--ground);
+  border-radius: 30px;
+  border: 1px solid var(--line);
+  box-shadow: 0 20px 80px rgba(0,0,0,.25);
+}
+.pc-card h2 {
+  margin: 0 12px 4px;
+  font-size: 44px;
+  font-weight: 500;
+}
+.pc-card p {
+  margin: 0 12px 20px;
+  font-size: 24px;
+  color: var(--mute);
+}
+.pc-option {
+  display: block;
+  width: 100%;
+  padding: 19px 24px;
+  font-size: 30px;
+  line-height: 38px;
+  text-align: left;
+  color: var(--ink);
+  border-radius: 18px;
+}
+.pc-option.is-focus,
+.keyboard-key.is-focus {
+  color: var(--solid-ink);
+  background: var(--solid);
+}
+.pc-card .pc-hint {
+  margin-top: 20px;
+  margin-bottom: 0;
+  font-size: 20px;
+}
+.keyboard-value {
+  position: absolute;
+  left: 140px;
+  top: 230px;
+  min-width: 900px;
+  max-width: 1640px;
+  padding: 22px 28px;
+  font-family: monospace;
+  font-size: 44px;
+  line-height: 60px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.keyboard-grid {
+  position: absolute;
+  left: 140px;
+  top: 400px;
+  display: grid;
+  grid-template-columns: repeat(10,144px);
+  gap: 14px;
+  width: 1640px;
+}
+.keyboard-key {
+  height: 90px;
+  font-size: 30px;
+  color: var(--ink);
+  background: rgba(128,128,128,.12);
+  border-radius: 18px;
+}
+.keyboard-error {
+  position: absolute;
+  left: 140px;
+  top: 770px;
+  font-size: 28px;
+  color: var(--warn);
+}
+/* Long online wallpaper names are clipped to the thumbnail row. */
+.wallpaper-choice .setting-copy {
+  flex: 1;
+  overflow: hidden;
+}
+.wallpaper-choice .setting-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 440" role="img" aria-label="Zeno TV">
+  <!-- The Zeno TV mark: a screen with the sun setting on calm water.
+       The outline uses currentColor so it can follow the text colour around it. -->
+  <defs>
+    <linearGradient id="zeno-sun" x1="0" y1="83.5" x2="0" y2="217" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#61998e"/>
+      <stop offset=".5" stop-color="#a3c3ae"/>
+      <stop offset="1" stop-color="#f5f3df"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round">
+    <rect x="25.5" y="26" width="548" height="333" rx="41"/>
+    <path d="M125.5 372 L99 407 M474.5 372 L501 407"/>
+  </g>
+  <path d="M166.5 217 A133.5 133.5 0 0 1 433.5 217 Z" fill="url(#zeno-sun)"/>
+  <path d="M108.5 236 Q300 220 491.5 236 Q300 252 108.5 236 Z" fill="#58928a"/>
+  <path d="M165 266 Q300 250 435 266 Q300 282 165 266 Z" fill="#669c92"/>
+  <path d="M205 293 Q300 279 395 293 Q300 307 205 293 Z" fill="#74a69b"/>
+  <path d="M250 315 Q300 305 350 315 Q300 325 250 315 Z" fill="#84b2a7"/>
+</svg>

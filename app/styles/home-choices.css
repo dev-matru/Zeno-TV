@@ -1,0 +1,236 @@
+/* Display choices saved in Settings: how apps, utilities and fonts appear on Home. */
+/* Header utilities follow the Home focus style; command buttons stay solid. */
+.s-head .btn {
+  position: relative;
+  color: var(--mute);
+  background: none;
+  box-shadow: none;
+  transition: transform 140ms var(--ease),color 140ms linear;
+}
+.s-head.is-awake .btn {
+  color: var(--faint);
+}
+.s-head .btn.is-focus {
+  text-shadow: none;
+  color: var(--ink);
+  background: none;
+}
+.s-head .btn.is-idle {
+  color: var(--faint);
+}
+.s-head .btn > span,
+.s-head .btn > .ico {
+  position: relative;
+  z-index: 1;
+}
+.f-type .s-head .btn.is-focus {
+  transform: scale(1.05);
+}
+.f-glass .s-head .btn.is-focus::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 2px;
+  height: 60px;
+  background: var(--plate);
+  border-radius: 30px;
+  box-shadow: var(--plate-edge);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion:reduce) {
+  .s-head .btn,
+  .m-tint .mat-img,
+  .m-tint .mat-scrim {
+    transform: none!important;
+  }
+  .ut-lens {
+    transition: opacity 120ms linear!important;
+  }
+}
+/* App style choices change what a tile shows, never which app it is. */
+.stage.is-reflow * {
+  transition: none!important;
+  animation: none!important;
+}
+.dock .tile,
+.dock .plate {
+  width: var(--tile-w);
+  height: var(--tile-h);
+}
+.dock .track {
+  height: var(--dock-h);
+}
+.a-text .tile .label {
+  left: 12px;
+  right: 12px;
+  top: 28px;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+}
+.a-text .label-ink {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.a-icons .tile .mark {
+  left: 20px;
+  top: 28px;
+}
+.a-text .ph-name {
+  left: 28px;
+}
+.a-icons .ph-group .mark {
+  top: 20px;
+}
+.app-focus-name {
+  position: absolute;
+  z-index: 3;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 500;
+  letter-spacing: -.6px;
+  text-shadow: 0 1px 2px rgba(14,10,6,.32),0 3px 14px rgba(14,10,6,.24);
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 120ms linear;
+  pointer-events: none;
+}
+.app-focus-name.is-on {
+  opacity: 1;
+}
+.l-dock .app-focus-name {
+  font-size: 36px;
+  line-height: 44px;
+  text-align: center;
+}
+.bg-dark .app-focus-name,
+.bg-light .app-focus-name {
+  text-shadow: none;
+}
+.quiet-utils.is-text {
+  right: 126px;
+  gap: 28px;
+}
+.quiet-utils.is-text .u-content .ico {
+  display: none;
+}
+.quiet-utils.is-text .u {
+  padding: 0 14px;
+}
+.l-list .quiet-utils.is-text {
+  gap: 0;
+}
+.l-list .quiet-utils.is-text .u-label {
+  max-width: 330px;
+}
+.l-list .quiet-utils.is-text .u-content {
+  gap: 0;
+}
+/* The chosen font applies to Home only; sheets keep the interface font. */
+.home {
+  font-synthesis: none;
+}
+.font-custom .home {
+  font-family: var(--font-ui-family),sans-serif;
+  font-weight: var(--font-ui-weight);
+}
+.font-custom .home .ph-name {
+  font-family: var(--font-display-family),sans-serif;
+  font-weight: var(--font-display-weight);
+  letter-spacing: -.01em;
+}
+.font-custom .home .clock {
+  position: relative;
+  top: var(--font-clock-shift);
+  font-family: var(--font-display-family),sans-serif;
+  font-weight: var(--font-clock-weight);
+  letter-spacing: -.01em;
+}
+.font-custom .home .tile .label,
+.font-custom .home .app-focus-name,
+.font-custom .home .full-name {
+  font-family: var(--font-primary-family),sans-serif;
+  font-weight: var(--font-primary-weight);
+  letter-spacing: 0;
+}
+.font-custom .home .u,
+.font-custom .home .util-focus-label,
+.font-custom .home .btn,
+.font-custom .home .dock-empty p,
+.font-custom .home .ph-empty p {
+  font-family: var(--font-ui-family),sans-serif;
+  font-weight: var(--font-ui-weight);
+  letter-spacing: 0;
+}
+.font-custom .home .full-name {
+  position: relative;
+  top: var(--font-full-name-shift);
+}
+.font-custom .home .quiet-utils .u-label {
+  position: relative;
+  top: var(--font-utility-shift);
+}
+.font-custom.l-list .home .quiet-utils .u-label {
+  top: calc(-1px + var(--font-utility-shift));
+}
+.home .monogram,
+.home .cap-line:not(.full-name),
+.home .error-chip {
+  font-family: Manrope,Arial,sans-serif;
+}
+.font-newsreader .home {
+  font-variation-settings: "opsz" 28;
+  font-optical-sizing: none;
+}
+.font-newsreader .home .ph-name {
+  font-variation-settings: "opsz" 72;
+  font-optical-sizing: none;
+}
+.font-newsreader .home .clock {
+  font-variation-settings: "opsz" 48;
+  font-optical-sizing: none;
+}
+.font-newsreader .home .tile .label,
+.font-newsreader .home .app-focus-name,
+.font-newsreader .home .full-name {
+  font-variation-settings: "opsz" 36;
+  font-optical-sizing: none;
+}
+.font-newsreader .home .btn,
+.font-newsreader .home .dock-empty p,
+.font-newsreader .home .ph-empty p {
+  font-variation-settings: "opsz" 36;
+}
+.clock-digit {
+  display: inline-block;
+  width: var(--font-clock-digit);
+  letter-spacing: 0;
+  text-align: center;
+}
+.is-font-switch .home .ph-name,
+.is-font-switch .home .clock,
+.is-font-switch .home .tile .label,
+.is-font-switch .home .u-label,
+.is-font-switch .home .app-focus-name,
+.is-font-switch .home .util-focus-label {
+  animation: font-in 160ms linear;
+}
+@keyframes font-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .is-font-switch .home .ph-name,
+  .is-font-switch .home .clock,
+  .is-font-switch .home .tile .label,
+  .is-font-switch .home .u-label,
+  .is-font-switch .home .app-focus-name,
+  .is-font-switch .home .util-focus-label {
+    animation-duration: 120ms;
+  }
+}
