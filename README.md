@@ -23,7 +23,7 @@ So I wrote Zeno. It runs as an app on the TV and you use it as your home screen.
 - **Three layouts.** A grid of cards you can place where you like, a dock along the bottom, or a plain list.
 - **Cards that match the apps.** In the coloured card style, each card takes the main colour of its app's icon.
 - **A few small widgets.** Clock (with other time zones and a timer that keeps ringing until you press a key), weather, music and your HDMI inputs.
-- **Some quiet music.** Six tracks made for Zeno: jazz lounge, piano, ambient, rain, sea waves and brown noise. You can add your own.
+- **Quiet music and real nature sounds.** Four small loops made for Zeno, plus a catalogue you can download on the TV: ambient music by real artists (Scott Buckley, Chris Zabriskie, Lee Rosevere, HoliznaCC0) and field recordings of rain, sea, forests and night, many by Félix Blume. All of it is free to share. You can also send the TV your own tracks from your phone, as files or links, through a QR code: big WAV files are compressed by the TV itself.
 - **HDMI devices as tiles.** Give them a name and an icon. It can also wake a PC over the network before switching to its input.
 - **Photos as the background.** Fourteen are included. The text and the glass behind the cards adjust their colour to each photo, so they stay readable.
 - **Made for the remote.** Arrows, OK and Back are all you need. Hold OK on something to see more options.
@@ -88,4 +88,4 @@ Bug reports, TV reports and ideas are welcome: pick a form when you [open an iss
 
 ## Credits
 
-Photos from Unsplash, fonts under the Open Font License, music and sounds made for Zeno. The full list is in [docs/credits.md](docs/credits.md). Zeno TV is released under the [MIT License](LICENSE).
+Photos from Unsplash, fonts under the Open Font License, sounds made for Zeno, and a music catalogue of CC0 and CC BY tracks that the TV downloads from their authors. The full list is in [docs/credits.md](docs/credits.md). Zeno TV is released under the [MIT License](LICENSE).

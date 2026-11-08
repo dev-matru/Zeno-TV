@@ -21,6 +21,7 @@
     "check:alignment": "node scripts/checks/compact-alignment.mjs",
     "check:cache": "node scripts/checks/wallpaper-cache.mjs",
     "check:network": "node scripts/checks/network.mjs",
+    "check:music": "node --no-deprecation scripts/checks/music.mjs && node --no-deprecation scripts/checks/music-convert.mjs",
     "package": "python3 scripts/build/package.py",
     "export:public": "python3 scripts/build/export-public.py",
     "tv:info": "python3 scripts/tv/control.py info",

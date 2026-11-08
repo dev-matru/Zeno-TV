@@ -759,7 +759,11 @@
         ? 'choice.' + axis + '.' + S.c[axis]
         : group === 'rotation'
           ? 'rotation.' + S.c.mode
-          : 'samsung.home';
+          : group === 'musiccatalog'
+            ? 'music.get.' + ZenoMusic.catalog()[0].id
+            : group === 'musicimport'
+              ? 'music.import.again'
+              : 'samsung.home';
     push({ id: 'appearance', group: group, f: { action: action } });
   }
   function openMessage(key) {
@@ -1583,7 +1587,7 @@
         icon: 'sliders'
       },
       { id: 'weather', label: 'Meteo', value: 'Località e visualizzazione', icon: 'art' },
-      { id: 'player', label: 'Musica', value: 'Sei brani originali, solo su richiesta', icon: 'apps' },
+      { id: 'player', label: 'Musica', value: 'Brani di base, catalogo e link dal telefono', icon: 'apps' },
       {
         id: 'background',
         label: 'Sfondo e colori',
@@ -1750,6 +1754,9 @@
     worldclock: 'Fusi orari',
     handcolor: 'Colore dei secondi',
     player: 'Musica',
+    musiccatalog: 'Catalogo musicale',
+    musicimport: 'Aggiungi da un link',
+    musicfiles: 'Brani scaricati',
     background: 'Sfondo e colori',
     layout: 'Layout',
     typography: 'Tipografia',
@@ -1816,6 +1823,227 @@
                         ? 'Entrambi'
                         : VALUE_NAMES[value]
     };
+  }
+  /* ---- Music: catalogue, links from a phone and downloaded tracks ---- */
+  var MUSIC_GROUPS = [
+    { id: 'sb', title: 'Scott Buckley' },
+    { id: 'cz', title: 'Chris Zabriskie · Cylinders' },
+    { id: 'lr', title: 'Lee Rosevere' },
+    { id: 'hz', title: 'HoliznaCC0' },
+    { id: 'night', title: 'Suoni della notte' },
+    { id: 'rain', title: 'Pioggia' },
+    { id: 'sea', title: 'Mare' },
+    { id: 'forest', title: 'Bosco' },
+    { id: 'water', title: 'Acqua' }
+  ];
+  function isMusicPage(t) {
+    return (
+      t.id === 'appearance' && ['player', 'musiccatalog', 'musicimport', 'musicfiles'].indexOf(t.group) >= 0
+    );
+  }
+  function musicLinks() {
+    var saved = ZenoMusic.tracks().length,
+      items = [
+        {
+          action: 'widget.open.musiccatalog',
+          label: 'Catalogo',
+          description:
+            ZenoMusic.catalog().length + ' brani di artisti veri e suoni della natura, da scaricare'
+        },
+        {
+          action: 'widget.open.musicimport',
+          label: 'Aggiungi da un link',
+          description: 'Dal telefono, con un QR code'
+        }
+      ];
+    if (saved)
+      items.push({
+        action: 'widget.open.musicfiles',
+        label: 'Brani scaricati',
+        description:
+          saved + (saved === 1 ? ' brano · ' : ' brani · ') + ZenoMusic.megabytes(ZenoMusic.state().bytes)
+      });
+    return items;
+  }
+  function musicStateText(e) {
+    if (e.state === 'ready') return 'Sul TV';
+    if (e.state === 'running')
+      return (e.origin === 'upload' ? 'Caricamento ' : 'Download ') + e.progress + '%';
+    if (e.state === 'queued') return 'In coda';
+    if (e.state === 'error') return 'Non riuscito: ' + e.error;
+    return '';
+  }
+  function musicCatalogSections() {
+    var all = ZenoMusic.catalog(),
+      error = ZenoMusic.state().error,
+      sections = [
+        {
+          id: 'musicIntro',
+          title: '',
+          items: [
+            {
+              info: true,
+              label: 'Da scaricare',
+              description: error || 'Il TV scarica i brani dal sito dell’autore e li conserva'
+            }
+          ],
+          reason: 'Licenze libere, CC0 o CC BY 4.0: autore e licenza sono accanto a ogni brano.'
+        }
+      ];
+    MUSIC_GROUPS.forEach(function (g) {
+      var items = all
+        .filter(function (e) {
+          return e.kind === 'music' ? e.id.indexOf(g.id + '-') === 0 : e.group === g.id;
+        })
+        .map(function (e) {
+          var facts =
+            e.kind === 'music'
+              ? [e.length, e.size, e.license]
+              : [e.place, e.artist, e.length, e.license].filter(Boolean);
+          var state = musicStateText(e);
+          return {
+            action: 'music.get.' + e.id,
+            label: e.title,
+            description: (state ? state + ' · ' : '') + facts.join(' · '),
+            selected: e.state === 'ready',
+            option: true
+          };
+        });
+      if (items.length) sections.push({ id: 'music-' + g.id, title: g.title, items: items });
+    });
+    return sections;
+  }
+  function musicImportSections() {
+    var st = ZenoMusic.state(),
+      received = ZenoMusic.links().map(function (l) {
+        var saved = !!ZenoMusic.downloaded(l.id),
+          ready = saved && l.ready !== false;
+        return {
+          action: 'music.play.' + l.id,
+          label: l.title || 'Brano',
+          description:
+            l.state === 'converting'
+              ? 'Compressione in corso ' + l.progress + '%'
+              : l.error && saved
+                ? 'Non compresso: ' + l.error
+                : saved && !ready
+                  ? 'In attesa di compressione'
+                  : saved
+                    ? [l.artist, l.license].filter(Boolean).join(' · ') || 'Sul TV'
+                    : musicStateText({
+                        state: l.state,
+                        origin: l.origin,
+                        error: l.error,
+                        progress: l.total ? Math.min(99, Math.floor((100 * l.received) / l.total)) : 0
+                      }),
+          disabled: !ready
+        };
+      });
+    var sections = [
+      {
+        id: 'musicPhone',
+        title: '',
+        items: [
+          {
+            info: true,
+            label: st.import ? 'Inquadra il QR col telefono' : 'Pagina per il telefono',
+            description: st.import
+              ? 'Carica un file o incolla un link a un brano'
+              : st.error || 'Preparazione della pagina…'
+          }
+        ],
+        reason: st.import ? 'La pagina resta aperta 15 minuti, solo nella rete di casa.' : ''
+      },
+      {
+        id: 'musicQr',
+        title: '',
+        items: [{ action: 'music.import.again', label: st.import ? 'Nuovo QR code' : 'Riprova' }]
+      }
+    ];
+    if (received.length)
+      sections.push({ id: 'musicReceived', title: 'Brani dai tuoi link', items: received });
+    return sections;
+  }
+  function musicFileSections() {
+    var tracks = ZenoMusic.tracks();
+    return [
+      {
+        id: 'musicSpace',
+        title: '',
+        items: [
+          {
+            info: true,
+            label: 'Spazio usato',
+            description: ZenoMusic.megabytes(ZenoMusic.state().bytes)
+          }
+        ],
+        reason: 'OK rimuove il brano dal TV. Dal catalogo puoi scaricarlo di nuovo.'
+      },
+      {
+        id: 'musicSaved',
+        title: tracks.length ? 'Sul TV' : '',
+        items: tracks.length
+          ? tracks.map(function (track) {
+              return { action: 'music.remove.' + track.id, label: track.title, description: track.note };
+            })
+          : [{ info: true, label: 'Nessun brano', description: 'Scaricali dal catalogo' }]
+      }
+    ];
+  }
+  function playTrack(id) {
+    var ids = ZenoWidgets.tracks().map(function (track) {
+      return track.id;
+    });
+    if (ids.indexOf(id) < 0) return;
+    ZenoWidgets.selectTrack(ids.indexOf(id));
+    ZenoWidgets.media('MediaPlay', function (e) {
+      if (e) {
+        message('Musica', 'Il TV non ha avviato l’audio.');
+        after();
+      }
+    });
+  }
+  function musicAction(action) {
+    if (action.indexOf('music.get.') === 0) {
+      var id = action.slice(10);
+      if (ZenoMusic.downloaded(id)) playTrack(id);
+      else
+        ZenoMusic.get(id, function (e) {
+          if (e) {
+            message('Musica', e.message);
+            after();
+          }
+        });
+    } else if (action.indexOf('music.play.') === 0) playTrack(action.slice(11));
+    else if (action.indexOf('music.remove.') === 0) ZenoMusic.remove(action.slice(13));
+    else if (action === 'music.import.again') ZenoMusic.openImport();
+  }
+  /* The phone page is open only while its settings page is on screen. */
+  var musicImportShown = false;
+  function syncMusicPages(t) {
+    ZenoMusic.watch(isMusicPage(t));
+    var shown = t.id === 'appearance' && t.group === 'musicimport';
+    if (shown === musicImportShown) return;
+    musicImportShown = shown;
+    if (shown) ZenoMusic.openImport();
+    else ZenoMusic.closeImport();
+  }
+  function musicQrHTML() {
+    var info = ZenoMusic.state().import;
+    if (!info) return '';
+    var qr = '';
+    try {
+      qr = ZenoQR.svg(info.url);
+    } catch (e) {
+      return '';
+    }
+    return (
+      '<div class="zeno-qr"><div class="zeno-qr-code" aria-hidden="true">' +
+      qr +
+      '</div><p class="zeno-qr-url">' +
+      esc(info.url.replace(/\?k=.*$/, '')) +
+      '</p></div>'
+    );
   }
   function detailSections(t) {
     var flat = S.c.bg !== 'photo',
@@ -2100,6 +2328,9 @@
           )
         }
       ];
+    if (t.group === 'musiccatalog') return musicCatalogSections();
+    if (t.group === 'musicimport') return musicImportSections();
+    if (t.group === 'musicfiles') return musicFileSections();
     if (t.group === 'player')
       return [
         {
@@ -2110,9 +2341,14 @@
               action: 'widget.audio',
               label:
                 (ZenoWidgets.player().playing ? 'Pausa' : 'Riproduci') + ' · ' + ZenoWidgets.player().title,
-              description: ZenoWidgets.player().note + ' · in loop'
+              description: ZenoWidgets.player().note + (ZenoWidgets.player().loop ? ' · in loop' : '')
             }
           ]
+        },
+        {
+          id: 'playerMore',
+          title: '',
+          items: musicLinks()
         },
         {
           id: 'playerList',
@@ -3347,6 +3583,7 @@
       )
         message('Preferenze', 'Impossibile salvare. Riprova.');
     } else if (item.action.indexOf('widget.media.') === 0) ZenoWidgets.media(item.action.slice(13));
+    else if (item.action.indexOf('music.') === 0) musicAction(item.action);
     else if (item.action.indexOf('widget.track.') === 0) {
       var trackIds = ZenoWidgets.tracks().map(function (track) {
         return track.id;
@@ -5148,6 +5385,7 @@
     renderAppearance(t);
     renderFocusStatus(t);
     ZenoI18n.render(stage);
+    syncMusicPages(t);
   }
 
   /* Typeface variables for Home: families, weights and the per-role optical shifts. */
@@ -5908,6 +6146,10 @@
     if (a === 'background.wallpaper') return 'Scegli una fotografia';
     if (a === 'background.rotation') return 'Scegli un intervallo';
     if (a === 'system.refresh') return 'Aggiorna informazioni';
+    if (a.indexOf('music.get.') === 0) return ZenoMusic.downloaded(a.slice(10)) ? 'Riproduci' : 'Scarica';
+    if (a.indexOf('music.remove.') === 0) return 'Rimuovi dal TV';
+    if (a.indexOf('music.play.') === 0) return 'Riproduci';
+    if (a === 'music.import.again') return 'Rigenera';
     if (item.option || item.selected !== undefined) return 'Applica';
     if (a.indexOf('edit.') === 0) return 'Modifica';
     if (a.indexOf('source.') === 0 || a === 'input.open') return 'Apri sorgente';
@@ -5952,6 +6194,15 @@
       if (stale) stale.parentNode.removeChild(stale);
       holder.innerHTML = calendarHTML(t);
       appearanceRows.appendChild(holder.firstChild);
+    }
+    if (t.group === 'musicimport') {
+      // The rows above are kept when their markup is unchanged: replace the code, never add another.
+      var staleQr = appearanceRows.querySelector('.zeno-qr'),
+        qrHolder = document.createElement('div');
+      if (staleQr) staleQr.parentNode.removeChild(staleQr);
+      qrHolder.innerHTML = musicQrHTML();
+      if (qrHolder.firstChild)
+        appearanceRows.insertBefore(qrHolder.firstChild, appearanceRows.children[1] || null);
     }
     scrollDetailToFocus(t);
     setHTML(appearanceStatus, detailStatus(t));
@@ -7027,6 +7278,11 @@
     updateClock();
     if (S.c.layout === 'grid' || top().id === 'appearance') render();
   });
+  document.addEventListener('zeno-music-change', function () {
+    if (!isMusicPage(top())) return;
+    norm();
+    render();
+  });
   document.addEventListener('zeno-widget-change', function () {
     updateClock();
     render();
@@ -7042,10 +7298,7 @@
     after();
   });
   ZenoRemote.listenMedia(function (name) {
-    var playerShown =
-      S.c.desktop.widgets.player ||
-      ZenoWidgets.player().playing ||
-      (top().id === 'appearance' && top().group === 'player');
+    var playerShown = S.c.desktop.widgets.player || ZenoWidgets.player().playing || isMusicPage(top());
     if (!playerShown) return false;
     return ZenoWidgets.media(name, function (e) {
       if (e) {

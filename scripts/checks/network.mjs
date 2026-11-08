@@ -18,6 +18,7 @@ vm.runInNewContext(
     clearTimeout,
     require(name) {
       if (name === './wallpapers') return { prepare() {}, image() {} };
+      if (name === './music') return { serve: () => false, state: () => ({}) };
       if (name === 'dgram') return dgram;
       if (name === 'http')
         return {

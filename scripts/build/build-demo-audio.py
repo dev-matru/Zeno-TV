@@ -5,7 +5,7 @@ original and free to share. Developer tool, standard library only; the AAC
 encoding uses macOS `afconvert`.
 
     python3 scripts/build/build-demo-audio.py            # everything
-    python3 scripts/build/build-demo-audio.py rain alarm  # only some
+    python3 scripts/build/build-demo-audio.py pad alarm  # only some
 
 Each track is made a little longer than it plays and its end is cross-faded into
 its start, so it loops without a seam.
@@ -162,56 +162,6 @@ def pad():
     return tr.samples()
 
 
-def rain():
-    """Steady soft rain: filtered noise plus scattered drops."""
-    rnd = random.Random(5)
-    tr = Track(40)
-    buf = tr.buf
-    low = high = 0.0
-    for i in range(len(buf)):
-        white = rnd.random() * 2 - 1
-        low += (white - low) * 0.18
-        high += (low - high) * 0.012
-        swell = 0.85 + 0.15 * math.sin(TAU * i / (RATE * 13.3))
-        buf[i] = (low - high) * 0.5 * swell
-    for _ in range(1400):
-        a = rnd.randrange(len(buf) - RATE // 10)
-        f = rnd.uniform(1800, 4200)
-        g = rnd.uniform(0.02, 0.08)
-        for j in range(int(0.03 * RATE)):
-            buf[a + j] += g * math.sin(TAU * f * j / RATE) * math.exp(-j / (RATE * 0.004))
-    return tr.samples()
-
-
-def waves():
-    """Sea waves: deep noise that rises and falls every eight to eleven seconds."""
-    rnd = random.Random(8)
-    tr = Track(40, fade=5)
-    buf = tr.buf
-    starts = []
-    t = 0.0
-    while t < 46:
-        starts.append((t, rnd.uniform(7.5, 10.5)))
-        t += starts[-1][1] * rnd.uniform(0.75, 0.9)
-    level = [0.0] * len(buf)
-    for start, length in starts:
-        a = int(start * RATE)
-        n = int(length * RATE)
-        for j in range(n):
-            if a + j >= len(buf):
-                break
-            x = j / n
-            level[a + j] += math.sin(math.pi * x) ** 2 * (1 - 0.6 * x)
-    brown = soft = 0.0
-    for i in range(len(buf)):
-        white = rnd.random() * 2 - 1
-        brown = (brown + white * 0.03) * 0.995
-        cut = 0.03 + 0.25 * min(1.0, level[i])
-        soft += (white - soft) * cut
-        buf[i] = brown * 1.2 * (0.25 + level[i]) + soft * 0.35 * level[i]
-    return tr.samples()
-
-
 def noise():
     """Brown noise: a deep, even hush for focus or sleep."""
     rnd = random.Random(3)
@@ -227,8 +177,6 @@ TRACKS = {
     'lounge': lounge,
     'piano': piano,
     'pad': pad,
-    'rain': rain,
-    'waves': waves,
     'noise': noise,
 }
 

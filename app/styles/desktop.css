@@ -395,6 +395,33 @@
   width: 100%;
   padding: 0 4px;
 }
+/* The QR code that opens the music page on a phone. */
+.zeno-qr {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin: 6px 4px 22px;
+}
+.zeno-qr-code {
+  flex: none;
+  width: 264px;
+  height: 264px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+}
+.zeno-qr-code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.zeno-qr-url {
+  margin: 0;
+  font-size: 23px;
+  line-height: 32px;
+  opacity: 0.72;
+  word-break: break-all;
+}
 .zeno-calendar h3 {
   margin: 18px 0;
   font-size: 30px;

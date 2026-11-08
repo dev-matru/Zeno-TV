@@ -20,13 +20,13 @@ app/                the TV app (HTML, CSS, ES5 JavaScript)
   main.js           screens, focus and settings: wires the modules together
   src/core/         shared helpers, remote input, focus, translations, remote shortcuts
   src/state/        saved preferences, the TV and PC tiles, personal app styles
-  src/home/         Grid layout maths, widgets, weather and clock
+  src/home/         Grid layout maths, widgets, weather, clock, the music catalogue
   src/sources/      HDMI inputs and their icons
   src/system/       talking to Tizen, the network service, system information
   src/look/         glass materials, card colours, colours measured from app icons
-  src/type/, src/ui/  typefaces, icons and the logo
+  src/type/, src/ui/  typefaces, icons, the logo and a small QR code encoder
   styles/           one stylesheet per area, loaded in order
-  service/          background service on the TV (local network, wallpaper cache)
+  service/          background service on the TV (local network, wallpaper and music cache)
   locales/          translations, one file per language
   assets/           fonts, photos, glass materials, icons, generated data
 scripts/
@@ -54,7 +54,7 @@ npx playwright install chromium
 npm run check:browser    # navigation, settings, persistence in a real browser
 ```
 
-More focused browser tests are listed in `package.json` (`check:desktop`, `check:palette`, `check:alignment`…). Set `ZENO_PUBLIC=1` to run them without your personal assets. They run against a private preview with a fresh browser profile and never contact a TV.
+More focused tests are listed in `package.json` (`check:desktop`, `check:palette`, `check:music`…). Set `ZENO_PUBLIC=1` to run them without your personal assets. They run against a private preview with a fresh browser profile and never contact a TV.
 
 ## Personal assets
 
@@ -94,7 +94,16 @@ The key is the app id on the TV (`scripts/tv/native-home/run.py inspect` lists t
 
 ### Music
 
-Put audio files (`.m4a`, `.mp3`, `.aac` or `.wav`) in `.local/personal/music/`. They are added to the package and appear in the music widget after the built-in tracks, titled after their file names. To choose the order, the titles or a short note, list them in `music.json`; only the files listed there are used:
+Zeno has three kinds of music:
+
+- **Four small loops** made for Zeno (jazz lounge, piano, ambient, brown noise), in `app/assets/audio/`.
+- **A catalogue to download**, in `app/src/home/music-catalog.js`: music by real artists and field recordings of rain, sea, forest and night, all CC0 or CC BY 4.0. No file is in the repository: when you pick a track, the network service on the TV downloads it from the artist's site, Freesound or the Internet Archive and keeps it in its private storage (`app/service/music.js`). Each entry shows its author and licence; the full credits are in [credits.md](credits.md). To add a track, add an entry with the same fields, check that the licence is CC0 or CC BY and run `npm run check:music`.
+- **Files and links from a phone.** Customize → Home content → Music → Add from a link shows a QR code. It opens a small page served by the TV on the home network (port 4798), where you upload audio files from the phone or paste the link to a track or to its page. The page needs the random key in the QR code and closes after 15 minutes or when you leave the settings page. The service refuses links to the TV itself or to other devices at home. Links can be audio files, pages with an Open Graph audio tag or an `<audio>` element, Freesound or the Internet Archive.
+- **Compression on the TV.** Uploaded WAV and AIFF files are large, so the TV app shrinks them to Ogg Opus (160 kbit/s, 96 for mono) in the background: `app/src/home/music-convert.js` reads the file from the service a few MB at a time, encodes it with WebCodecs and sends it back, and the service swaps it for the original. This runs in the app rather than on the phone because the phone page is plain http, where browsers offer no audio encoder; the app runs from `file://` and has one. `npm run check:music` uploads WAV and AIFF files in several layouts, converts them in Chromium and decodes the result again.
+
+The service plays downloaded tracks to the app with HTTP Range requests, so seeking works. Downloaded songs move on to the next track when they end; loops and nature recordings repeat.
+
+Your own files can also go straight into the package. Put audio files (`.m4a`, `.mp3`, `.aac` or `.wav`) in `.local/personal/music/`. They are added to the package and appear in the music widget after the built-in tracks, titled after their file names. To choose the order, the titles or a short note, list them in `music.json`; only the files listed there are used:
 
 ```json
 [
@@ -103,9 +112,9 @@ Put audio files (`.m4a`, `.mp3`, `.aac` or `.wav`) in `.local/personal/music/`. 
 ]
 ```
 
-Every track loops until you pause it or switch track. Keep an eye on the package size: the whole app has to be copied to the TV at every update.
+Each one plays to its end and then moves on to the next track. Keep an eye on the package size: the whole app has to be copied to the TV at every update.
 
-The built-in tracks and the timer alarm are generated, not recorded: `python3 scripts/build/build-demo-audio.py` (or `... rain alarm` for just some) writes them to `app/assets/audio/`. The encoding uses macOS `afconvert`.
+The built-in tracks and the timer alarm are generated, not recorded: `python3 scripts/build/build-demo-audio.py` (or `... pad alarm` for just some) writes them to `app/assets/audio/`. The encoding uses macOS `afconvert`.
 
 ### Screenshots
 

@@ -217,6 +217,36 @@
     return SERVICE_URL + 'wallpaper/' + wall + '/1080/' + variant + '.' + extension + '?v=2&token=' + token;
   }
 
+  /* ---- Music downloaded and played through the service ---- */
+
+  function musicURL(id, ext) {
+    return (
+      SERVICE_URL + 'music/' + id + '.' + ext + '?token=' + encodeURIComponent(defaults.localToken || '')
+    );
+  }
+
+  /* Send a converted track back to the service, which swaps it for the original. */
+  function musicConverted(id, blob, done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', SERVICE_URL + 'music-convert/' + id, true);
+    xhr.timeout = 120000;
+    xhr.setRequestHeader('Authorization', 'Bearer ' + defaults.localToken);
+    xhr.setRequestHeader('Content-Type', 'audio/ogg');
+    xhr.onload = function () {
+      try {
+        var value = JSON.parse(xhr.responseText);
+        if (xhr.status !== 200) throw Error(value.error || 'Conversione non salvata.');
+        done(null, value);
+      } catch (e) {
+        done({ message: e.message });
+      }
+    };
+    xhr.onerror = xhr.ontimeout = function () {
+      done({ message: 'Il servizio locale del TV non risponde.' });
+    };
+    xhr.send(blob);
+  }
+
   /* ---- Other requests: the computer helper and GitHub ---- */
 
   function timeoutForUrl(url) {
@@ -388,6 +418,8 @@
     wol: wake,
     prepareWallpaper: prepareWallpaper,
     wallpaperURL: wallpaperURL,
+    musicURL: musicURL,
+    musicConverted: musicConverted,
     appBridge: appBridge,
     appAction: appAction,
     checkUpdates: checkUpdates,

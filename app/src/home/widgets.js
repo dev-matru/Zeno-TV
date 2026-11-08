@@ -2,8 +2,9 @@
  *
  * Settings are saved under zeno.widgets.v1. The clock can show another time
  * zone and seconds; the timer survives a restart because it stores its end
- * time. Music is a single bundled loop that plays only when asked to, and
- * pauses whenever Zeno goes to the background.
+ * time. Music plays only when asked to and pauses whenever Zeno goes to the
+ * background: four small bundled loops, your own tracks, then whatever the TV
+ * has downloaded (src/home/music.js).
  */
 (function () {
   'use strict';
@@ -30,20 +31,22 @@
     { id: 'Australia/Sydney', name: 'Sydney' }
   ];
 
-  /* Original tracks made by scripts/build/build-demo-audio.py; each one loops. */
-  var PLAYLIST = [
+  /* Original loops made by scripts/build/build-demo-audio.py. */
+  var BUILTIN = [
     { id: 'lounge', title: 'Jazz lounge', note: 'Piano elettrico e contrabbasso' },
     { id: 'piano', title: 'Pianoforte', note: 'Arpeggi lenti con eco' },
     { id: 'pad', title: 'Ambient', note: 'Accordi morbidi che vanno e vengono' },
-    { id: 'rain', title: 'Pioggia', note: 'Pioggia leggera e costante' },
-    { id: 'waves', title: 'Onde del mare', note: 'Risacca lenta' },
     { id: 'noise', title: 'Rumore marrone', note: 'Fruscio profondo per concentrarsi o dormire' }
-  ]
-    .map(function (track) {
-      track.src = 'assets/audio/' + track.id + '.m4a';
-      return track;
-    })
-    .concat(personalTracks());
+  ].map(function (track) {
+    track.src = 'assets/audio/' + track.id + '.m4a';
+    track.loop = true;
+    return track;
+  });
+  var PERSONAL = personalTracks();
+
+  function playlist() {
+    return BUILTIN.concat(PERSONAL, window.ZenoMusic ? ZenoMusic.tracks() : []);
+  }
 
   /* Your own tracks, from .local/personal/music in a personal build. */
   function personalTracks() {
@@ -58,7 +61,13 @@
         );
       })
       .map(function (track) {
-        return { id: track.id, title: track.title, note: track.note || 'La tua musica', src: track.src };
+        return {
+          id: track.id,
+          title: track.title,
+          note: track.note || 'La tua musica',
+          src: track.src,
+          loop: false
+        };
       });
   }
 
@@ -413,28 +422,44 @@
   var audio = null;
   var audioError = '';
   var playRequest = 0; // a pause cancels a play that has not started yet
-  var trackIndex = 0;
+  var trackId = BUILTIN[0].id; // the track survives changes to the playlist
   var pendingSeek = 0; // seconds to seek once the track's length is known
 
+  function trackIndex() {
+    var list = playlist();
+    for (var i = 0; i < list.length; i++) if (list[i].id === trackId) return i;
+    return 0;
+  }
+
+  function current() {
+    return playlist()[trackIndex()];
+  }
+
   function player() {
+    var track = current();
     return {
       playing: !!(audio && !audio.paused),
       error: audioError,
       position: audio ? audio.currentTime : 0,
       duration: audio && isFinite(audio.duration) ? audio.duration : 0,
-      track: trackIndex,
-      tracks: PLAYLIST.length,
-      id: PLAYLIST[trackIndex].id,
-      title: PLAYLIST[trackIndex].title,
-      note: PLAYLIST[trackIndex].note
+      track: trackIndex(),
+      tracks: playlist().length,
+      id: track.id,
+      title: track.title,
+      note: track.note,
+      loop: track.loop
     };
   }
 
   function ensureAudio() {
     if (audio) return;
-    audio = new Audio(PLAYLIST[trackIndex].src);
+    audio = new Audio(current().src);
     audio.preload = 'none';
-    audio.loop = true;
+    audio.loop = current().loop;
+    // A downloaded song moves on to the next track; loops never end.
+    audio.addEventListener('ended', function () {
+      if (changeTrack(1)) playAudio();
+    });
     audio.addEventListener('loadedmetadata', function () {
       if (!pendingSeek) return;
       var delta = pendingSeek;
@@ -513,20 +538,23 @@
   }
 
   function changeTrack(delta) {
-    return selectTrack((trackIndex + delta + PLAYLIST.length) % PLAYLIST.length);
+    var count = playlist().length;
+    return selectTrack((trackIndex() + delta + count) % count);
   }
 
   /* Switch to track `index`, carrying on playing if music was playing. */
   function selectTrack(index) {
-    if (!(index >= 0 && index < PLAYLIST.length)) return false;
-    if (index === trackIndex) return true;
+    var list = playlist();
+    if (!(index >= 0 && index < list.length)) return false;
+    if (list[index].id === trackId && audio && audio.src.indexOf(list[index].src) >= 0) return true;
     var wasPlaying = audio && !audio.paused;
     pauseAudio();
     pendingSeek = 0;
     audioError = '';
-    trackIndex = index;
+    trackId = list[index].id;
     if (audio) {
-      audio.src = PLAYLIST[trackIndex].src;
+      audio.src = list[index].src;
+      audio.loop = list[index].loop;
       audio.load();
     }
     if (wasPlaying) playAudio();
@@ -616,6 +644,14 @@
     loadSaved();
   } catch (ignore) {}
 
+  /* A track removed from the TV: move on to the first one. */
+  document.addEventListener('zeno-music-change', function () {
+    var list = playlist();
+    for (var i = 0; i < list.length; i++) if (list[i].id === trackId) return;
+    selectTrack(0);
+    changed();
+  });
+
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
       pauseAudio();
@@ -651,8 +687,8 @@
     pauseAudio: pauseAudio,
     selectTrack: selectTrack,
     tracks: function () {
-      return PLAYLIST.map(function (track) {
-        return { id: track.id, title: track.title, note: track.note };
+      return playlist().map(function (track) {
+        return { id: track.id, title: track.title, note: track.note, loop: track.loop };
       });
     },
     ring: ring,

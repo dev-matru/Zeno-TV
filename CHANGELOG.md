@@ -2,6 +2,14 @@
 
 Each release is tagged in Git (`v1.0.0`…) and published on the GitHub releases page. A build made from any other commit shows its commit next to the version, in Customize → System information.
 
+## Unreleased
+
+- A music catalogue to download on the TV: ambient music by Scott Buckley, Chris Zabriskie, Lee Rosevere and HoliznaCC0, and field recordings of rain, sea, forests and night from Freesound, many by Félix Blume. All CC0 or CC BY 4.0, credited next to each track.
+- Add tracks from your phone: the TV shows a QR code that opens a page on the home network, where you upload audio files or paste a link to a track or its page. The TV compresses WAV and AIFF files to Ogg Opus by itself.
+- Downloaded songs move on to the next track when they end; loops and nature recordings repeat.
+- The synthesised rain and sea waves are gone, replaced by real recordings in the catalogue. The jazz lounge, piano, ambient and brown noise loops stay.
+- A build without `.local/device-defaults.json` now creates the token its TV service needs, so online wallpapers, wake-on-LAN and music downloads work in every build.
+
 ## 1.0.0
 
 The first public release. Earlier versions were private builds, never published.

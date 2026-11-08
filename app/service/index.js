@@ -1,7 +1,8 @@
 /* Zeno TV network service. Authenticated HTTP bound to loopback only. */
 'use strict';
 var fs = require('fs'),
-  wallpapers = require('./wallpapers');
+  wallpapers = require('./wallpapers'),
+  music = require('./music');
 function log(value) {
   try {
     fs.writeFileSync('/home/owner/share/zeno-tv-network-error.txt', String(value).slice(0, 1000), {
@@ -131,6 +132,11 @@ function dispatch(data, done) {
   if (data.op === 'wallpaper') return wallpapers.prepare(data, null, done);
   if (data.op === 'developer') return done(Error('Il firmware richiede il menu Developer Mode di Samsung.'));
   if (data.op === 'settings') return done(Error('Apri il menu con l’API del launcher.'));
+  if (data.op === 'music-state') return done(null, music.state());
+  if (data.op === 'music-get') return done(null, music.fetch(data.track));
+  if (data.op === 'music-remove') return done(null, music.remove(data.track));
+  if (data.op === 'music-import') return music.openImport(data.ip, done);
+  if (data.op === 'music-import-close') return done(null, music.closeImport());
   if (data.op === 'cache-info') return done(null, wallpapers.info());
   if (data.op === 'cache-clear') return done(null, wallpapers.clear(data.keep || ''));
   if (data.op === 'app-memory') {
@@ -174,7 +180,7 @@ function start() {
       res.writeHead(status, {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        'Access-Control-Allow-Headers': 'Authorization, Content-Type, Range',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         Vary: 'Origin',
         'Cache-Control': 'no-store'
@@ -192,6 +198,16 @@ function start() {
     var route = req.url.split('?')[0],
       match = /[?&]token=([a-f0-9]{64})(?:&|$)/.exec(req.url);
     if (
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      route.indexOf('/music/') === 0 &&
+      match &&
+      config.token &&
+      match[1] === config.token
+    ) {
+      if (!music.serve(route, req, res)) reply(404, { error: 'Brano non trovato.' });
+      return;
+    }
+    if (
       req.method === 'GET' &&
       route.indexOf('/wallpaper/') === 0 &&
       match &&
@@ -205,6 +221,13 @@ function start() {
     }
     if (!authorized(req)) {
       reply(403, { error: 'Servizio locale non autorizzato.' });
+      return;
+    }
+    var converted = /^\/music-convert\/([a-z]{2}-[a-z0-9-]{1,48})$/.exec(route);
+    if (req.method === 'POST' && converted) {
+      music.replace(converted[1], req, function (error, value) {
+        reply(error ? 400 : 200, error ? { error: error.message } : value);
+      });
       return;
     }
     if (req.method === 'GET' && req.url === '/ready') {

@@ -283,7 +283,7 @@ try {
   await page.mouse.click(1900, 1000);
   await pressMedia(10252);
   await page.waitForFunction(() => ZenoWidgets.player().playing && ZenoWidgets.player().duration > 0);
-  check(await page.evaluate(() => ZenoWidgets.player().tracks >= 6), 'Explicit Play/Pause starts the music');
+  check(await page.evaluate(() => ZenoWidgets.player().tracks >= 4), 'Explicit Play/Pause starts the music');
   await media(10252);
   await media(10252, true, true);
   check(await page.evaluate(() => !ZenoWidgets.player().playing), 'Held Play/Pause toggles only once');
@@ -343,11 +343,11 @@ try {
   await settings();
   await act('settings.group.desktopwidgets');
   await act('widget.open.player');
-  await act('widget.track.rain');
+  await act('widget.track.pad');
   await page.waitForFunction(() => ZenoWidgets.player().playing);
   check(
     await page.evaluate(
-      () => ZenoWidgets.player().id === 'rain' && testAudios.some(a => /rain\.m4a$/.test(a.src))
+      () => ZenoWidgets.player().id === 'pad' && testAudios.some(a => /pad\.m4a$/.test(a.src))
     ),
     'Picking a track plays it'
   );

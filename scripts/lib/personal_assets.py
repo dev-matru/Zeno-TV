@@ -22,6 +22,7 @@ and is layered over `app/` at preview or package time. It is never copied into
 
 from pathlib import Path
 import json
+import secrets
 import re
 import subprocess
 import zipfile
@@ -290,12 +291,25 @@ def _apply_identity(app, overlay, ident):
             overlay[name] = identity.personalise(text, ident).encode()
 
 
+def device_defaults(root=ROOT):
+    """Settings only your own package carries. The token that lets the app talk to
+    its service on the TV is created on the first build and then kept."""
+    path = root / '.local/device-defaults.json'
+    personal = json.loads(path.read_text()) if path.is_file() else {}
+    if not re.fullmatch(r'[a-f0-9]{64}', str(personal.get('localToken', ''))):
+        personal['localToken'] = secrets.token_hex(32)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(personal, indent=2) + '\n')
+        path.chmod(0o600)
+    return personal
+
+
 def write_widget_archive(output, root=ROOT, include_private=True, include_device=False):
     """Create an unsigned archive without reading signing or device settings."""
     app = root / 'app'
     overlay = personal_overlay(root, include_private)
-    if include_device and (root / '.local/device-defaults.json').is_file():
-        personal = json.loads((root / '.local/device-defaults.json').read_text())
+    if include_device:
+        personal = device_defaults(root)
         overlay['service/index.js'] = (
             (app / 'service/index.js')
             .read_text()
