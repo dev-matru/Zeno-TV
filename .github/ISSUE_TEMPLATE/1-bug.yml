@@ -19,8 +19,8 @@ body:
     id: version
     attributes:
       label: Zeno version or commit
-      description: Customize → System information, or the commit you built from.
-      placeholder: e.g. 1.0.0 or 5c05fee
+      description: Customize → System information → Zeno TV. Copy it as it is, commit included if there is one.
+      placeholder: e.g. 1.0.0, or 1.0.0 · 5c05fee
     validations:
       required: true
   - type: dropdown

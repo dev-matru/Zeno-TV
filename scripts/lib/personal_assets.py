@@ -23,6 +23,7 @@ and is layered over `app/` at preview or package time. It is never copied into
 from pathlib import Path
 import json
 import re
+import subprocess
 import zipfile
 
 import identity
@@ -77,9 +78,41 @@ def _fonts(root):
     return entries, assets, css
 
 
+def _git(root, *args):
+    try:
+        result = subprocess.run(['git', *args], cwd=root, capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def build_info(root=ROOT):
+    """Version from config.xml, plus the commit when this is not exactly a release.
+
+    A build is a release when HEAD carries the tag v<version> and nothing is
+    changed or untracked outside .local; otherwise the app shows the commit too.
+    """
+    config = (root / 'app/config.xml').read_text()
+    version = re.search(r'<widget[^>]*\sversion="([^"]+)"', config).group(1)
+    commit = _git(root, 'rev-parse', '--short', 'HEAD') or ''
+    tags = (_git(root, 'tag', '--points-at', 'HEAD') or '').split()
+    status = _git(root, 'status', '--porcelain')
+    modified = bool(status)
+    info = {
+        'version': version,
+        'commit': commit,
+        'release': ('v' + version) in tags and not modified,
+        'modified': modified,
+    }
+    return (
+        '/* Which Zeno this is: written from Git at preview or package time. */\nwindow.ZenoBuild = %s;\n'
+        % (json.dumps(info))
+    )
+
+
 def personal_overlay(root=ROOT, include_private=True):
     """Return package-relative paths mapped to bytes or files under .local/personal."""
-    assets = {}
+    assets = {'assets/build-info.js': build_info(root).encode()}
     fonts, css = [], ['/* Personal font overlay: empty in the public source. */']
     catalog = []
     if include_private:

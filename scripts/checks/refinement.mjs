@@ -329,7 +329,13 @@ try {
   await page.evaluate(() => ZenoQA.scene('settings'));
   await act('settings.category.system');
   await act('settings.group.about');
-  await page.waitForFunction(() => document.querySelector('.setting-info-value')?.textContent === 'QA TV');
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('.setting-info-value')].some(e => e.textContent === 'QA TV')
+  );
+  check(
+    'System information starts with the Zeno version',
+    /^\d+\.\d+\.\d+/.test(await page.locator('.setting-info-value').first().textContent())
+  );
   check(
     'System information shows real API values',
     await page

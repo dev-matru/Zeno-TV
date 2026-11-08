@@ -130,6 +130,16 @@ Downloaded wallpapers work differently. The service on the TV fetches them throu
 
 Preferences are stored in the TV's `localStorage`. The main key is `zeno.home.v1`. Home apps are saved by their app id on the TV, so they survive the app list being unavailable for a moment. Widgets, sources, remote keys and language each have their own `zeno.*` key. Older keys from earlier versions are read once and migrated, so updating never resets the Home.
 
+## Releases
+
+The version lives in `app/config.xml` (and `package.json`). Every release is an annotated tag `vX.Y.Z` on main, with its notes in `CHANGELOG.md`:
+
+1. Add a `## X.Y.Z` section at the top of `CHANGELOG.md`, commit it.
+2. `python3 scripts/build/release.py X.Y.Z` sets the version everywhere, commits and tags. It pushes nothing.
+3. `git push origin main vX.Y.Z`. The release workflow publishes the GitHub release with those notes.
+
+Customize → System information shows "Zeno TV 1.0.0" for a build made exactly from a release tag, and "1.0.0 · 5c05fee" for any other commit (plus "con modifiche" if the tree had uncommitted changes), so a bug report always says which code was running.
+
 ## Packaging
 
 `npm run package` builds and signs `dist/ZenoTV.wgt` with the Tizen SDK and certificates in `.local/`. See [TV setup](tv-setup.md).

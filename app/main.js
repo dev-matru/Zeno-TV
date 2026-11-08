@@ -4714,16 +4714,26 @@
       a.sourceShowBadge = p.showBadge;
     });
   }
+  /* "1.0.0" for a release; "1.0.0 · 5c05fee" for any other build, so a report
+     always says exactly which code was running. */
+  function zenoVersion() {
+    var b = window.ZenoBuild || {};
+    if (!b.version) return 'Non disponibile';
+    if (b.release || !b.commit) return b.version;
+    return b.version + ' · ' + b.commit + (b.modified ? ' · con modifiche' : '');
+  }
   function systemInfoItems() {
     var d = systemData || {},
       v = d.device || {},
       items = [
+        { info: true, label: 'Zeno TV', description: zenoVersion() },
         { info: true, label: 'Modello', description: v.model || 'Non disponibile' },
-        { info: true, label: 'Software', description: v.firmware || v.build || 'Non disponibile' },
         {
           info: true,
-          label: 'Sistema operativo',
-          description: v.platform ? 'Tizen ' + v.platform : 'Non disponibile'
+          label: 'Software',
+          description:
+            [v.firmware || v.build, v.platform ? 'Tizen ' + v.platform : ''].filter(Boolean).join(' · ') ||
+            'Non disponibile'
         },
         { info: true, label: 'Pannello', description: v.panel || 'Non disponibile' },
         { info: true, label: 'Risoluzione interfaccia', description: v.display || '1920 × 1080' },

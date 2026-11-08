@@ -1,0 +1,33 @@
+name: Release
+
+# Publishes the GitHub release for a version tag, with its notes from CHANGELOG.md.
+# The tag itself is made by scripts/build/release.py and pushed by hand.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Check that the tag matches the app version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          grep -q "version=\"$version\"" app/config.xml || { echo "app/config.xml is not at $version"; exit 1; }
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python3 scripts/build/release.py --notes "$version" > notes.md
+          test -s notes.md || { echo "No CHANGELOG.md section for $version"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" --title "Zeno TV $version" --notes-file notes.md --verify-tag
