@@ -39,7 +39,7 @@
     { id: 'noise', title: 'Rumore marrone', note: 'Fruscio profondo per concentrarsi o dormire' }
   ].map(function (track) {
     track.src = 'assets/audio/' + track.id + '.m4a';
-    track.loop = true;
+    track.kind = 'builtin';
     return track;
   });
   var PERSONAL = personalTracks();
@@ -66,7 +66,7 @@
           title: track.title,
           note: track.note || 'La tua musica',
           src: track.src,
-          loop: false
+          kind: 'song'
         };
       });
   }
@@ -84,7 +84,10 @@
     timer: 0, // end time in ms, 0 when no timer runs
     timerLabel: '',
     timerNote: '',
-    timers: [] // saved presets: { id, name, note, seconds }
+    timers: [], // saved presets: { id, name, note, seconds }
+    playMode: 'one', // 'one' repeats the track, 'order' and 'shuffle' go through the playlist
+    rotation: [], // the playlist: track ids, empty for every track
+    track: '' // the last track picked
   };
 
   var revision = 0;
@@ -152,6 +155,18 @@
         );
       case 'weatherMode':
         return ['minimal', 'detailed'].indexOf(value) >= 0;
+      case 'playMode':
+        return ['one', 'order', 'shuffle'].indexOf(value) >= 0;
+      case 'rotation':
+        return (
+          Array.isArray(value) &&
+          value.length <= 500 &&
+          value.every(function (id) {
+            return typeof id === 'string' && /^[a-z0-9-]{1,60}$/.test(id);
+          })
+        );
+      case 'track':
+        return typeof value === 'string' && /^[a-z0-9-]{0,60}$/.test(value);
       case 'zone':
         return isZone(value);
       case 'timer':
@@ -417,13 +432,29 @@
     });
   }
 
-  /* ---- Music ---- */
+  /* ---- Music ----
+     Three ways to play: repeat the current track (the default), the playlist in
+     order, or shuffled. The playlist is the tracks you picked, or all of them.
+     Two audio elements take turns, so a track fades into the next one, or into
+     its own beginning when it repeats: field recordings never restart with a
+     jump. The built-in loops are made to repeat seamlessly and use the native
+     loop instead; in the playlist they stay on for a few minutes. */
 
-  var audio = null;
+  var MODES = ['one', 'order', 'shuffle'];
+  var FADE_SECONDS = { song: 3, ambient: 7, manual: 1.2 };
+  var LOOP_MIN_SECONDS = 180; // a short built-in loop plays at least this long in a playlist
+  var MAX_HISTORY = 50;
+
+  var audio = null; // the element you hear
+  var fading = null; // { from, to, start, length, timer }
   var audioError = '';
   var playRequest = 0; // a pause cancels a play that has not started yet
   var trackId = BUILTIN[0].id; // the track survives changes to the playlist
   var pendingSeek = 0; // seconds to seek once the track's length is known
+  var looped = 0; // seconds already played by the current track in earlier loops
+  var lastTime = 0;
+  var history = [];
+  var bag = []; // shuffle: tracks not played yet in this round
 
   function trackIndex() {
     var list = playlist();
@@ -433,6 +464,31 @@
 
   function current() {
     return playlist()[trackIndex()];
+  }
+
+  function byId(id) {
+    return playlist().filter(function (t) {
+      return t.id === id;
+    })[0];
+  }
+
+  /* The tracks in rotation: the ones you picked that still exist, else all. */
+  function rotation() {
+    var all = playlist(),
+      picked = all.filter(function (t) {
+        return settings.rotation.indexOf(t.id) >= 0;
+      });
+    return picked.length ? picked : all;
+  }
+
+  function nativeLoop(track) {
+    return track.kind === 'builtin';
+  }
+
+  function fadeLength(track, duration) {
+    var seconds =
+      track.kind === 'nature' || track.kind === 'builtin' ? FADE_SECONDS.ambient : FADE_SECONDS.song;
+    return isFinite(duration) && duration > 0 ? Math.min(seconds, duration / 4) : seconds;
   }
 
   function player() {
@@ -447,31 +503,172 @@
       id: track.id,
       title: track.title,
       note: track.note,
-      loop: track.loop
+      loop: settings.playMode === 'one',
+      mode: settings.playMode,
+      rotation: rotation().length,
+      fading: !!fading
     };
   }
 
-  function ensureAudio() {
-    if (audio) return;
-    audio = new Audio(current().src);
-    audio.preload = 'none';
-    audio.loop = current().loop;
-    // A downloaded song moves on to the next track; loops never end.
-    audio.addEventListener('ended', function () {
-      if (changeTrack(1)) playAudio();
+  function makeAudio(track) {
+    var a = new Audio(track.src);
+    a.preload = 'none';
+    a.loop = nativeLoop(track) && settings.playMode === 'one';
+    a.addEventListener('ended', function () {
+      if (a !== audio) return;
+      // Normally the fade starts before the end; this covers very short files.
+      advance(false);
     });
-    audio.addEventListener('loadedmetadata', function () {
-      if (!pendingSeek) return;
+    a.addEventListener('timeupdate', function () {
+      if (a === audio) watch();
+    });
+    a.addEventListener('loadedmetadata', function () {
+      if (a !== audio || !pendingSeek) return;
       var delta = pendingSeek;
       pendingSeek = 0;
       seekAudio(delta);
     });
-    audio.addEventListener('pause', changed);
-    audio.addEventListener('playing', changed);
-    audio.addEventListener('error', function () {
+    a.addEventListener('pause', function () {
+      if (a === audio) changed();
+    });
+    a.addEventListener('playing', function () {
+      if (a === audio) changed();
+    });
+    a.addEventListener('error', function () {
+      if (a !== audio) return;
       audioError = 'Audio non disponibile';
       changed();
     });
+    return a;
+  }
+
+  function ensureAudio() {
+    if (!audio) audio = makeAudio(current());
+  }
+
+  /* Called a few times a second while playing: count loops, start the fade in time. */
+  function watch() {
+    if (fading || audio.paused) return;
+    var track = current(),
+      d = audio.duration,
+      t = audio.currentTime;
+    if (!isFinite(d) || d <= 0) return;
+    if (t + 1 < lastTime) looped += lastTime; // the native loop went back to the start
+    lastTime = t;
+    if (nativeLoop(track)) {
+      // In a playlist, a short loop repeats until it has played a few minutes.
+      var stay = settings.playMode === 'one' || looped + d < LOOP_MIN_SECONDS;
+      if (audio.loop !== stay) audio.loop = stay;
+      if (stay) return;
+    }
+    if (d - t <= fadeLength(track, d)) advance(true);
+  }
+
+  function shuffled(list) {
+    var out = list.slice();
+    for (var i = out.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)),
+        x = out[i];
+      out[i] = out[j];
+      out[j] = x;
+    }
+    return out;
+  }
+
+  /* The track after the current one in this mode. */
+  function nextId(step) {
+    var list = rotation(),
+      ids = list.map(function (t) {
+        return t.id;
+      });
+    if (settings.playMode === 'shuffle' && ids.length > 1) {
+      bag = bag.filter(function (id) {
+        return ids.indexOf(id) >= 0 && id !== trackId;
+      });
+      if (!bag.length)
+        bag = shuffled(ids).filter(function (id) {
+          return id !== trackId;
+        });
+      return bag.shift();
+    }
+    var at = ids.indexOf(trackId);
+    if (at < 0) return ids[0];
+    return ids[(at + (step || 1) + ids.length) % ids.length];
+  }
+
+  /* At the end of a track: the same one again in "repeat", else the next one. */
+  function advance(fade) {
+    var id = settings.playMode === 'one' ? trackId : nextId(1);
+    if (id !== trackId) remember();
+    go(id, fade ? fadeLength(current(), audio && audio.duration) : 0, true);
+  }
+
+  function remember() {
+    history.push(trackId);
+    if (history.length > MAX_HISTORY) history.shift();
+  }
+
+  /* Switch to track `id`. While music plays, the two tracks cross-fade over
+     `seconds` (0: a clean cut); otherwise the new track simply waits. */
+  function go(id, seconds, autoplay) {
+    var track = byId(id);
+    if (!track) return false;
+    var wasPlaying = (audio && !audio.paused) || autoplay;
+    endFade();
+    pendingSeek = 0;
+    audioError = '';
+    looped = 0;
+    lastTime = 0;
+    var changedTrack = id !== trackId;
+    trackId = id;
+    if (changedTrack && settings.track !== id) update({ track: id });
+    var outgoing = audio;
+    if (!wasPlaying || !outgoing || !seconds) {
+      // No fade: the same element simply changes track, and an idle player stays idle.
+      if (outgoing) {
+        outgoing.pause();
+        outgoing.src = track.src;
+        outgoing.loop = nativeLoop(track) && settings.playMode === 'one';
+        outgoing.volume = 1;
+        try {
+          outgoing.load();
+        } catch (ignore) {}
+      }
+      if (wasPlaying) playAudio();
+      else changed();
+      return true;
+    }
+    audio = makeAudio(track);
+    audio.volume = 0;
+    fading = { from: outgoing, to: audio, start: Date.now(), length: seconds * 1000, timer: null };
+    fading.timer = setInterval(stepFade, 50);
+    playAudio(function (error) {
+      if (error) endFade();
+    });
+    changed();
+    return true;
+  }
+
+  /* Equal-power fade: the sum stays as loud as either track alone. */
+  function stepFade() {
+    if (!fading) return;
+    var k = Math.min(1, (Date.now() - fading.start) / fading.length);
+    try {
+      fading.from.volume = Math.cos((k * Math.PI) / 2);
+      fading.to.volume = Math.sin((k * Math.PI) / 2);
+    } catch (ignore) {}
+    if (k >= 1) endFade();
+  }
+
+  function endFade() {
+    if (!fading) return;
+    clearInterval(fading.timer);
+    try {
+      fading.from.pause();
+      fading.from.removeAttribute('src');
+      fading.to.volume = 1;
+    } catch (ignore) {}
+    fading = null;
   }
 
   function playAudio(done) {
@@ -509,6 +706,7 @@
 
   function pauseAudio() {
     playRequest++;
+    endFade();
     if (audio) audio.pause();
   }
 
@@ -525,41 +723,77 @@
   /* Move by delta seconds. Before the track has loaded, the seek waits for it. */
   function seekAudio(delta) {
     if (!audio || !isFinite(delta)) return false;
+    endFade();
     if (!isFinite(audio.duration) || audio.duration <= 0) {
       pendingSeek = Math.max(-DAY_SECONDS, Math.min(DAY_SECONDS, pendingSeek + delta));
       return true;
     }
     try {
-      audio.currentTime = Math.max(0, Math.min(audio.duration - 0.05, audio.currentTime + delta));
+      var limit = audio.duration - (audio.loop ? 0.05 : fadeLength(current(), audio.duration) + 0.5);
+      audio.currentTime = Math.max(0, Math.min(Math.max(0, limit), audio.currentTime + delta));
+      lastTime = audio.currentTime;
       return true;
     } catch (e) {
       return false;
     }
   }
 
+  /* Next and previous: shuffle remembers what it played, so "previous" goes back. */
   function changeTrack(delta) {
-    var count = playlist().length;
-    return selectTrack((trackIndex() + delta + count) % count);
+    if (!playlist().length) return false;
+    var id;
+    if (delta < 0 && settings.playMode === 'shuffle' && history.length) id = history.pop();
+    else {
+      id = nextId(delta);
+      if (delta > 0) remember();
+    }
+    return go(id, FADE_SECONDS.manual, false);
   }
 
-  /* Switch to track `index`, carrying on playing if music was playing. */
+  /* Switch to track `index` of tracks(), carrying on playing if music was playing. */
   function selectTrack(index) {
     var list = playlist();
     if (!(index >= 0 && index < list.length)) return false;
-    if (list[index].id === trackId && audio && audio.src.indexOf(list[index].src) >= 0) return true;
-    var wasPlaying = audio && !audio.paused;
-    pauseAudio();
-    pendingSeek = 0;
-    audioError = '';
-    trackId = list[index].id;
-    if (audio) {
-      audio.src = list[index].src;
-      audio.loop = list[index].loop;
-      audio.load();
-    }
-    if (wasPlaying) playAudio();
-    else changed();
+    if (list[index].id === trackId && audio) return true;
+    if (list[index].id !== trackId) remember();
+    return go(list[index].id, FADE_SECONDS.manual, false);
+  }
+
+  function setMode(mode) {
+    if (MODES.indexOf(mode) < 0) return false;
+    bag = [];
+    if (!update({ playMode: mode })) return false;
+    if (audio) audio.loop = nativeLoop(current()) && mode === 'one';
+    looped = 0;
     return true;
+  }
+
+  /* Add or remove a track from the playlist; an empty playlist means every track. */
+  function toggleRotation(id) {
+    if (!byId(id)) return false;
+    var picked = rotation()
+      .map(function (t) {
+        return t.id;
+      })
+      .filter(function (x) {
+        return settings.rotation.length || x !== id; // from "all": keep everything but this one
+      });
+    if (settings.rotation.length) {
+      var at = picked.indexOf(id);
+      if (at >= 0) picked.splice(at, 1);
+      else picked.push(id);
+    }
+    if (!picked.length && settings.rotation.length) return false; // keep at least one
+    return setRotation(picked.length === playlist().length ? [] : picked);
+  }
+
+  function setRotation(ids) {
+    bag = [];
+    return update({ rotation: ids });
+  }
+
+  function inRotation(id) {
+    return !settings.rotation.length || settings.rotation.indexOf(id) >= 0;
   }
 
   function stopAudio() {
@@ -643,6 +877,7 @@
   try {
     loadSaved();
   } catch (ignore) {}
+  if (settings.track && byId(settings.track)) trackId = settings.track;
 
   /* A track removed from the TV: move on to the first one. */
   document.addEventListener('zeno-music-change', function () {
@@ -686,9 +921,18 @@
     toggleAudio: toggleAudio,
     pauseAudio: pauseAudio,
     selectTrack: selectTrack,
+    setMode: setMode,
+    toggleRotation: toggleRotation,
+    setRotation: setRotation,
     tracks: function () {
       return playlist().map(function (track) {
-        return { id: track.id, title: track.title, note: track.note, loop: track.loop };
+        return {
+          id: track.id,
+          title: track.title,
+          note: track.note,
+          kind: track.kind,
+          inRotation: inRotation(track.id)
+        };
       });
     },
     ring: ring,

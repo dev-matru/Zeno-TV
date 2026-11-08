@@ -1754,6 +1754,7 @@
     worldclock: 'Fusi orari',
     handcolor: 'Colore dei secondi',
     player: 'Musica',
+    playerlist: 'Playlist',
     musiccatalog: 'Catalogo musicale',
     musicimport: 'Aggiungi da un link',
     musicfiles: 'Brani scaricati',
@@ -1838,8 +1839,15 @@
   ];
   function isMusicPage(t) {
     return (
-      t.id === 'appearance' && ['player', 'musiccatalog', 'musicimport', 'musicfiles'].indexOf(t.group) >= 0
+      t.id === 'appearance' &&
+      ['player', 'playerlist', 'musiccatalog', 'musicimport', 'musicfiles'].indexOf(t.group) >= 0
     );
+  }
+  function playlistText() {
+    var all = ZenoWidgets.tracks().length,
+      n = ZenoWidgets.player().rotation;
+    var text = n === all ? 'Tutti i brani' : n + (n === 1 ? ' brano su ' : ' brani su ') + all;
+    return ZenoWidgets.player().mode === 'one' ? text + ' · per Precedente e Successivo' : text;
   }
   function musicLinks() {
     var saved = ZenoMusic.tracks().length,
@@ -2331,6 +2339,38 @@
     if (t.group === 'musiccatalog') return musicCatalogSections();
     if (t.group === 'musicimport') return musicImportSections();
     if (t.group === 'musicfiles') return musicFileSections();
+    if (t.group === 'playerlist') {
+      var everything = ZenoWidgets.tracks().every(function (track) {
+        return track.inRotation;
+      });
+      return [
+        {
+          id: 'playlistAll',
+          title: '',
+          items: [
+            {
+              action: 'widget.rotation.all',
+              label: 'Tutti i brani',
+              description: 'In ordine o in modo casuale, il player passa da un brano all’altro',
+              selected: everything
+            }
+          ]
+        },
+        {
+          id: 'playlistTracks',
+          title: 'Brani in rotazione',
+          items: ZenoWidgets.tracks().map(function (track) {
+            return {
+              action: 'widget.rotation.' + track.id,
+              label: track.title,
+              description: track.note,
+              selected: !everything && track.inRotation
+            };
+          }),
+          reason: 'Scegli i brani che vuoi: gli altri restano fuori dalla rotazione.'
+        }
+      ];
+    }
     if (t.group === 'player')
       return [
         {
@@ -2342,6 +2382,35 @@
               label:
                 (ZenoWidgets.player().playing ? 'Pausa' : 'Riproduci') + ' · ' + ZenoWidgets.player().title,
               description: ZenoWidgets.player().note + (ZenoWidgets.player().loop ? ' · in loop' : '')
+            }
+          ]
+        },
+        {
+          id: 'playerMode',
+          title: 'Riproduzione',
+          horizontal: true,
+          items: [
+            ['one', 'Ripeti brano'],
+            ['order', 'In ordine'],
+            ['shuffle', 'Casuale']
+          ].map(function (m) {
+            return {
+              action: 'widget.mode.' + m[0],
+              label: m[1],
+              selected: ZenoWidgets.player().mode === m[0],
+              option: true
+            };
+          }),
+          reason: 'I brani sfumano l’uno nell’altro, e anche quando ricominciano.'
+        },
+        {
+          id: 'playerPlaylist',
+          title: '',
+          items: [
+            {
+              action: 'widget.open.playerlist',
+              label: 'Playlist',
+              description: playlistText()
             }
           ]
         },
@@ -3584,7 +3653,12 @@
         message('Preferenze', 'Impossibile salvare. Riprova.');
     } else if (item.action.indexOf('widget.media.') === 0) ZenoWidgets.media(item.action.slice(13));
     else if (item.action.indexOf('music.') === 0) musicAction(item.action);
-    else if (item.action.indexOf('widget.track.') === 0) {
+    else if (item.action.indexOf('widget.mode.') === 0) ZenoWidgets.setMode(item.action.slice(12));
+    else if (item.action === 'widget.rotation.all') ZenoWidgets.setRotation([]);
+    else if (item.action.indexOf('widget.rotation.') === 0) {
+      if (!ZenoWidgets.toggleRotation(item.action.slice(16)))
+        message('Playlist', 'Lascia almeno un brano nella playlist.');
+    } else if (item.action.indexOf('widget.track.') === 0) {
       var trackIds = ZenoWidgets.tracks().map(function (track) {
         return track.id;
       });

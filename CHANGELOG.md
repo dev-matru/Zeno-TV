@@ -6,7 +6,7 @@ Each release is tagged in Git (`v1.0.0`…) and published on the GitHub releases
 
 - A music catalogue to download on the TV: ambient music by Scott Buckley, Chris Zabriskie, Lee Rosevere and HoliznaCC0, and field recordings of rain, sea, forests and night from Freesound, many by Félix Blume. All CC0 or CC BY 4.0, credited next to each track.
 - Add tracks from your phone: the TV shows a QR code that opens a page on the home network, where you upload audio files or paste a link to a track or its page. The TV compresses WAV and AIFF files to Ogg Opus by itself.
-- Downloaded songs move on to the next track when they end; loops and nature recordings repeat.
+- The player repeats the current track by default, or plays a playlist in order or shuffled. The playlist is every track, or the ones you pick in Music → Playlist. Tracks fade into one another, and a recording that repeats fades into its own beginning, so you never hear it restart. Mode, playlist and last track are kept.
 - The synthesised rain and sea waves are gone, replaced by real recordings in the catalogue. The jazz lounge, piano, ambient and brown noise loops stay.
 - A build without `.local/device-defaults.json` now creates the token its TV service needs, so online wallpapers, wake-on-LAN and music downloads work in every build.
 

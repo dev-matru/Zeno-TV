@@ -16,7 +16,7 @@
     "check:header": "node scripts/checks/header.mjs",
     "check:palette": "node scripts/checks/palette.mjs",
     "check:desktop": "node scripts/checks/desktop.mjs",
-    "check:media": "node scripts/checks/media-timers.mjs",
+    "check:media": "node scripts/checks/media-timers.mjs && node scripts/checks/player.mjs",
     "check:world": "node scripts/checks/desktop-world.mjs",
     "check:alignment": "node scripts/checks/compact-alignment.mjs",
     "check:cache": "node scripts/checks/wallpaper-cache.mjs",
