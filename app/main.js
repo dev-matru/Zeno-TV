@@ -2237,7 +2237,7 @@
       return [
         {
           id: 'about',
-          title: 'Zeno TV · 1.0.0',
+          title: 'Zeno TV · ' + ((window.ZenoBuild && ZenoBuild.version) || ''),
           items: [{ action: 'system.refresh', label: 'Aggiorna informazioni' }].concat(systemInfoItems())
         }
       ];
