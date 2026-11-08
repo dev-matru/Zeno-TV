@@ -19,9 +19,11 @@ So I wrote Zeno. It runs as an app on the TV and you use it as your home screen.
 
 ## What it does
 
-- **Shows only your apps.** You pick which ones and in what order. Everything else stays in an "All apps" page, out of the way.
+- **Shows only your apps.** Zeno lists whatever is installed on the TV, with each app's own name and icon. On the first start it puts them on the Home; then you pick which ones stay and in what order. Everything else waits in an "All apps" page, out of the way.
 - **Three layouts.** A grid of cards you can place where you like, a dock along the bottom, or a plain list.
-- **A few small widgets.** Clock (with other time zones and a timer), weather, what's playing, and your HDMI inputs.
+- **Cards that match the apps.** In the coloured card style, each card takes the main colour of its app's icon.
+- **A few small widgets.** Clock (with other time zones and a timer that keeps ringing until you press a key), weather, music and your HDMI inputs.
+- **Some quiet music.** Six tracks made for Zeno: jazz lounge, piano, ambient, rain, sea waves and brown noise. You can add your own.
 - **HDMI devices as tiles.** Give them a name and an icon. It can also wake a PC over the network before switching to its input.
 - **Photos as the background.** Fourteen are included. The text and the glass behind the cards adjust their colour to each photo, so they stay readable.
 - **Made for the remote.** Arrows, OK and Back are all you need. Hold OK on something to see more options.
@@ -60,7 +62,7 @@ npm ci
 npm run dev
 ```
 
-Then open [localhost:4795/home](http://localhost:4795/home/). Use the arrow keys, Enter and Escape as if they were the remote. Everything works in the browser except actually opening apps, which needs the TV.
+Then open [localhost:4795/home](http://localhost:4795/home/). Use the arrow keys, Enter and Escape as if they were the remote. Everything works in the browser except what needs the TV: the list of installed apps, opening them and switching inputs. In the browser the Home starts with just the TV and PC tiles.
 
 ## Install it on the TV
 
@@ -76,10 +78,10 @@ In short:
 
 Every step is explained in [docs/tv-setup.md](docs/tv-setup.md).
 
-## Your own fonts, logos and photos
+## Your own fonts, logos, photos and music
 
-If you have fonts, app logos or photos that you can't share publicly, put them in a private folder that Git ignores. They get added only to your build, never to the repository. How it works: [docs/development.md](docs/development.md#personal-assets).
+If you have fonts, app logos, photos or music that you can't share publicly, put them in a private folder that Git ignores. They get added only to your build, never to the repository. For music, drop your audio files in `.local/personal/music/` and they show up in the music widget after the built-in tracks. How it works: [docs/development.md](docs/development.md#personal-assets).
 
 ## Credits
 
-Photos from Unsplash, fonts under the Open Font License. The full list is in [docs/credits.md](docs/credits.md). Zeno TV is released under the [MIT License](LICENSE).
+Photos from Unsplash, fonts under the Open Font License, music and sounds made for Zeno. The full list is in [docs/credits.md](docs/credits.md). Zeno TV is released under the [MIT License](LICENSE).

@@ -19,11 +19,11 @@ The preview serves `app/`, the same files that go into the TV package. Use the a
 app/                the TV app (HTML, CSS, ES5 JavaScript)
   main.js           screens, focus and settings: wires the modules together
   src/core/         shared helpers, remote input, focus, translations, remote shortcuts
-  src/state/        saved preferences, built-in apps
+  src/state/        saved preferences, the TV and PC tiles, personal app styles
   src/home/         Grid layout maths, widgets, weather and clock
   src/sources/      HDMI inputs and their icons
   src/system/       talking to Tizen, the network service, system information
-  src/look/         glass materials, card colours
+  src/look/         glass materials, card colours, colours measured from app icons
   src/type/, src/ui/  typefaces, icons and the logo
   styles/           one stylesheet per area, loaded in order
   service/          background service on the TV (local network, wallpaper cache)
@@ -36,7 +36,7 @@ scripts/
   tv/               install, launch and the optional native Home helper
   lib/              shared helpers (app identity, TV checks, SDB transport)
 docs/               this file, TV setup, credits
-scripts/dev/demo/   made-up apps and icons that stand in for a TV in screenshots
+scripts/dev/demo/   made-up apps that stand in for a TV in the checks
 ```
 
 The TV runs an older web engine, so code in `app/` stays ES5: `var`, `function`, no arrow functions, no modules. Each file in `src/` is a function that adds one object to `window` (`ZenoSources`, `ZenoWidgets`…) or to `window.Zeno`. Tools in `scripts/` can use modern JavaScript and Python.
@@ -68,6 +68,9 @@ Some things you may want on your own TV can't be shared: commercial fonts, servi
   identity.json              your app ids on the TV (see TV setup)
   storage.json               old saved-data names to carry over after a rename
   apps.json                  your own logo or colour for some apps (see below)
+  music/<files>              your own tracks for the music widget (see below)
+  music.json                 optional order, titles and notes for those tracks
+  screenshot-apps.json       apps to show in the README screenshots (see below)
   overlay/<path>             any file, used as if it were app/<path>
 ```
 
@@ -89,6 +92,25 @@ Zeno lists whatever the TV reports as installed: each app keeps its own name and
 
 The key is the app id on the TV (`scripts/tv/native-home/run.py inspect` lists them), `logo` names an SVG in `overlay/assets/icons/`, `color` is "r,g,b". After adding logos, run `node scripts/build/build-icon-metrics.mjs` to measure them and copy the result to `overlay/assets/icons/metrics.js`.
 
+### Music
+
+Put audio files (`.m4a`, `.mp3`, `.aac` or `.wav`) in `.local/personal/music/`. They are added to the package and appear in the music widget after the built-in tracks, titled after their file names. To choose the order, the titles or a short note, list them in `music.json`; only the files listed there are used:
+
+```json
+[
+  {"file": "evening.m4a", "title": "Evening", "note": "Recorded at home"},
+  {"file": "rain-on-roof.mp3", "title": "Rain on the roof"}
+]
+```
+
+Every track loops until you pause it or switch track. Keep an eye on the package size: the whole app has to be copied to the TV at every update.
+
+The built-in tracks and the timer alarm are generated, not recorded: `python3 scripts/build/build-demo-audio.py` (or `... rain alarm` for just some) writes them to `app/assets/audio/`. The encoding uses macOS `afconvert`.
+
+### Screenshots
+
+`node scripts/build/readme-images.mjs` renders `docs/images/` with a pretend TV. Without other files it lists the made-up apps in `scripts/dev/demo/apps.json`, shown with their initials. With `.local/personal/screenshot-apps.json` (`[{"id": "...", "name": "..."}]`, in the order you want them on the Home) it uses those apps and your personal build, logos and colours included.
+
 ## Wallpapers and glass
 
 The glass effect is not live blur: the TV is too slow for that. Every wallpaper ships with pre-rendered versions (blurred, frosted, clear, soft), and cards show the matching crop of those images. Changing focus only moves and fades things.
@@ -106,7 +128,7 @@ Downloaded wallpapers work differently. The service on the TV fetches them throu
 
 ## Preferences
 
-Preferences are stored in the TV's `localStorage`. The main key is `zeno.home.v1`. Widgets, sources, remote keys and language each have their own `zeno.*` key. Older keys from earlier versions are read once and migrated, so updating never resets the Home.
+Preferences are stored in the TV's `localStorage`. The main key is `zeno.home.v1`. Home apps are saved by their app id on the TV, so they survive the app list being unavailable for a moment. Widgets, sources, remote keys and language each have their own `zeno.*` key. Older keys from earlier versions are read once and migrated, so updating never resets the Home.
 
 ## Packaging
 

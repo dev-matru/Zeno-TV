@@ -14,6 +14,9 @@ and is layered over `app/` at preview or package time. It is never copied into
     storage.json             older localStorage keys to carry over (see personal_storage_script)
     identity.json            your app ids on the TV (see scripts/lib/identity.py)
     apps.json                logo and card colour per app id (see personal_app_styles)
+    music/<file>             your own tracks (.m4a, .mp3, .aac, .wav), added to the
+                             music widget after the built-in ones (see personal_music)
+    music.json               optional order and titles: [{"file", "title", "note"}]
     overlay/<path>           any file, served or packaged as app/<path>
 """
 
@@ -28,6 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PERSONAL = ROOT / '.local' / 'personal'
 PUBLIC_FONT_IDS = ['geist', 'newsreader']
 ONLINE_CATALOG = 'service/online-wallpapers.json'
+MUSIC_TYPES = {'.m4a', '.mp3', '.aac', '.wav'}
 
 
 def is_runtime_source(name):
@@ -106,6 +110,10 @@ def personal_overlay(root=ROOT, include_private=True):
         personal_js += personal_storage_script(json.loads(storage.read_text()))
     if include_private:
         personal_js += personal_app_styles(root)
+        tracks, music_files = personal_music(root)
+        assets.update(music_files)
+        if tracks:
+            personal_js += 'window.ZenoPersonalMusic = ' + json.dumps(tracks, ensure_ascii=False) + ';\n'
     assets['assets/personal-catalog.js'] = personal_js.encode()
     return assets
 
@@ -194,6 +202,46 @@ def personal_app_styles(root):
     if not styles.is_file():
         return ''
     return 'window.ZenoAppStyles = ' + json.dumps(json.loads(styles.read_text())) + ';\n'
+
+
+def personal_music(root):
+    """Tracks in music/, as (playlist entries, {package path: file}).
+
+    Without music.json every audio file is listed by name, its title taken from
+    the file name. With it, only the files it names, in its order and with its
+    titles and notes. Files are packaged as assets/music/track-N.<ext>, so odd
+    characters in a file name never reach a URL.
+    """
+    folder = root / '.local/personal/music'
+    if not folder.is_dir():
+        return [], {}
+    found = {
+        p.name: p
+        for p in sorted(folder.iterdir(), key=lambda p: p.name.lower())
+        if p.is_file() and not p.is_symlink() and p.suffix.lower() in MUSIC_TYPES and _inside(p, folder)
+    }
+    listing = root / '.local/personal/music.json'
+    if listing.is_file():
+        wanted = [
+            e for e in json.loads(listing.read_text()) if isinstance(e, dict) and e.get('file') in found
+        ]
+    else:
+        wanted = [{'file': name} for name in found]
+    tracks, files = [], {}
+    for n, entry in enumerate(wanted, 1):
+        source = found[entry['file']]
+        path = 'assets/music/track-%d%s' % (n, source.suffix.lower())
+        title = entry.get('title') or re.sub(r'[_-]+', ' ', source.stem).strip() or 'Brano %d' % n
+        tracks.append(
+            {
+                'id': 'personal-%d' % n,
+                'title': str(title)[:80],
+                'note': str(entry.get('note') or '')[:120],
+                'src': path,
+            }
+        )
+        files[path] = source
+    return tracks, files
 
 
 def _apply_identity(app, overlay, ident):

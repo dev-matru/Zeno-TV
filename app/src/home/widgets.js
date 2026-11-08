@@ -38,10 +38,29 @@
     { id: 'rain', title: 'Pioggia', note: 'Pioggia leggera e costante' },
     { id: 'waves', title: 'Onde del mare', note: 'Risacca lenta' },
     { id: 'noise', title: 'Rumore marrone', note: 'Fruscio profondo per concentrarsi o dormire' }
-  ].map(function (track) {
-    track.src = 'assets/audio/' + track.id + '.m4a';
-    return track;
-  });
+  ]
+    .map(function (track) {
+      track.src = 'assets/audio/' + track.id + '.m4a';
+      return track;
+    })
+    .concat(personalTracks());
+
+  /* Your own tracks, from .local/personal/music in a personal build. */
+  function personalTracks() {
+    var list = Array.isArray(window.ZenoPersonalMusic) ? window.ZenoPersonalMusic : [];
+    return list
+      .filter(function (track) {
+        return (
+          track &&
+          typeof track.id === 'string' &&
+          typeof track.title === 'string' &&
+          /^assets\/music\/[\w.-]+$/.test(track.src)
+        );
+      })
+      .map(function (track) {
+        return { id: track.id, title: track.title, note: track.note || 'La tua musica', src: track.src };
+      });
+  }
 
   var ALARM_SRC = 'assets/audio/alarm.wav';
   var ALARM_LIMIT_MS = 10 * 60 * 1000; // a forgotten alarm stops by itself

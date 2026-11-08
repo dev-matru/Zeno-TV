@@ -283,7 +283,7 @@ try {
   await page.mouse.click(1900, 1000);
   await pressMedia(10252);
   await page.waitForFunction(() => ZenoWidgets.player().playing && ZenoWidgets.player().duration > 0);
-  check(await page.evaluate(() => ZenoWidgets.player().tracks === 6), 'Explicit Play/Pause starts the music');
+  check(await page.evaluate(() => ZenoWidgets.player().tracks >= 6), 'Explicit Play/Pause starts the music');
   await media(10252);
   await media(10252, true, true);
   check(await page.evaluate(() => !ZenoWidgets.player().playing), 'Held Play/Pause toggles only once');

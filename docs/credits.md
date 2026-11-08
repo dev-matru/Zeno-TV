@@ -29,6 +29,8 @@ The fourteen bundled wallpapers come from [Unsplash](https://unsplash.com) and a
 
 The music tracks (jazz lounge, piano, ambient, rain, sea waves, brown noise) and the timer alarm are synthesised from scratch by `scripts/build/build-demo-audio.py`: no recordings, free to share.
 
-## App names
+## Apps and logos
 
-Zeno shows the names and icons that the TV itself reports for installed apps. Those names and icons belong to their owners; no service logo is distributed with this project. The apps in the screenshots are made up; their icons (`scripts/dev/demo/icons/`) were drawn for this project.
+Zeno shows the names and icons that the TV itself reports for installed apps. Those names, icons and logos belong to their owners, and none of them is distributed with this project.
+
+The screenshots in `docs/images/` show Zeno as I use it, on a TV with those apps installed and with logos from my own private folder. They are pictures of the launcher, not assets of the project: a clone of this repository contains no service logo. The checks use made-up app names (`scripts/dev/demo/apps.json`).
