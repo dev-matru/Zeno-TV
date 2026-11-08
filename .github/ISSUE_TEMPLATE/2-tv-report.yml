@@ -1,0 +1,57 @@
+name: It runs on my TV
+description: Tell me how Zeno works on your Samsung TV, even if everything is fine.
+labels: [tv report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        I can only test on one TV, so every report helps, good or bad.
+  - type: input
+    id: tv
+    attributes:
+      label: TV model and year
+      placeholder: e.g. QE55Q80C, 2023
+    validations:
+      required: true
+  - type: input
+    id: tizen
+    attributes:
+      label: Tizen version
+      description: Customize → System information shows it.
+      placeholder: e.g. 7.0
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Zeno version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: How does it go?
+      options:
+        - Everything works
+        - It works, with some problems
+        - It installs but doesn't start, or is unusable
+        - It doesn't install
+    validations:
+      required: true
+  - type: checkboxes
+    id: works
+    attributes:
+      label: What did you try?
+      description: Tick what works.
+      options:
+        - label: Home and moving around with the remote
+        - label: Opening apps
+        - label: Switching to HDMI inputs
+        - label: Weather and clock
+        - label: Music
+        - label: Set as the TV's home screen (Home key opens Zeno)
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Slow parts, things that look wrong, what didn't work.

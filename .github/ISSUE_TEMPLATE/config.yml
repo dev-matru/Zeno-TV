@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installing on the TV
+    url: https://github.com/dev-matru/zeno-tv/blob/main/docs/tv-setup.md
+    about: Certificates, Developer Mode and installing step by step. Most setup problems are answered here.
+  - name: Running it on your computer
+    url: https://github.com/dev-matru/zeno-tv/blob/main/docs/development.md
+    about: The local preview, the checks and your personal fonts, logos and music.

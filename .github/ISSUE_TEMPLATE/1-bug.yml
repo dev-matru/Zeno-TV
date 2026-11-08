@@ -1,0 +1,66 @@
+name: Something doesn't work
+description: Zeno does something wrong, crashes or looks broken.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. One problem per issue, please.
+        Don't paste IP addresses, certificates, passwords or anything else private.
+  - type: input
+    id: tv
+    attributes:
+      label: TV model
+      description: On the TV, Settings → Support → About This TV. Or in Zeno, Customize → System information.
+      placeholder: e.g. QE65S90D, Tizen 9.0
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Zeno version or commit
+      description: Customize → System information, or the commit you built from.
+      placeholder: e.g. 1.0.0 or 5c05fee
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - On the TV
+        - In the preview on my computer
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      description: The keys you pressed, starting from the Home.
+      placeholder: |
+        1. Hold OK on a card
+        2. Choose …
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Photo, screenshot or log
+      description: A phone photo of the screen is fine. Drag it here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before sending
+      options:
+        - label: I looked through the open issues and this isn't one of them.
+          required: true
+        - label: It still happens with the latest version.

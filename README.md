@@ -47,7 +47,7 @@ It's also light. Blur effects are prepared in advance, so the TV only has to sho
 
 ## Does it work on my TV?
 
-I made it on a Samsung S90D with Tizen 9, and that's the only TV I've tested it on. Other recent Samsung TVs should work. If you try it on yours, open an issue and tell me how it went, even if everything worked.
+I made it on a Samsung S90D with Tizen 9, and that's the only TV I've tested it on. Other recent Samsung TVs should work. If you try it on yours, [tell me how it went](https://github.com/dev-matru/zeno-tv/issues/new?template=2-tv-report.yml), even if everything worked.
 
 It doesn't work on LG, Sony, Android TV or other brands. It's a Tizen app.
 
@@ -81,6 +81,10 @@ Every step is explained in [docs/tv-setup.md](docs/tv-setup.md).
 ## Your own fonts, logos, photos and music
 
 If you have fonts, app logos, photos or music that you can't share publicly, put them in a private folder that Git ignores. They get added only to your build, never to the repository. For music, drop your audio files in `.local/personal/music/` and they show up in the music widget after the built-in tracks. How it works: [docs/development.md](docs/development.md#personal-assets).
+
+## Contributing
+
+Bug reports, TV reports and ideas are welcome: pick a form when you [open an issue](https://github.com/dev-matru/zeno-tv/issues/new/choose). Before a pull request, have a look at [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 

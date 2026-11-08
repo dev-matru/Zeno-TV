@@ -1,0 +1,30 @@
+name: An idea
+description: Something Zeno could do, or do better.
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Zeno is meant to stay small and quiet. Ideas that keep it that way have the best chance.
+        Not planned: accounts, ads, recommendations, tracking, or features that only work with one paid service.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's missing
+      description: What you were trying to do, and why it's hard or impossible now.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How you'd like it to work with the remote. A sketch or photo is welcome.
+    validations:
+      required: true
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you like to work on it?
+      options:
+        - No, just suggesting
+        - Yes, I'd open a pull request
