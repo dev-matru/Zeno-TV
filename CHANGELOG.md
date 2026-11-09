@@ -2,6 +2,10 @@
 
 Each release is tagged in Git (`v1.0.0`…) and published on the GitHub releases page. A build made from any other commit shows its commit next to the version, in Customize → System information.
 
+## Unreleased
+
+- An online wallpaper no longer leaves the screen black when the TV wakes up after a long standby. The TV often starts Zeno in the background then, and the wallpaper could miss its start. Now a built-in photo stands in and the wallpaper is loaded again, at once when the screen comes back. Loading timeouts count only time on screen.
+
 ## 1.1.0
 
 - A music catalogue to download on the TV: ambient music by Scott Buckley, Chris Zabriskie, Lee Rosevere and HoliznaCC0, and field recordings of rain, sea, forests and night from Freesound, many by Félix Blume. All CC0 or CC BY 4.0, credited next to each track.

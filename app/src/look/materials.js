@@ -6,6 +6,10 @@
   'use strict';
 
   var DECODE_TIMEOUT = 8000;
+  var visibleSince = 0; // when the app last came back on screen
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) visibleSince = Date.now();
+  });
   var LOCAL_DIR = 'assets/wallpapers/',
     MATERIAL_DIR = 'assets/materials/';
 
@@ -62,12 +66,22 @@
       return img;
     }
 
-    /* Calls back once with true when the image is decoded, false on error or timeout. */
+    /* Calls back once with true when the image is decoded, false on error or timeout.
+       The timeout counts only time on screen: the TV freezes a hidden app, and its
+       timers all fire at once when the screen comes back. */
     function decoded(img, done) {
       var settled = false,
-        timer = setTimeout(function () {
-          settle(false);
-        }, DECODE_TIMEOUT);
+        timer = setTimeout(expire, DECODE_TIMEOUT);
+      function expire() {
+        if (document.hidden || Date.now() - visibleSince < DECODE_TIMEOUT) {
+          timer = setTimeout(
+            expire,
+            document.hidden ? DECODE_TIMEOUT : DECODE_TIMEOUT - (Date.now() - visibleSince)
+          );
+          return;
+        }
+        settle(false);
+      }
       function settle(ok) {
         if (settled) return;
         settled = true;

@@ -6886,6 +6886,7 @@
     if (bundle) {
       Materials.mount(bundle, IMG, previewOnly ? { bg: true } : null);
       S.bundleKey = bundle.key;
+      if (!previewOnly) wallRecovered();
     }
     S.shown = {
       bg: look.bg,
@@ -7044,6 +7045,7 @@
       S.pending = null;
       S.wallPending = null;
       if (type === 'load') S.wallError = target.wall;
+      if (type === 'load' && opts.startup) wallFailed(target);
       S.lookError = {
         type: type,
         reason: reason || null,
@@ -7113,6 +7115,62 @@
         }
       );
     render();
+  }
+
+  /* ---------- A wallpaper that did not load at startup ----------
+     After a long standby the TV often starts Zeno in the background, frozen, and
+     an online wallpaper can miss its start: its service is not up yet, or its
+     timeout runs out the moment the screen comes back. Instead of a black screen,
+     a built-in photo stands in and the wallpaper is loaded again: soon, then less
+     often, and every time the screen comes back. */
+  var WALL_RETRY_SECONDS = [3, 10, 30, 60, 300],
+    wallRetry = { failed: false, step: 0, timer: 0 };
+  function wallFailed(look) {
+    wallRetry.failed = true;
+    standInWall(look);
+    clearTimeout(wallRetry.timer);
+    var seconds = WALL_RETRY_SECONDS[Math.min(wallRetry.step++, WALL_RETRY_SECONDS.length - 1)];
+    wallRetry.timer = setTimeout(retryWall, seconds * 1000);
+  }
+  function wallRecovered() {
+    wallRetry.failed = false;
+    S.standIn = false;
+    wallRetry.step = 0;
+    clearTimeout(wallRetry.timer);
+  }
+  /* A built-in photo, mounted without becoming the look: the real one replaces it. */
+  function standInWall(look) {
+    if (IMG.photo.naturalWidth || S.standIn) return;
+    var local = find(WALLS, function (w) {
+      return !w.download;
+    });
+    if (!local || local.id === look.wall) return;
+    var stand = {};
+    Object.keys(look).forEach(function (k) {
+      stand[k] = look[k];
+    });
+    stand.wall = local.id;
+    S.standIn = true;
+    Materials.prepare(
+      stand,
+      function () {
+        return wallRetry.failed;
+      },
+      function (bundle) {
+        if (bundle && wallRetry.failed) Materials.mount(bundle, IMG);
+        else S.standIn = false;
+      }
+    );
+  }
+  function retryWall() {
+    clearTimeout(wallRetry.timer);
+    if (!wallRetry.failed || document.hidden) return;
+    // Not while you are choosing a look: try again a little later.
+    if (S.pending || S.previewBundle || top().id !== 'home') {
+      wallRetry.timer = setTimeout(retryWall, 5000);
+      return;
+    }
+    setLook({}, { transient: true, startup: true });
   }
 
   /* Wallpaper previews install a bundle without saving it; restoreLook() puts the
@@ -7466,6 +7524,7 @@
     updateClock();
     focusStage();
     watchHome();
+    if (wallRetry.failed) wallRetry.timer = setTimeout(retryWall, 1000);
   });
   window.addEventListener('resize', fit);
 
